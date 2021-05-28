@@ -1,4 +1,4 @@
-(define-module (mychannel packages myteam)
+(define-module (johnlepikhin packages myteam)
   #:use-module (guix licenses)
   #:use-module (guix packages)
   #:use-module (guix download)

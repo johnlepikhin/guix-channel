@@ -1,5 +1,5 @@
 
-(define-module (mychannel packages oping)
+(define-module (johnlepikhin packages oping)
   #:use-module (guix licenses)
   #:use-module (guix packages)
   #:use-module (guix download)

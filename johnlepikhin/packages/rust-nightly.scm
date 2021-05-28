@@ -1,5 +1,5 @@
 
-(define-module (mychannel packages rust-nightly)
+(define-module (johnlepikhin packages rust-nightly)
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix packages)
   #:use-module (guix download)
