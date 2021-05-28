@@ -17,9 +17,7 @@
             (sha256 (base32 checksum))))
    (build-system gnu-build-system)
    (supported-systems '("x86_64-linux"))
-   (inputs
-    `(
-      ("perl" ,perl)))
+   (native-inputs `(("perl" ,perl)))
    (synopsis "octo's ping library")
    (description "octo's ping library")
    (home-page "https://noping.cc")

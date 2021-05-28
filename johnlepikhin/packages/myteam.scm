@@ -91,7 +91,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
     (description "Myteam")
     (home-page "https://dl.internal.myteam.mail.ru//")
     (native-inputs `(("patchelf" ,patchelf)))
-    (inputs `(("libxrandr" ,libxrandr)
+    (propagated-inputs `(("libxrandr" ,libxrandr)
               ("libxcomposite" ,libxcomposite)
               ("libxcursor" ,libxcursor)
               ("libxdamage" ,libxdamage)
