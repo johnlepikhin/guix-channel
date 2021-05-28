@@ -1,0 +1,12 @@
+* Changelog
+
+** [2021-05-28] v0.1.0
+
+*** New features
+
+ - Renamed top-level directory (a00e54d)
+
+*** Other changes
+
+ - Initial commit (f4565f9)
+
