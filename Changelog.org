@@ -1,4 +1,17 @@
 * Changelog
+** [2021-05-29] v0.2.0
+
+*** New features
+
+ - Added git-sync (bccb22d)
+
+*** Bugfixes
+
+ - inputs -> propagated inputs (3dc29bc)
+ - git-sync requires git at runtime (109cdde)
+ - Typo (08bbb9f)
+
+
 
 ** [2021-05-28] v0.1.0
 
