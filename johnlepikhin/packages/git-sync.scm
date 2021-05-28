@@ -25,5 +25,5 @@
     (description "This scrips intends to sync near-automatically via git in \"tracking\" repositories where a nice history is not as crucial
 as having one.")
     (home-page "https://github.com/simonthum/git-sync/")
-    (inputs `(("git" ,git)))
+    (propagated-inputs `(("git" ,git)))
     (license cc0)))
