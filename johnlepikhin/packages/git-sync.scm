@@ -1,4 +1,4 @@
-(define-module (johnlepikhin packages myteam)
+(define-module (johnlepikhin packages git-sync)
   #:use-module (guix licenses)
   #:use-module (guix packages)
   #:use-module (gnu packages version-control)
