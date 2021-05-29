@@ -20,7 +20,10 @@
    (version (string-append "nightly-" timestamp))
    (source (origin
             (method url-fetch)
-            (uri (string-append "https://static.rust-lang.org/dist/" timestamp "/rust-nightly-x86_64-unknown-linux-gnu.tar.xz"))
+            (uri (string-append
+                  "https://static.rust-lang.org/dist/"
+                  timestamp
+                  "/rust-nightly-x86_64-unknown-linux-gnu.tar.xz"))
             (sha256 (base32 checksum))))
    (build-system copy-build-system)
    (supported-systems '("x86_64-linux"))
@@ -48,7 +51,12 @@
                              out "/lib/*.so "
                              out "/lib/rustlib/x86_64-unknown-linux-gnu/lib/*.so"))
                  (dynamic-linker (string-append (assoc-ref inputs "libc") ,(glibc-dynamic-linker))))
-            (system (string-append patchelf " --set-rpath \"$LIBRARY_PATH:" out "/lib\" --set-interpreter " dynamic-linker " " bin-masks))
+            (system (string-append
+                     patchelf
+                     " --set-rpath \"$LIBRARY_PATH:"
+                     out
+                     "/lib\" --set-interpreter "
+                     dynamic-linker " " bin-masks))
             (system (string-append patchelf " --set-rpath \"$LIBRARY_PATH:" out "/lib\" " lib-masks))
             #t))))
       #:install-plan
@@ -62,13 +70,14 @@
         ("rust-analyzer-preview/bin/rust-analyzer" "bin/")
         ("cargo/bin/cargo" "bin/")
         ("rustc/lib" "lib")
-        ("rust-std-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib" "lib/rustlib/x86_64-unknown-linux-gnu/lib"))))
-   (native-inputs `(("patchelf" ,patchelf)))
+        ("rust-std-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib"
+         "lib/rustlib/x86_64-unknown-linux-gnu/lib"))))
+   (native-inputs `(("patchelf" ,patchelf)
+                    ("cmake" ,cmake)))
    (inputs
     `(("libstdc++" ,(make-libstdc++ gcc))
       ("gcc:lib" ,(canonical-package gcc) "lib")
       ("glibc" ,glibc)
-      ("cmake" ,cmake)
       ("zlib" ,zlib)))
    (synopsis "Compiler for the Rust programming language")
    (description "Rust is a systems programming language that provides memory safety and thread safety guarantees.")
