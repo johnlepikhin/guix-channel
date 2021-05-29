@@ -1,4 +1,16 @@
 * Changelog
+** [2021-05-29] v0.3.0
+
+*** New features
+
+ - Added 1Password CLI (4d711c4)
+ - Added apcalc (94afe95)
+
+*** Other changes
+
+ - Reindented, removed unused imports (663d2f4)
+
+
 ** [2021-05-29] v0.2.0
 
 *** New features
