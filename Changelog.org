@@ -1,4 +1,11 @@
 * Changelog
+** [2021-05-30] v0.4.1
+
+*** Bugfixes
+
+ - Propagate Zoom inputs (d3f370d)
+
+
 ** [2021-05-30] v0.4.0
 
 *** New features
