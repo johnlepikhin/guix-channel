@@ -22,7 +22,7 @@
   #:use-module (guix store)
   #:use-module (guix gexp)
   #:use-module (guix build-system copy)
-  #:export (make-myteam))
+  #:export (make-zoom))
 
 (define license:zoomus
   (non-copyleft "Proprietary Zoom.us license"
