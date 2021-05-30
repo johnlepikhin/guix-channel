@@ -187,7 +187,28 @@
                                    " " out "/bin/QtQuick/XmlListModel"
                                    " " out "/bin/egldeviceintegrations"
                                    " " out "/bin/platforms/libqeglfs.so"))
-            #t))))))
+            #t)))
+       (add-after
+        'install 'finalize-install
+        (lambda* (#:key outputs #:allow-other-keys)
+          (let ((out (assoc-ref outputs "out")))
+            (let ((apps (string-append out "/share/applications")))
+              (mkdir-p apps)
+              (make-desktop-entry-file
+               (string-append apps "/zoom.desktop")
+               #:name "Zoom"
+               #:exec (string-append out "/bin/ZoomLauncher %U")
+               #:mime-type (list
+                            "x-scheme-handler/zoommtg"
+                            "x-scheme-handler/zoomus"
+                            "x-scheme-handler/tel"
+                            "x-scheme-handler/callto"
+                            "x-scheme-handler/zoomphonecall")
+               #:categories '("Network" "Application")
+               #:comment
+               '(("en" "Zoom Video Conference")
+                 (#f "Zoom Video Conference")))
+              #t)))))))
    (synopsis "Zoom")
    (description "Zoom")
    (home-page "https://zoom.us")
