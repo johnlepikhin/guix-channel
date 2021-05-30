@@ -192,7 +192,7 @@
    (description "Zoom")
    (home-page "https://zoom.us")
    (native-inputs `(("patchelf" ,patchelf)))
-   (inputs 
+   (propagated-inputs
     `(("alsa-lib" ,alsa-lib)
       ("atk" ,atk)
       ("cairo" ,cairo)
