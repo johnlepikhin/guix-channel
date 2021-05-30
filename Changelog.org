@@ -1,4 +1,11 @@
 * Changelog
+** [2021-05-30] v0.4.0
+
+*** New features
+
+ - Added Zoom (8442809)
+
+
 ** [2021-05-29] v0.3.0
 
 *** New features
