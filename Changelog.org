@@ -1,4 +1,11 @@
 * Changelog
+** [2021-05-30] v0.4.2
+
+*** Bugfixes
+
+ - Exported name (6d42d10)
+
+
 ** [2021-05-30] v0.4.1
 
 *** Bugfixes
