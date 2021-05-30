@@ -1,4 +1,16 @@
 * Changelog
+** [2021-05-30] v0.5.0
+
+*** New features
+
+ - Added zoom.desktop file (f13c5c7)
+
+*** Bugfixes
+
+ - Install Zoom into private directory to prevent unwanted exports (b4045ae)
+ - Namespaces clashing (dbfa4cd)
+
+
 ** [2021-05-30] v0.4.2
 
 *** Bugfixes
