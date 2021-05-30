@@ -1,7 +1,6 @@
 (define-module (johnlepikhin packages zoom)
-  #:use-module ((guix licenses) #:prefix license:)
+  #:use-module ((guix licenses) #:select (non-copyleft))
   #:use-module (guix packages)
-  #:use-module (guix licenses)
   #:use-module (guix download)
   #:use-module (guix utils)
   #:use-module (gnu packages gcc)
