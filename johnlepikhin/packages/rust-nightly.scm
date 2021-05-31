@@ -103,8 +103,59 @@
    (home-page "https://www.rust-lang.org")
    (license (list license:asl2.0 license:expat))))
 
+(define (make-clippy-nightly timestamp checksum rust-package)
+  (package
+    (name "rust-clippy")
+    (version (string-append "nightly-" timestamp))
+    (source (origin
+              (method url-fetch)
+              (uri (string-append
+                    "https://static.rust-lang.org/dist/"
+                    timestamp
+                    "/clippy-nightly-x86_64-unknown-linux-gnu.tar.xz"))
+              (sha256 (base32 checksum))))
+    (build-system copy-build-system)
+    (supported-systems '("x86_64-linux"))
+    (arguments
+     `(
+       #:phases
+       (modify-phases
+           %standard-phases
+         (add-after
+             'strip 'fix-binary
+           (lambda*
+               (#:key outputs inputs #:allow-other-keys)
+             (let* ((out (assoc-ref outputs "out"))
+                    (patchelf (string-append (assoc-ref inputs "patchelf") "/bin/patchelf"))
+                    (binaries
+                     (string-append
+                      out "/bin/cargo-clippy "
+                      out "/bin/clippy-driver"))
+                    (dynamic-linker (string-append (assoc-ref inputs "libc") ,(glibc-dynamic-linker))))
+               (system (string-append
+                        patchelf
+                        " --set-rpath \"$LIBRARY_PATH\" --set-interpreter "
+                        dynamic-linker " " binaries))))))
+       #:install-plan
+       `(("clippy-preview/bin/cargo-clippy" "bin/")
+         ("clippy-preview/bin/clippy-driver" "bin/"))))
+    (native-inputs `(("patchelf" ,patchelf)))
+    (propagated-inputs
+     `(("gcc:lib" ,(canonical-package gcc) "lib")
+       ("glibc" ,glibc)
+       ("rust" ,rust-package)))
+    (synopsis "Lints to avoid common pitfalls in Rust")
+    (description "This package provides a bunch of helpful lints to avoid common pitfalls in Rust.")
+    (home-page " https://github.com/rust-lang/rust-clippy")
+    (license (list license:asl2.0 license:expat))))
+
 (define-public rust-nightly-2021.05.21
   (make-rust-nightly "2021-05-21" "1r3b45krsaffbpbnla02y797x1lab5hp4x95mrp2bkq0clyzyk70"))
 
 (define-public rust-src-nightly-2021.05.21
   (make-rust-src-nightly "2021-05-21" "06k4a7j69x2yqkmksihnjkwiy0f3amh1iykscka0iykdfwh2mcsg"))
+
+(define-public clippy-nightly-2021.05.21
+  (make-clippy-nightly "2021-05-21" "0wpfrwzmgg0r67kvymx937iffr11bh9nig3xk92dd3kp5dhvrf6j" rust-nightly-2021.05.21))
+
+clippy-nightly-2021.05.21
