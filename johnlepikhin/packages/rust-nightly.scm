@@ -157,5 +157,3 @@
 
 (define-public clippy-nightly-2021.05.21
   (make-clippy-nightly "2021-05-21" "0wpfrwzmgg0r67kvymx937iffr11bh9nig3xk92dd3kp5dhvrf6j" rust-nightly-2021.05.21))
-
-clippy-nightly-2021.05.21
