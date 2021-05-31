@@ -74,7 +74,7 @@
          "lib/rustlib/x86_64-unknown-linux-gnu/lib"))))
    (native-inputs `(("patchelf" ,patchelf)
                     ("cmake" ,cmake)))
-   (inputs
+   (propagated-inputs
     `(("libstdc++" ,(make-libstdc++ gcc))
       ("gcc:lib" ,(canonical-package gcc) "lib")
       ("glibc" ,glibc)
