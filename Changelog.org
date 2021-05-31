@@ -1,4 +1,15 @@
 * Changelog
+** [2021-05-31] v0.6.0
+
+*** New features
+
+ - Added make-clippy-nightly (5d575cf)
+
+*** Bugfixes
+
+ - inputs -> propagated-inputs (e7f717e)
+
+
 ** [2021-05-30] v0.5.0
 
 *** New features
