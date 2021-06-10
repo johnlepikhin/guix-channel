@@ -27,5 +27,3 @@
   (make-puppet-lint "2.4.2" "1pwpjxxr3wz71yl7jhhaa93fsrr72kz25isjydfhsf1igc9mfj9k"))
 
 (define-public puppet-lint puppet-lint-2.4.2)
-
-puppet-lint
