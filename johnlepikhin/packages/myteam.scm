@@ -100,3 +100,8 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("libfontconfig" ,fontconfig)
               ("libxinerama" ,libxinerama)))
     (license gpl3+)))
+
+(define-public myteam-2021-08-04
+     (make-myteam "10.0.8143" "0f7m08lpfwxl7kaw3fsc73d4sp9sfbl6dh4yxm8mr6px8rv3g2h9"))
+
+(define-public myteam myteam-2021-07-27)
