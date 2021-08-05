@@ -130,4 +130,3 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
 
 (define-public myteam myteam-2021-05-15)
 
-myteam
