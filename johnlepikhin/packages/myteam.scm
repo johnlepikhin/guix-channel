@@ -3,6 +3,7 @@
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module (guix utils)
+  #:use-module (gnu packages linux)
   #:use-module (gnu packages gcc)
   #:use-module (gnu packages base)
   #:use-module (gnu packages elf)
@@ -11,6 +12,10 @@
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages gnupg)
   #:use-module (gnu packages fontutils)
+  #:use-module (gnu packages pulseaudio)
+  #:use-module (gnu packages qt)
+  #:use-module (gnu packages glib)
+  #:use-module (gnu packages nss)
   #:use-module (ice-9 match)
   #:use-module (guix monads)
   #:use-module (guix store)
@@ -73,7 +78,9 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
     (build-system copy-build-system)
     (arguments
      `(#:install-plan
-       `(("myteam" "bin/myteam"))
+       `(("myteam" "bin/myteam")
+         ("lib" "lib")
+         ("plugins" "plugins"))
        #:phases
        (modify-phases
         %standard-phases
@@ -84,8 +91,13 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
           (let* ((out (assoc-ref outputs "out"))
                  (patchelf (string-append (assoc-ref inputs "patchelf") "/bin/patchelf"))
                  (binary (string-append out "/bin/myteam"))
-                 (dynamic-linker (string-append (assoc-ref inputs "libc") ,(glibc-dynamic-linker))))
-            (system (string-append patchelf " --set-rpath \"$LIBRARY_PATH\" --set-interpreter " dynamic-linker " " binary))
+                 (libs (string-append out "/lib/lib*.so*"
+                                      " " out "/plugins/*/lib*.so*"))
+                 (dynamic-linker (string-append (assoc-ref inputs "libc") ,(glibc-dynamic-linker)))
+                 (nss (string-append (assoc-ref inputs "nss") "/lib/nss")))
+            (system (string-append patchelf " --set-rpath \"" out "/lib:" nss ":" out "/plugins:$LIBRARY_PATH\" --set-interpreter " dynamic-linker " " binary))
+            ;; (system (string-append "rm -rf " out "/lib " out "/plugins"))
+            (system (string-append patchelf " --set-rpath \"" out "/lib:" nss ":" out "/plugins:$LIBRARY_PATH\" " libs))
             #t))))))
     (synopsis "Myteam")
     (description "Myteam")
@@ -99,10 +111,23 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("glibc" ,glibc)
               ("libfontconfig" ,fontconfig)
               ("libxau" ,libxau)
+              ("pulseaudio" ,pulseaudio)
+              ("qtbase@5" ,qtbase)
+              ("dbus" ,dbus)
+              ("glib" ,glib)
+              ("libxi" ,libxi)
+              ("libxtst" ,libxtst)
+              ("alsa-lib" ,alsa-lib)
+               ("nss" ,nss)
               ("libxinerama" ,libxinerama)))
     (license gpl3+)))
 
-(define-public myteam-2021-08-04
+(define-public myteam-2021-05-15
+     (make-myteam "10.0.7075" "0f7m08lpfwxl7kaw3fsc73d4sp9sfbl6dh4yxm8mr6px8rv3g2h9"))
+
+(define-public myteam-2021-08-04-broken
      (make-myteam "10.0.8143" "0f7m08lpfwxl7kaw3fsc73d4sp9sfbl6dh4yxm8mr6px8rv3g2h9"))
 
-(define-public myteam myteam-2021-08-04)
+(define-public myteam myteam-2021-05-15)
+
+myteam
