@@ -98,6 +98,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("libgpg-error" ,libgpg-error)
               ("glibc" ,glibc)
               ("libfontconfig" ,fontconfig)
+              ("libxau" ,libxau)
               ("libxinerama" ,libxinerama)))
     (license gpl3+)))
 
