@@ -149,6 +149,7 @@
         ("QtGraphicalEffects" "zoom/bin/")
         ("QtQuick" "zoom/bin/")
         ("QtQuick.2" "zoom/bin/")
+        ("QtQml" "zoom/bin/")
         ("json" "zoom/bin/")
         ("sip" "zoom/bin/")
         ("timezones" "zoom/bin/")
