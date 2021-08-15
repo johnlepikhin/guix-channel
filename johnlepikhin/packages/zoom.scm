@@ -247,4 +247,6 @@
 
 (define-public zoom-5.6.20278.0524 (make-zoom "5.6.20278.0524" "10y6klgq1w9xkv5xfj10rr9x5nl954sz316zbnlpwagcqa5ghiap"))
 
-(define-public zoom zoom-5.6.20278.0524)
+(define-public zoom-5.7.5.29123.0808 (make-zoom "5.7.5.29123.0808" "10y6klgq1w9xkv5xfj10rr9x5nl954sz316zbnlpwagcqa5ghiap"))
+
+(define-public zoom zoom-5.7.5.29123.0808)
