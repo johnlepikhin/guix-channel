@@ -1,4 +1,13 @@
 * Changelog
+** [2021-08-15] v0.7.0
+
+*** New features
+
+ - Updated and fixed Zoom (2c55272, 9f8824c)
+ - Added puppet-lint (bde2c30)
+ - Added packages (8c696e5)
+
+
 ** [2021-05-31] v0.6.0
 
 *** New features
