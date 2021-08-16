@@ -13,7 +13,6 @@
   #:use-module (gnu packages gnupg)
   #:use-module (gnu packages fontutils)
   #:use-module (gnu packages pulseaudio)
-  #:use-module (gnu packages qt)
   #:use-module (gnu packages glib)
   #:use-module (gnu packages nss)
   #:use-module (ice-9 match)
@@ -73,7 +72,8 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
     (version version)
     (source (origin
               (method url-fetch/tarbomb)
-              (uri "https://dl.internal.myteam.mail.ru/downloads/linux/x64/latest/myteam.tar.xz")
+              ;; (uri "https://dl.internal.myteam.mail.ru/downloads/linux/x64/latest/myteam.tar.xz")
+              (uri "/tmp/myteam-123.tar.xz")
               (sha256 (base32 checksum))))
     (build-system copy-build-system)
     (arguments
@@ -112,7 +112,6 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("libfontconfig" ,fontconfig)
               ("libxau" ,libxau)
               ("pulseaudio" ,pulseaudio)
-              ("qtbase@5" ,qtbase)
               ("dbus" ,dbus)
               ("glib" ,glib)
               ("libxi" ,libxi)
@@ -122,11 +121,8 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("libxinerama" ,libxinerama)))
     (license gpl3+)))
 
-(define-public myteam-2021-05-15
-     (make-myteam "10.0.7075" "0f7m08lpfwxl7kaw3fsc73d4sp9sfbl6dh4yxm8mr6px8rv3g2h9"))
-
-;; (define-public myteam-2021-08-04-broken
-;;      (make-myteam "10.0.8143" "0f7m08lpfwxl7kaw3fsc73d4sp9sfbl6dh4yxm8mr6px8rv3g2h9"))
+(define-public myteam-2021-08-04-broken
+     (make-myteam "10.0.8143" "0f7m08lpfwxl7kaw3fsc73d4sp9sfbl6dh4yxm8mr6px8rv3g2h9"))
 
 (define-public myteam myteam-2021-05-15)
 
