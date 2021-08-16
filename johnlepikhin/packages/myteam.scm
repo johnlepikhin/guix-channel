@@ -73,7 +73,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
     (source (origin
               (method url-fetch/tarbomb)
               ;; (uri "https://dl.internal.myteam.mail.ru/downloads/linux/x64/latest/myteam.tar.xz")
-              (uri "/tmp/myteam-123.tar.xz")
+              (uri (string-append "file:///tmp/myteam-" version ".tar.xz"))
               (sha256 (base32 checksum))))
     (build-system copy-build-system)
     (arguments
@@ -121,8 +121,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("libxinerama" ,libxinerama)))
     (license gpl3+)))
 
-(define-public myteam-2021-08-04-broken
+(define-public myteam-10.0.8143
      (make-myteam "10.0.8143" "0f7m08lpfwxl7kaw3fsc73d4sp9sfbl6dh4yxm8mr6px8rv3g2h9"))
 
-(define-public myteam myteam-2021-05-15)
-
+(define-public myteam myteam-10.0.8143)
