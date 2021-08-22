@@ -124,6 +124,9 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
     (license gpl3+)))
 
 (define-public myteam-10.0.8143
-     (make-myteam "10.0.8143" "0f7m08lpfwxl7kaw3fsc73d4sp9sfbl6dh4yxm8mr6px8rv3g2h9"))
+  (make-myteam "10.0.8143" "0f7m08lpfwxl7kaw3fsc73d4sp9sfbl6dh4yxm8mr6px8rv3g2h9"))
 
-(define-public myteam myteam-10.0.8143)
+(define-public myteam-10.0.8804
+  (make-myteam "10.0.8804" "16igq814qw63j8p7lzsj2376xf2hz1gla9yy2c9aic6fy02wi8n3"))
+
+(define-public myteam myteam-10.0.8804)
