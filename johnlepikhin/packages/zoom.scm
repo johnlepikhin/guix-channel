@@ -246,6 +246,6 @@
       ("zlib" ,zlib)))
    (license license:zoomus)))
 
-(define-public zoom-5.7.5.29123.0808 (make-zoom "5.7.5.29123.0808" "13x9cxbzg89vws3pr84ldl31dxk0grp0c4pwapqja0b6mv15wk9n"))
+(define-public zoom-5.7.6.31792.0820 (make-zoom "5.7.6.31792.0820" "0bdi3qvln9iznn2j4mh4vihplw5hygj93ssmfrmdk7sv0c3rlgrm"))
 
-(define-public zoom zoom-5.7.5.29123.0808)
+(define-public zoom zoom-5.7.6.31792.0820)
