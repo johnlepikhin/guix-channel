@@ -1,11 +1,11 @@
 (define-module (johnlepikhin packages dbeaver)
   #:use-module ((guix licenses) #:prefix license:)
-  #:use-module (gnu packages elf)
   #:use-module (gnu packages bootstrap)
-  #:use-module (guix packages)
-  #:use-module (guix download)
-  #:use-module (gnu packages java)
+  #:use-module (gnu packages elf)
+  #:use-module (gnu packages)
   #:use-module (guix build-system copy)
+  #:use-module (guix download)
+  #:use-module (guix packages)
   #:export (make-dbeaver
             dbeaver-21.1.5
             dbeaver))
@@ -51,7 +51,7 @@
             #t))))))
    (native-inputs `(("patchelf" ,patchelf)))
    (propagated-inputs
-    `(("openjdk" ,openjdk16)))
+    `(("openjdk" ,(specification->package "openjdk@16"))))
    (synopsis "Free multi-platform database tool for developers, SQL programmers, database administrators and analysts.")
    (description "Supports any database which has JDBC driver (which basically means - ANY database).
 
