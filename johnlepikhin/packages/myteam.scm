@@ -129,4 +129,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
 (define-public myteam-10.0.8804
   (make-myteam "10.0.8804" "16igq814qw63j8p7lzsj2376xf2hz1gla9yy2c9aic6fy02wi8n3"))
 
-(define-public myteam myteam-10.0.8804)
+(define-public myteam-10.0.9663
+  (make-myteam "10.0.9663" "1kpksd3icgk9051i05baznrawy958a4qvw753fmxalsb6dxgflqv"))
+
+(define-public myteam myteam-10.0.9663)
