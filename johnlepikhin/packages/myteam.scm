@@ -9,6 +9,7 @@
   #:use-module (gnu packages glib)
   #:use-module (gnu packages gnupg)
   #:use-module (gnu packages linux)
+  #:use-module (gnu packages ncurses)
   #:use-module (gnu packages nss)
   #:use-module (gnu packages pulseaudio)
   #:use-module (gnu packages xorg)
@@ -90,6 +91,8 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
          (lambda*
           (#:key outputs inputs #:allow-other-keys)
           (let* ((out (assoc-ref outputs "out"))
+                 (ncurses-lib
+                  (string-append (assoc-ref inputs "ncurses") "/lib"))
                  (patchelf (string-append (assoc-ref inputs "patchelf") "/bin/patchelf"))
                  (binary (string-append out "/bin/myteam"))
                  (libs (string-append out "/lib/lib*.so*"
@@ -99,6 +102,17 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
             (system (string-append patchelf " --set-rpath \"" out "/lib:" nss ":" out "/plugins:$LIBRARY_PATH\" --set-interpreter " dynamic-linker " " binary))
             ;; (system (string-append "rm -rf " out "/lib " out "/plugins"))
             (system (string-append patchelf " --set-rpath \"" out "/lib:" nss ":" out "/plugins:$LIBRARY_PATH\" " libs))
+
+            (symlink
+             (string-append ncurses-lib "/libncursesw.so."
+                            ;; Extract "6.0" from "6.0-20170930" if a
+                            ;; dash-separated version tag exists.
+                            ,(let* ((v (package-version ncurses))
+                                    (d (or (string-index v #\-)
+                                           (string-length v))))
+                               (version-major+minor (string-take v d))))
+             (string-append out "/lib/libtinfo.so.5"))
+
             #t))))))
     (synopsis "Myteam")
     (description "Myteam")
@@ -117,6 +131,8 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("mesa" ,mesa)
               ("glib" ,glib)
               ("libxi" ,libxi)
+              ("gcc:lib" ,(canonical-package gcc) "lib")
+              ("ncurses" ,ncurses)
               ("libxtst" ,libxtst)
               ("alsa-lib" ,alsa-lib)
                ("nss" ,nss)
