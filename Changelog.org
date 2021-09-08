@@ -8,7 +8,7 @@
  - Updated Zoom (43a3b34)
  - Updated Myteam (b0d0919)
  - Added DBeaver (230f77c)
-xs
+
 *** Bugfixes
 
  - Added missing dependency (668c79b)
