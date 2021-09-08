@@ -1,4 +1,23 @@
 * Changelog
+** [2021-09-08] v0.8.0
+
+*** New features
+
+ - Added perlcritic and all missing dependencies (92eaa0c)
+ - Added experimental myteam version (b029ebd)
+ - Updated Zoom (43a3b34)
+ - Updated Myteam (b0d0919)
+ - Added DBeaver (230f77c)
+xs
+*** Bugfixes
+
+ - Added missing dependency (668c79b)
+ - Perlcritic is renamed (af8e2ba)
+ - Added missing dependencies (ff67e99)
+ - Require openjdk@16 (f85d2ce)
+ - New Myteam if fixed at last (7f5bebd)
+
+
 ** [2021-08-15] v0.7.0
 
 *** New features
