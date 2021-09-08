@@ -162,9 +162,9 @@ is to find interpolated variables for Perl::Critic policies and similar code.")
     (description "A formatter for spellchecking Pod")
     (license perl-license)))
 
-(define-public perlcritic
+(define-public perl-perlcritic
   (package
-    (name "perl-critic")
+    (name "perl-perlcritic")
     (version "1.140")
     (source
       (origin
