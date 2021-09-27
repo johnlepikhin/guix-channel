@@ -1,4 +1,4 @@
-(define-module (johnlepikhin packages chromium)
+(define-module (johnlepikhin packages googled-chromium)
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (gnu packages base)
   #:use-module (gnu packages bootstrap)
