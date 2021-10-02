@@ -45,7 +45,7 @@
     (description "1Password CLI")
     (home-page "https://1password.com/")
     (native-inputs `(("patchelf" ,patchelf)))
-    (propagated-inputs `(("glibc" ,glibc)))
+    (inputs `(("glibc" ,glibc)))
     (license license:1password)))
 
 (define-public 1password-cli-1.10.0 (make-1password-cli "1.10.0" "0zj30fwjgj0fv16z24jq0pfsqf3q7ckbfp8rpwaqw7a88b8z4nx5"))

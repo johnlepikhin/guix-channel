@@ -53,7 +53,7 @@
                 "cscript/Makefile"
                 "help/Makefile"))
           #t)))))
-   (propagated-inputs `(("readline" ,readline)))
+   (inputs `(("readline" ,readline)))
    (native-inputs `(("util-linux" ,util-linux)
                     ("groff-minimal" ,groff-minimal)))
    (synopsis "C-style arbitrary precision calculator")

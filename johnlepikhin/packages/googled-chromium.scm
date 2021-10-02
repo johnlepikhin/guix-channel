@@ -91,7 +91,7 @@
     (description "Google Chromium")
     (home-page "https://www.google.com/intl/ru_ru/chrome/")
     (native-inputs `(("patchelf" ,patchelf)))
-    (propagated-inputs
+    (inputs
      `(("alsa-lib" ,alsa-lib)
        ("at-spi2-atk" ,at-spi2-atk)
        ("at-spi2-core" ,at-spi2-core)
