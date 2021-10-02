@@ -244,4 +244,4 @@
 
 (define-public zoom-5.8.0 (make-zoom "5.8.0" "1qdzv95gla14za1i2i1r794sflnlq8phsgcs2vpycphfbz57f6w7"))
 
-(define-public zoom zoom-5.8.01)
+(define-public zoom zoom-5.8.0)
