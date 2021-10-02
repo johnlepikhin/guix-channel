@@ -96,10 +96,6 @@
         ("libQt5QuickWidgets.so.5" "zoom/bin/")
         ("libQt5QuickWidgets.so.5.12" "zoom/bin/")
         ("libQt5QuickWidgets.so.5.12.10" "zoom/bin/")
-        ("libQt5Script.so" "zoom/bin/")
-        ("libQt5Script.so.5" "zoom/bin/")
-        ("libQt5Script.so.5.12" "zoom/bin/")
-        ("libQt5Script.so.5.12.10" "zoom/bin/")
         ("libQt5Svg.so" "zoom/bin/")
         ("libQt5Svg.so.5" "zoom/bin/")
         ("libQt5Svg.so.5.12" "zoom/bin/")
@@ -216,7 +212,7 @@
    (description "Zoom")
    (home-page "https://zoom.us")
    (native-inputs `(("patchelf" ,patchelf)))
-   (propagated-inputs
+   (inputs
     `(("alsa-lib" ,alsa-lib)
       ("atk" ,atk)
       ("cairo" ,cairo)
@@ -246,6 +242,6 @@
       ("zlib" ,zlib)))
    (license license:zoomus)))
 
-(define-public zoom-5.7.6.31792.0820 (make-zoom "5.7.6.31792.0820" "0bdi3qvln9iznn2j4mh4vihplw5hygj93ssmfrmdk7sv0c3rlgrm"))
+(define-public zoom-5.8.0 (make-zoom "5.8.0" "1qdzv95gla14za1i2i1r794sflnlq8phsgcs2vpycphfbz57f6w7"))
 
-(define-public zoom zoom-5.7.6.31792.0820)
+(define-public zoom zoom-5.8.01)
