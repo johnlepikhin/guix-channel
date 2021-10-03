@@ -55,13 +55,16 @@
   (connections-dir home-ssh-configuration-connections-dir)
   (hosts home-ssh-configuration-hosts (default '())))
 
+(define (ssh-control-path _)
+  (string-append (getenv "XDG_RUNTIME_DIR") "/ssh-connections"))
+
 (define (add-ssh-config-file config)
   `(("ssh/config"
      ,(mixed-text-file
        "ssh-config"
        #~(string-append
           #$@(append
-              (list "ControlPath " (home-ssh-configuration-connections-dir config) "/%h:%p:%r\n\n")
+              (list "ControlPath " (ssh-control-path '()) "/%h:%p:%r\n\n")
               (map (lambda (host)
                      (serialize-home-ssh-host-configuration host))
                    (home-ssh-configuration-hosts config))))))))
@@ -74,10 +77,10 @@
             extensions))))
 
 (define (home-ssh-activation config)
-  (let* ((connections-dir (home-ssh-configuration-connections-dir config)))
+  (let* ((path (ssh-control-path '())))
     #~(begin
-        (format #t "Creating ~a for persistent ssh connections storage\n" #$connections-dir)
-        (mkdir-p #$connections-dir))))
+        (format #t "Creating ~a for persistent ssh control path\n" #$control-path)
+        (mkdir-p #$control-path))))
 
 (define home-ssh-service-type
   (service-type (name 'home-ssh)
