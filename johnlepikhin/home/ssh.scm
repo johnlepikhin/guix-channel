@@ -52,7 +52,6 @@
 (define-record-type* <home-ssh-configuration>
   home-ssh-configuration make-home-ssh-configuration
   home-ssh-configuration?
-  (connections-dir home-ssh-configuration-connections-dir)
   (hosts home-ssh-configuration-hosts (default '())))
 
 (define (ssh-control-path _)
@@ -77,10 +76,10 @@
             extensions))))
 
 (define (home-ssh-activation config)
-  (let* ((path (ssh-control-path '())))
-    #~(begin
-        (format #t "Creating ~a for persistent ssh control path\n" #$control-path)
-        (mkdir-p #$control-path))))
+  #~(begin
+      (let ((path #$@(ssh-control-path '())))
+        (format #t "Creating ~a for persistent ssh control path\n" path)
+        (mkdir-p path))))
 
 (define home-ssh-service-type
   (service-type (name 'home-ssh)
