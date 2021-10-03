@@ -5,6 +5,7 @@
   #:use-module (gnu home-services configuration)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
+  #:use-module (guix gexp)
   #:export (home-ssh-host-configuration
             home-ssh-configuration
             home-ssh-service-type))
@@ -76,10 +77,10 @@
             extensions))))
 
 (define (home-ssh-activation config)
-  #~(begin
-      (let ((path #$@(ssh-control-path '())))
-        (format #t "Creating ~a for persistent ssh control path\n" path)
-        (mkdir-p path))))
+  (let ((path (ssh-control-path '())))
+    #~(begin
+        (format #t "Creating ~a for persistent ssh control path\n" #$path)
+        (mkdir-p #$path))))
 
 (define home-ssh-service-type
   (service-type (name 'home-ssh)
