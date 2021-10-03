@@ -1,4 +1,4 @@
-(define-module (johnlepikhin home bash)
+(define-module (johnlepikhin home ssh)
   #:export (home-ssh-host-configuration
             home-ssh-configuration
             home-ssh-service-type))
