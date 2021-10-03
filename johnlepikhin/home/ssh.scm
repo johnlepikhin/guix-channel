@@ -1,4 +1,5 @@
 (define-module (johnlepikhin home ssh)
+  #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (gnu home-services configuration)
   #:use-module (srfi srfi-1)
