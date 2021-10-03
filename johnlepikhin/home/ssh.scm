@@ -52,8 +52,7 @@
 (define-record-type* <home-ssh-configuration>
   home-ssh-configuration make-home-ssh-configuration
   home-ssh-configuration?
-  (connections-dir home-ssh-configuration-connections-dir
-                   (default (string-append (getenv "XDG_RUNTIME_DIR") "/ssh-connections")))
+  (connections-dir home-ssh-configuration-connections-dir)
   (hosts home-ssh-configuration-hosts (default '())))
 
 (define (add-ssh-config-file config)
