@@ -88,5 +88,4 @@
                   ))
                 (compose concatenate)
                 (extend add-ssh-extensions)
-                (default-value (home-ssh-configuration))
                 (description "Create @file{~/.ssh/config}")))
