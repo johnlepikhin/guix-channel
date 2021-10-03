@@ -1,4 +1,8 @@
 (define-module (johnlepikhin home ssh)
+  #:use-module (gnu services configuration)
+  #:use-module (gnu home-services configuration)
+  #:use-module (srfi srfi-1)
+  #:use-module (guix records)
   #:export (home-ssh-host-configuration
             home-ssh-configuration
             home-ssh-service-type))
