@@ -24,7 +24,6 @@
   #:use-module (johnlepikhin packages rust-nightly)
   #:use-module (johnlepikhin packages zoom)
   #:use-module (johnlepikhin packages perl)
-  #:use-module (johnlepikhin packages googled-chromium)
   #:use-module (johnlepikhin home bash)
   #:use-module (johnlepikhin home ssh)
   #:use-module (gnu packages virtualization)
@@ -129,7 +128,7 @@
     telegram-desktop
     ungoogled-chromium
     ;; firefox
-    google-chromium
+    ;; google-chromium
     pasystray
     mplayer
     xset
