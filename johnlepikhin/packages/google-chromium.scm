@@ -1,4 +1,4 @@
-(define-module (johnlepikhin packages googled-chromium)
+(define-module (johnlepikhin packages google-chromium)
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (gnu packages base)
   #:use-module (gnu packages bootstrap)
@@ -41,7 +41,7 @@
 
 (define (make-chromium version version-uri checksum)
   (package
-    (name "googled-chromium")
+    (name "google-chromium")
     (version version)
     (source (origin
               (method url-fetch/zipbomb)
@@ -162,6 +162,9 @@
                    (license:non-copyleft "chrome://credits"
                                          "See chrome://credits for more information.")
                    license:lgpl2.1+))))
+
+;; release channels: https://chromereleases.googleblog.com/search/label/Stable%20updates
+;; base positions: https://omahaproxy.appspot.com/
 
 (define-public google-chromium-92.5087
   (make-chromium "92.5087.rev9" "925087" "0bwbkvxcp3j0k15ns0kfmhknm6rrbhjbmv3xrnpwsqbp68abssdg"))
