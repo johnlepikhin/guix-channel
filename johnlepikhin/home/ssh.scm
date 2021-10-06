@@ -87,8 +87,7 @@
                 (extensions
                  (list
                   (service-extension home-files-service-type add-ssh-config-file)
-                  (service-extension home-activation-service-type home-ssh-activation)
-                  ))
+                  (service-extension home-activation-service-type home-ssh-activation)))
                 (compose concatenate)
                 (extend add-ssh-extensions)
                 (description "Create @file{~/.ssh/config}")))
