@@ -141,7 +141,6 @@
     mesa-utils
     dunst
     xsetroot
-    cheese
     xev
     xclip
     xkbcomp
@@ -173,7 +172,6 @@
    pwgen
    xz
    netcat
-   flatpak
    blueman
    ispell
    aspell-dict-ru
