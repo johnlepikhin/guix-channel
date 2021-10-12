@@ -23,6 +23,7 @@
   (control-persist home-ssh-host-configuration-control-persist (default #f))
   (proxy-jump home-ssh-host-configuration-proxy-jump (default #f))
   (pubkey-accepted-key-types home-ssh-host-configuration-pubkey-accepted-key-types (default #f))
+  (host-key-algorithms home-ssh-host-configuration-host-key-algorithms (default #f))
   (comment home-ssh-host-configuration-comment (default #f)))
 
 (define (serialize-home-ssh-host-configuration val)
@@ -50,6 +51,8 @@
        (format #f "  ProxyJump ~a\n" (home-ssh-host-configuration-proxy-jump val)) "")
    (if (home-ssh-host-configuration-pubkey-accepted-key-types val)
        (format #f "  PubkeyAcceptedKeyTypes ~a\n" (home-ssh-host-configuration-pubkey-accepted-key-types val)) "")
+   (if (home-ssh-host-configuration-host-key-algorithms val)
+       (format #f "  HostKeyAlgorithms ~a\n" (home-ssh-host-configuration-host-key-algorithms val)) "")
    "\n"))
 
 (define-record-type* <home-ssh-configuration>
