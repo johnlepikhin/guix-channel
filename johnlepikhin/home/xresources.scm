@@ -45,7 +45,7 @@
             extensions))))
 
 (define (add-xresources-to-shell-profile config)
-  (list (string-append "xrdb -merge <" (getenv "HOME") "/.config/xresources")))
+  (list (plain-file "xrdb-merge-xresources.sh" (string-append "xrdb -merge <" (getenv "HOME") "/.config/xresources"))))
 
 (define (home-xresources-activation config)
   `(("files/xresources" ,#~(system #$(string-append "xrdb -merge <" (getenv "HOME") "/.config/xresources")))))
