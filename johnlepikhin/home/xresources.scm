@@ -1,12 +1,17 @@
 (define-module (johnlepikhin home xresources)
-  #:use-module (gnu home-services)
+  #:use-module (gnu home services)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (guix gexp)
-  #:use-module (gnu home-services shells)
+  #:use-module (gnu home services shells)
   #:export (home-xresources-service-type
             home-xresources-configuration
             home-xresources-record))
+
+(define xresources-path "config/xresources")
+
+(define xresources-reload ()
+  (string-append "xrdb -merge <" (getenv "HOME") "/." xresources-path))
 
 (define-record-type* <home-xresources-record>
   home-xresources-record make-xresources-record
