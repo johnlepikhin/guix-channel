@@ -23,7 +23,7 @@
   (control-master home-ssh-host-configuration-control-master (default #f))
   (control-persist home-ssh-host-configuration-control-persist (default #f))
   (proxy-jump home-ssh-host-configuration-proxy-jump (default #f))
-  (pubkey-accepted-key-types home-ssh-host-configuration-comment (default #f))
+  (pubkey-accepted-key-types home-ssh-host-configuration-pubkey-accepted-key-types (default #f))
   (comment home-ssh-host-configuration-comment (default #f)))
 
 (define (serialize-home-ssh-host-configuration val)
