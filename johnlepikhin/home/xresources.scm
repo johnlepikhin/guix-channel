@@ -8,11 +8,6 @@
             home-xresources-configuration
             home-xresources-record))
 
-(define xresources-path "config/xresources")
-
-(define xresources-reload ()
-  (string-append "xrdb -merge <" (getenv "HOME") "/." xresources-path))
-
 (define-record-type* <home-xresources-record>
   home-xresources-record make-xresources-record
   home-xresources-record?
