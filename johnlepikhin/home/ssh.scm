@@ -61,7 +61,7 @@
   (hosts home-ssh-configuration-hosts (default '())))
 
 (define (ssh-control-path _)
-  (string-append (getenv "XDG_RUNTIME_DIR") "/ssh-connections"))
+  (string-append (getenv "XDG_CACHE_HOME") "/ssh-connections"))
 
 (define (add-ssh-config-file config)
   `(("ssh/config"
