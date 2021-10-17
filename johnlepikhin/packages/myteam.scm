@@ -82,6 +82,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
      `(#:install-plan
        `(("myteam" "bin/myteam")
          ("lib" "lib")
+         ("lib/libGLsoft.so.1" "bin/lib/libGLsoft.so.1")
          ("libexec" "libexec")
          ("resources" "resources")
          ("plugins" "plugins"))
@@ -98,7 +99,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
                  (patchelf (string-append (assoc-ref inputs "patchelf") "/bin/patchelf"))
                  (binaries (string-append out "/bin/myteam"
                                           " " out "/libexec/*"))
-                 (libs (string-append out "/lib/lib*.so*"))
+                 (libs (string-append out "/lib/lib*.so* " out "/bin/lib/lib*.so*"))
                  (plugins (string-append out "/plugins/*/lib*.so*"))
                  (dynamic-linker (string-append (assoc-ref inputs "libc") ,(glibc-dynamic-linker)))
                  (nss (string-append (assoc-ref inputs "nss") "/lib/nss")))
@@ -158,4 +159,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
 (define-public myteam-10.0.9824
   (make-myteam "10.0.9824" "2kdkddddddk9051i05baznrawy958a4qvw753fmxalsb6dxgflq2"))
 
-(define-public myteam myteam-10.0.9824)
+(define-public myteam-10.0.10760
+  (make-myteam "10.0.10760-rev2" "1yz2szm7p3f3s04saz05863w2y8ns12nic0p5r5lrbz2g9fbbl3d"))
+
+(define-public myteam myteam-10.0.10760)
