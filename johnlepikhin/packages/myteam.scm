@@ -68,14 +68,13 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
                       #:local-build? #t)))
 
 
-(define (make-myteam version checksum)
+(define (make-myteam version uri checksum)
   (package
     (name "myteam")
     (version version)
     (source (origin
               (method url-fetch/tarbomb)
-              ;; (uri "https://dl.internal.myteam.mail.ru/downloads/linux/x64/latest/myteam.tar.xz")
-              (uri (string-append "file:///tmp/myteam-" version ".tar.xz"))
+              (uri uri)
               (sha256 (base32 checksum))))
     (build-system copy-build-system)
     (arguments
@@ -148,7 +147,6 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("glib" ,glib)
               ("libxi" ,libxi)
               ("eudev" ,eudev)
-              ;; ("gcc:lib" ,(canonical-package gcc) "lib")
               ("ncurses" ,ncurses)
               ("libxtst" ,libxtst)
               ("alsa-lib" ,alsa-lib)
@@ -156,10 +154,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("libxinerama" ,libxinerama)))
     (license gpl3+)))
 
-(define-public myteam-10.0.9824
-  (make-myteam "10.0.9824" "2kdkddddddk9051i05baznrawy958a4qvw753fmxalsb6dxgflq2"))
+(define-public myteam-10.0.11725
+  (make-myteam "10.0.11725" "https://cloclo13.cldmail.ru/public/get/7Y2EHzGYNRQ2sAFLvEMsPUHzCKSoY4xzUrFYsBwoPEUrYGZjca1sdrkRFAVZdTu79hNiDQ/e.lepikhin@corp.mail.ru/myteam-10.0.11725_64bit.tar.xz" "1806k6nd8zcjqv2aq8jqc5yr4czcagr4hkb2xkhwv167dhyjbp7g"))
 
-(define-public myteam-10.0.10760
-  (make-myteam "10.0.10760-rev2" "1yz2szm7p3f3s04saz05863w2y8ns12nic0p5r5lrbz2g9fbbl3d"))
-
-(define-public myteam myteam-10.0.10760)
+(define-public myteam myteam-10.0.11725)
