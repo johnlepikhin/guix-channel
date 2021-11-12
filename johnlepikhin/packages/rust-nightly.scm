@@ -40,13 +40,14 @@
                  (patchelf (string-append (assoc-ref inputs "patchelf") "/bin/patchelf"))
                  (bin-masks
                   (string-append
-                   out "/bin/rustc "
-                   out "/bin/rustdoc "
-                   out "/bin/rustfmt "
-                   out "/bin/cargo "
-                   out "/bin/cargo-fmt "
-                   out "/bin/rust-analyzer "
-                   out "/lib/rustlib/x86_64-unknown-linux-gnu/bin/*"))
+                   out "/bin/rustc"
+                   " " out "/bin/rustdoc"
+                   " " out "/bin/rustfmt"
+                   " " out "/bin/cargo"
+                   " " out "/bin/cargo-fmt"
+                   " " out "/bin/rust-analyzer"
+                   " " out "/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust*"
+                   " " out "/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld/*"))
                  (lib-masks (string-append
                              out "/lib/*.so "
                              out "/lib/rustlib/x86_64-unknown-linux-gnu/lib/*.so"))
@@ -152,8 +153,17 @@
 (define-public rust-nightly-2021.05.21
   (make-rust-nightly "2021-05-21" "1r3b45krsaffbpbnla02y797x1lab5hp4x95mrp2bkq0clyzyk70"))
 
+(define-public rust-nightly-2021.11.11
+  (make-rust-nightly "2021-11-11" "1bs2866yc16x9m0lsj4sij67f4zwiq1f3b1b0jqck7m44p71d0dr"))
+
 (define-public rust-src-nightly-2021.05.21
   (make-rust-src-nightly "2021-05-21" "06k4a7j69x2yqkmksihnjkwiy0f3amh1iykscka0iykdfwh2mcsg"))
 
+(define-public rust-src-nightly-2021.11.11
+  (make-rust-src-nightly "2021-11-11" "10rjnzzx5pl3xvn3fzz0whpbixg6388qzjfwa9k537bp5dkp8bsf"))
+
 (define-public clippy-nightly-2021.05.21
   (make-clippy-nightly "2021-05-21" "0wpfrwzmgg0r67kvymx937iffr11bh9nig3xk92dd3kp5dhvrf6j" rust-nightly-2021.05.21))
+
+(define-public clippy-nightly-2021.11.11
+  (make-clippy-nightly "2021-11-11" "0wpfrwzmgg0r67kvymx937iffr11bh9nig3xk92dd3kp5dhvrf6j" rust-nightly-2021.11.11))
