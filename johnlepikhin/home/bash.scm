@@ -69,7 +69,6 @@ function whereis_guix {
 export PATH=\"$HOME/bin:$HOME/.cargo/bin:$PATH\"
 
 # Именно такое значение выставляется в emacs (надо разобраться)
-export PKG_CONFIG_PATH=\"$HOME/.guix-profile/lib/pkgconfig:$HOME/.guix-profile/share/pkgconfig:$HOME/.guix-profile/lib/pkgconfig:$HOME/.guix-profile/share/pkgconfig\"
 export LIBCLANG_PATH=\"$HOME/.guix-profile/lib/\"
 export RUST_SRC_PATH=\"$HOME/.guix-profile/lib/rustlib/src/rust/library\"
 export XDG_DATA_DIRS=\"/home/evgenii/.local/share/flatpak/exports/share:$XDG_DATA_DIRS\"
