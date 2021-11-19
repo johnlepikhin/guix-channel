@@ -204,8 +204,9 @@
 (define %python-packages
   (list
    python
+   python-pip
    python-pytest
-   python-pip))
+   python-language-server))
 
 (define %devel-other-packages
   (list
