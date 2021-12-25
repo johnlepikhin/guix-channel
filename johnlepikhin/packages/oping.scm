@@ -2,7 +2,7 @@
 (define-module (johnlepikhin packages oping)
   #:use-module (guix licenses)
   #:use-module (guix packages)
-  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (gnu packages perl)
   #:use-module (gnu packages elf)
   #:use-module (guix build-system gnu))
