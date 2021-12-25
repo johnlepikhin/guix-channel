@@ -16,10 +16,7 @@
              (uri (git-reference
                    (url "https://github.com/johnlepikhin/liboping")
                     (commit commit)))
-
-             (method url-fetch)
-            (uri (string-append "https://noping.cc/files/liboping-" version ".tar.bz2"))
-            (sha256 (base32 checksum))))
+             (sha256 (base32 checksum))))
    (build-system gnu-build-system)
    (supported-systems '("x86_64-linux"))
    (native-inputs `(("perl" ,perl)))
