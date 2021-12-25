@@ -35,5 +35,3 @@
   (liboping "1.10.1" "7a6e4795c5fb1a98624c3a1c922da87b44476200" "1nmhi4652izd0adrs72m038cy035snn7c8kmhrafx2zw7vwwnrgj"))
 
 (define-public liboping liboping-1.10.1)
-
-liboping

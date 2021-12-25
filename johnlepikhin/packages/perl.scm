@@ -151,6 +151,7 @@ is to find interpolated variables for Perl::Critic policies and similar code.")
        ("perl-test-deep" ,perl-test-deep)
        ("perl-class-tiny" ,perl-class-tiny)
        ("perl-path-tiny" ,perl-path-tiny)
+       ("perl-pod-parser" ,perl-pod-parser)
        ("perl-lingua-en-inflect" ,perl-lingua-en-inflect)))
     (propagated-inputs
      `(("perl-class-tiny" ,perl-class-tiny)
@@ -189,6 +190,8 @@ is to find interpolated variables for Perl::Critic policies and similar code.")
        ("perl-string-format" ,perl-string-format)
        ("perl-config-tiny" ,perl-config-tiny)
        ("perl-pod-spell" ,perl-pod-spell)
+       ("perl-pod-parser" ,perl-pod-parser)
+       ("perl-file-which" ,perl-file-which)
        ("perltidy" ,perltidy)))
     (propagated-inputs
      `(("perl-readonly" ,perl-readonly)
@@ -203,6 +206,8 @@ is to find interpolated variables for Perl::Critic policies and similar code.")
        ("perl-string-format" ,perl-string-format)
        ("perl-config-tiny" ,perl-config-tiny)
        ("perl-pod-spell" ,perl-pod-spell)
+       ("perl-pod-parser" ,perl-pod-parser)
+       ("perl-file-which" ,perl-file-which)
        ("perltidy" ,perltidy)))
     (home-page "https://metacpan.org/dist/Perl-Critic")
     (synopsis "Command-line interface to critique Perl source.")
@@ -211,5 +216,3 @@ identify awkward, hard to read, error-prone, or unconventional constructs in you
 Perl Best Practices. However, perlcritic is not limited to enforcing PBP, and it will even support rules that contradict Conway. All rules
 can easily be configured or disabled to your liking.")
     (license perl-license)))
-
-perl-perlcritic
