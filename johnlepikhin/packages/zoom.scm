@@ -220,7 +220,7 @@
       ("fontconfig" ,fontconfig)
       ("freetype" ,freetype)
       ("gcc:lib" ,(canonical-package gcc) "lib")
-      ("gdk-pixbuf+svg" ,gdk-pixbuf+svg)
+      ("librsvg" ,librsvg)
       ("glib" ,glib)
       ("gtk+" ,gtk+)
       ("libdrm" ,libdrm)
