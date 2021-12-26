@@ -236,3 +236,8 @@
 (define %mail-packages
   (list
    offlineimap))
+
+(define %astro-packages
+  (list
+   stellarium
+   celestia))
