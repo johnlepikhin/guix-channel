@@ -83,7 +83,8 @@
             %devel-other-packages
             %rust-packages
             %editors-packages
-            %mail-packages))
+            %mail-packages
+            %astro-packages))
 
 (define %devel-common-tools-packages
   (list
