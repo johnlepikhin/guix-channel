@@ -102,7 +102,7 @@
    tcpdump
    perl-perlcritic
    socat
-   clang:extra))
+   (list clang "extra")))
 
 (define %devel-common-libs-packages
   (list
