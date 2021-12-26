@@ -5,6 +5,7 @@
   #:use-module (gnu packages web)
   #:use-module (gnu packages gdb)
   #:use-module (gnu packages commencement)
+  #:use-module (gnu packages astronomy)
   #:use-module (gnu packages lsof)
   #:use-module (gnu packages valgrind)
   #:use-module (gnu packages elf)
