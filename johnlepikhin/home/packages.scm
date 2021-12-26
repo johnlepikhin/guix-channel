@@ -100,7 +100,9 @@
    puppet-lint
    lxc
    tcpdump
-   perl-perlcritic))
+   perl-perlcritic
+   socat
+   clang:extra))
 
 (define %devel-common-libs-packages
   (list
@@ -125,7 +127,7 @@
     network-manager-applet
     xhost
     feh
-    telegram-desktop
+    ;; telegram-desktop
     ungoogled-chromium
     ;; firefox
     ;; google-chromium
