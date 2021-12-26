@@ -222,8 +222,7 @@
    rust-nightly-2021.11.11
    clippy-nightly-2021.11.11
    rust-src-nightly-2021.11.11
-   openssl
-   clang))
+   openssl))
 
 (define %editors-packages
   (list
