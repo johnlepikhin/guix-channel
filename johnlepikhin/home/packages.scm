@@ -115,7 +115,7 @@
 ;; (list gcc "lib")))
 
 (define %xmonad-packages
-  (list ghc ghc-hostname ghc-xmonad-contrib xmonad))
+  (list ghc ghc-hostname ghc-xmonad-contrib xmonad xmessage))
 
 (define %xdesktop-packages
   (append
