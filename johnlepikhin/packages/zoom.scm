@@ -34,7 +34,7 @@
    (version version)
    (source (origin
             (method url-fetch)
-            (uri "https://zoom.us/client/latest/zoom_x86_64.tar.xz")
+            (uri (string-append "https://cdn.zoom.us/prod/" version "/zoom_x86_64.tar.xz"))
             (sha256 (base32 checksum))))
    (build-system copy-build-system)
    (arguments
@@ -243,6 +243,6 @@
       ("zlib" ,zlib)))
    (license license:zoomus)))
 
-(define-public zoom-5.8.0 (make-zoom "5.8.0" "1qdzv95gla14za1i2i1r794sflnlq8phsgcs2vpycphfbz57f6w7"))
+(define-public zoom-5.9.1.1380 (make-zoom "5.9.1.1380" "1z7msgqjhnhlw8gfzkxva4928zjrgq7djyak3ks3w7pdk3s377dr"))
 
-(define-public zoom zoom-5.8.0)
+(define-public zoom zoom-5.9.1.1380)
