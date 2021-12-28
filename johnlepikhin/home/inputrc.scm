@@ -20,7 +20,7 @@
   (string-append
    (if (home-inputrc-record-comment record)
        (format #f "# ~a\n" (home-inputrc-record-comment record)) "")
-   (format #f "\"~a\": ~a\n\n"
+   (format #f "~a: ~a\n\n"
            (home-inputrc-record-key record)
            (home-inputrc-record-function record))))
 
