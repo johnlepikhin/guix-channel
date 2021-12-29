@@ -128,7 +128,7 @@
     network-manager-applet
     xhost
     feh
-    ;; telegram-desktop
+    telegram-desktop
     ungoogled-chromium
     ;; firefox
     ;; google-chromium
@@ -207,7 +207,6 @@
 (define %python-packages
   (list
    python
-   python-pip
    python-pytest
    python-language-server))
 

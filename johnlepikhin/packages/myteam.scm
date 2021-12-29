@@ -128,7 +128,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               (with-output-to-file (string-append out "/dist/qt.conf")
                 (lambda _
                   (display qt.conf))))
-            
+
             (symlink
              (string-append ncurses-lib "/libncursesw.so."
                             ;; Extract "6.0" from "6.0-20170930" if a
