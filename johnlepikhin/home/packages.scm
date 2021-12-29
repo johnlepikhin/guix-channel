@@ -214,7 +214,7 @@
   (list
    node
    guile-2.2
-   icedtea))
+   (specification->package "openjdk@17")))
 
 (define %rust-packages
   (list
