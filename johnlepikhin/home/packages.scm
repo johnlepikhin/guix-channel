@@ -213,8 +213,7 @@
 (define %devel-other-packages
   (list
    node
-   guile-2.2
-   (specification->package "openjdk@17")))
+   guile-2.2))
 
 (define %rust-packages
   (list
