@@ -79,12 +79,12 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
     (build-system copy-build-system)
     (arguments
      `(#:install-plan
-       `(("myteam" "bin/.myteam-real")
-         ("lib" "local-lib")
-         ("lib/libGLsoft.so.1" "bin/lib/libGLsoft.so.1")
-         ("libexec" "libexec")
-         ("resources" "resources")
-         ("plugins" "plugins"))
+       `(("myteam" "dist/.myteam-real")
+         ("lib" "dist/lib")
+         ;; ("lib/libGLsoft.so.1" "dist/lib/libGLsoft.so.1")
+         ("libexec" "dist/libexec")
+         ("resources" "dist/resources")
+         ("plugins" "dist/plugins"))
        #:phases
        (modify-phases
         %standard-phases
@@ -96,37 +96,39 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
                  (ncurses-lib
                   (string-append (assoc-ref inputs "ncurses") "/lib"))
                  (patchelf (string-append (assoc-ref inputs "patchelf") "/bin/patchelf"))
-                 (binaries (string-append out "/bin/.myteam-real"
-                                          " " out "/libexec/*"))
-                 (libs (string-append out "/local-lib/lib*.so* " out "/bin/lib/lib*.so*"))
-                 (plugins (string-append out "/plugins/*/lib*.so*"))
+                 (binaries (string-append out "/dist/.myteam-real"
+                                          " " out "/dist/libexec/*"))
+                 (libs (string-append out "/dist/lib/lib*.so*"))
+                 (plugins (string-append out "/dist/plugins/*/lib*.so*"))
                  (dynamic-linker (string-append (assoc-ref inputs "libc") ,(glibc-dynamic-linker)))
-                 (nss (string-append (assoc-ref inputs "nss") "/lib/nss"))
-                 (plugins-bearer-path (string-append out "/plugins/bearer"))
-                 (plugins-imageformats-path (string-append out "/plugins/imageformats"))
-                 (plugins-platforms-path (string-append out "/plugins/platforms"))
-                 (plugins-xcbglintegrations-path (string-append out "/plugins/xcbglintegrations"))
-                 (plugins-paths
-                  (string-append
-                   plugins-bearer-path
-                   ":" plugins-imageformats-path
-                   ":" plugins-platforms-path
-                   ":" plugins-xcbglintegrations-path)))
+                 (nss (string-append (assoc-ref inputs "nss") "/lib/nss")))
             (system
              (string-append
               patchelf
-              " --set-rpath \"" out "/local-lib:" nss ":" plugins-paths ":$LIBRARY_PATH\""
+              " --set-rpath \"" out "/dist/lib:" nss ":$LIBRARY_PATH\""
               " --set-interpreter " dynamic-linker
               " " binaries))
 
             (system
              (string-append
-              patchelf " --set-rpath \"" out "/local-lib:" nss ":" plugins-paths ":$LIBRARY_PATH\" " libs " " plugins))
+              patchelf " --set-rpath \"" out "/dist/lib:" nss ":$LIBRARY_PATH\" " libs " " plugins))
 
+            (mkdir (string-append out "/bin"))
             (let ((wrapper (string-append out "/bin/myteam")))
-              (text-file wrapper (string-append "#! /bin/sh\n\n" out "/bin/.myteam-real"))
+              (with-output-to-file wrapper
+                (lambda _
+                  (display (string-append "#! /bin/sh\n\nSOFTWARE_RENDER=1 " out "/dist/.myteam-real\n"))))
               (chmod wrapper #o755))
 
+            (let ((qt.conf (string-append
+                          "[Paths]\n"
+                          "Plugins = " out "/dist/plugins\n"
+                          "Libraries = " out "/dist/lib\n"
+                          "LibraryExecutables = " out "/dist/libexec\n")))
+              (with-output-to-file (string-append out "/dist/qt.conf")
+                (lambda _
+                  (display qt.conf))))
+            
             (symlink
              (string-append ncurses-lib "/libncursesw.so."
                             ;; Extract "6.0" from "6.0-20170930" if a
@@ -135,7 +137,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
                                     (d (or (string-index v #\-)
                                            (string-length v))))
                                (version-major+minor (string-take v d))))
-             (string-append out "/local-lib/libtinfo.so.5"))
+             (string-append out "/dist/lib/libtinfo.so.5"))
 
             #t))))))
     (synopsis "Myteam")
@@ -164,6 +166,6 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
     (license gpl3+)))
 
 (define-public myteam-10.0.11725.1
-  (make-myteam "10.0.11725.1" "https://cloclo61.cldmail.ru/public/get/81vfnTGwmtQwyDavaUJ1tWC9u79D1v1dvyXY4KuxS7VsKCxmXB1fkX7rDTbvhBsdVvd6LF/no/myteam-10.0.11725_64bit.tar.xz" "1806k6nd8zcjqv2aq8jqc5yr4czcagr4hkb2xkhwv167dhyjbp7g"))
+  (make-myteam "10.0.11725.1" "https://t.bk.ru/1yahJYa/myteam-10.0.11725_64bit.tar.xz" "1806k6nd8zcjqv2aq8jqc5yr4czcagr4hkb2xkhwv167dhyjbp7g"))
 
 (define-public myteam myteam-10.0.11725.1)
