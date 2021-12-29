@@ -75,7 +75,7 @@
          "lib/rustlib/x86_64-unknown-linux-gnu/lib"))))
    (native-inputs `(("patchelf" ,patchelf)
                     ("cmake" ,cmake)))
-   (propagated-inputs
+   (inputs
     `(("libstdc++" ,(make-libstdc++ gcc))
       ("gcc:lib" ,(canonical-package gcc) "lib")
       ("glibc" ,glibc)
@@ -141,7 +141,7 @@
        `(("clippy-preview/bin/cargo-clippy" "bin/")
          ("clippy-preview/bin/clippy-driver" "bin/"))))
     (native-inputs `(("patchelf" ,patchelf)))
-    (propagated-inputs
+    (inputs
      `(("gcc:lib" ,(canonical-package gcc) "lib")
        ("glibc" ,glibc)
        ("rust" ,rust-package)))
