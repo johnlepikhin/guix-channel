@@ -81,7 +81,6 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
      `(#:install-plan
        `(("myteam" "dist/.myteam-real")
          ("lib" "dist/lib")
-         ;; ("lib/libGLsoft.so.1" "dist/lib/libGLsoft.so.1")
          ("libexec" "dist/libexec")
          ("resources" "dist/resources")
          ("plugins" "dist/plugins"))
