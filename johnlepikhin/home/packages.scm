@@ -214,7 +214,7 @@
   (list
    node
    guile-2.2
-   openjdk))
+   openjdk17))
 
 (define %rust-packages
   (list

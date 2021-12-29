@@ -51,7 +51,7 @@
             #t))))))
    (native-inputs `(("patchelf" ,patchelf)))
    (propagated-inputs
-    `(("openjdk" ,(specification->package "openjdk@17"))))
+    `(("openjdk" ,openjdk17)))
    (synopsis "Free multi-platform database tool for developers, SQL programmers, database administrators and analysts.")
    (description "Supports any database which has JDBC driver (which basically means - ANY database).
 
