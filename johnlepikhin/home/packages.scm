@@ -214,8 +214,7 @@
   (list
    node
    guile-2.2
-   ;; Java's JDK
-   icedtea))
+   openjdk))
 
 (define %rust-packages
   (list
