@@ -213,8 +213,9 @@
 (define %devel-other-packages
   (list
    node
-   guile-2.2
-   emacs-guix))
+   guile
+   emacs-guix
+   emacs-geiser))
 
 (define %rust-packages
   (list
