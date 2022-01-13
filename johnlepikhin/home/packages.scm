@@ -210,6 +210,10 @@
    python-pytest
    python-language-server))
 
+(define %golang-packages
+  (list
+   golang))
+
 (define %devel-other-packages
   (list
    node
