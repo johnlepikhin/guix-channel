@@ -218,7 +218,7 @@
 (define %devel-other-packages
   (list
    node
-   guile
+   guile-3.0
    emacs-guix
    emacs-geiser))
 
