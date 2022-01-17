@@ -66,7 +66,7 @@ function whereis_guix {
   ls -l `which $1` | sed -r 's/.* (.+)\\/bin\\/[^\\/]+/\\1/'
 }
 
-export PATH=\"$HOME/bin:$HOME/.cargo/bin:$PATH\"
+export PATH=\"$HOME/bin:$HOME/.cargo/bin:$HOME/go/bin:$PATH\"
 
 # Именно такое значение выставляется в emacs (надо разобраться)
 export LIBCLANG_PATH=\"$HOME/.guix-profile/lib/\"

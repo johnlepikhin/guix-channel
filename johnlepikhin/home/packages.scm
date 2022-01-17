@@ -39,6 +39,7 @@
   #:use-module (gnu packages video)
   #:use-module (gnu packages stalonetray)
   #:use-module (gnu packages gl)
+  #:use-module (gnu packages golang)
   #:use-module (gnu packages dunst)
   #:use-module (gnu packages libreoffice)
   #:use-module (gnu packages freedesktop)
@@ -212,7 +213,7 @@
 
 (define %golang-packages
   (list
-   golang))
+   go))
 
 (define %devel-other-packages
   (list
