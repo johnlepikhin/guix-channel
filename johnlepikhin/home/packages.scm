@@ -83,6 +83,7 @@
             %python-packages
             %devel-other-packages
             %rust-packages
+            %golang-packages
             %editors-packages
             %mail-packages
             %astro-packages))
