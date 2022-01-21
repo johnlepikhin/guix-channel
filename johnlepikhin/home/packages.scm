@@ -132,7 +132,7 @@
     feh
     telegram-desktop
     ungoogled-chromium
-    ;; firefox
+    firefox
     ;; google-chromium
     pasystray
     mplayer
