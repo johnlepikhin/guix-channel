@@ -74,7 +74,6 @@
   #:use-module (gnu packages file)
   #:use-module (gnu packages graphviz)
   #:use-module (gnu packages music)
-  #:use-module (nongnu packages mozilla)
   #:export (%devel-common-tools-packages
             %devel-common-libs-packages
             %xmonad-packages
@@ -133,8 +132,6 @@
     feh
     telegram-desktop
     ungoogled-chromium
-    firefox
-    ;; google-chromium
     pasystray
     mplayer
     xset
