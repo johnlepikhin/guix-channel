@@ -130,7 +130,8 @@
     network-manager-applet
     xhost
     feh
-    telegram-desktop
+    ;; Doesn't compile
+    ;; telegram-desktop
     ungoogled-chromium
     pasystray
     mplayer
