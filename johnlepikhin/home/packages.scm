@@ -225,9 +225,9 @@
 
 (define %rust-packages
   (list
-   rust-nightly-2021.11.11
-   clippy-nightly-2021.11.11
-   rust-src-nightly-2021.11.11
+   rust-nightly-2022.03.13
+   clippy-nightly-2022.03.13
+   rust-src-nightly-2022.03.13
    clang
    openssl))
 

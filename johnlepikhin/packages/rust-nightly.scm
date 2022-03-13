@@ -153,17 +153,30 @@
 (define-public rust-nightly-2021.05.21
   (make-rust-nightly "2021-05-21" "1r3b45krsaffbpbnla02y797x1lab5hp4x95mrp2bkq0clyzyk70"))
 
-(define-public rust-nightly-2021.11.11
-  (make-rust-nightly "2021-11-11" "1bs2866yc16x9m0lsj4sij67f4zwiq1f3b1b0jqck7m44p71d0dr"))
-
 (define-public rust-src-nightly-2021.05.21
   (make-rust-src-nightly "2021-05-21" "06k4a7j69x2yqkmksihnjkwiy0f3amh1iykscka0iykdfwh2mcsg"))
-
-(define-public rust-src-nightly-2021.11.11
-  (make-rust-src-nightly "2021-11-11" "10rjnzzx5pl3xvn3fzz0whpbixg6388qzjfwa9k537bp5dkp8bsf"))
 
 (define-public clippy-nightly-2021.05.21
   (make-clippy-nightly "2021-05-21" "0wpfrwzmgg0r67kvymx937iffr11bh9nig3xk92dd3kp5dhvrf6j" rust-nightly-2021.05.21))
 
+;;
+
+(define-public rust-nightly-2021.11.11
+  (make-rust-nightly "2021-11-11" "1bs2866yc16x9m0lsj4sij67f4zwiq1f3b1b0jqck7m44p71d0dr"))
+
+(define-public rust-src-nightly-2021.11.11
+  (make-rust-src-nightly "2021-11-11" "10rjnzzx5pl3xvn3fzz0whpbixg6388qzjfwa9k537bp5dkp8bsf"))
+
 (define-public clippy-nightly-2021.11.11
   (make-clippy-nightly "2021-11-11" "0bcwcra1bs0srwwiyc2hvr1l8rcnjndjcpcwsc6n8584nslg6r99" rust-nightly-2021.11.11))
+
+;;
+
+(define-public rust-nightly-2022.03.13
+  (make-rust-nightly "2022-03-13" "1jzz4kf64b8d8lkkxci5a28jwk7wrpz8hnmjqdgpf48h66lslkvh"))
+
+(define-public rust-src-nightly-2022.03.13
+  (make-rust-src-nightly "2022-03-13" "0qgpcwcabbrjnc6d9b0i04vg70p8ss0qxs02m5bxp7g764pgb8bf"))
+
+(define-public clippy-nightly-2022.03.13
+  (make-clippy-nightly "2022-03-13" "09i3iz689v4m9902xnkp4ia23zphlvwszy589lcpv65clcx0psby" rust-nightly-2022.03.13))
