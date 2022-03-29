@@ -225,7 +225,8 @@
    node
    guile-3.0
    emacs-guix
-   emacs-geiser))
+   emacs-geiser
+   shellcheck))
 
 (define %rust-packages
   (list
