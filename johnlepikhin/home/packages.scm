@@ -93,6 +93,7 @@
   (list
    git
    (list git "send-email")
+   (list git "credential-netrc")
    strace
    jq
    gdb
