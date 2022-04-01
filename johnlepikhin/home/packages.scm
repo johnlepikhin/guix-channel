@@ -92,7 +92,7 @@
 (define %devel-common-tools-packages
   (list
    git
-   (list git "send-email")
+   (list git "send-email" "credential-netrc")
    strace
    jq
    gdb
