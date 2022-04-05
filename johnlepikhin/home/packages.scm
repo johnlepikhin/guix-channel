@@ -92,6 +92,7 @@
 (define %devel-common-tools-packages
   (list
    git
+   git-lfs
    (list git "send-email")
    (list git "credential-netrc")
    strace
