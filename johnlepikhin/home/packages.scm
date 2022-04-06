@@ -18,7 +18,6 @@
   #:use-module (johnlepikhin packages apcalc)
   #:use-module (johnlepikhin packages dbeaver)
   #:use-module (johnlepikhin packages git-sync)
-  #:use-module (johnlepikhin packages myteam)
   #:use-module (johnlepikhin packages one-password)
   #:use-module (johnlepikhin packages oping)
   #:use-module (johnlepikhin packages puppet-lint)

@@ -1,4 +1,4 @@
-(define-module (johnlepikhin packages myteam)
+(define-module (johnlepikhin packages vkteams)
   #:use-module (gnu packages base)
   #:use-module (gnu packages bootstrap)
   #:use-module (gnu packages compression)
@@ -22,7 +22,7 @@
   #:use-module (guix store)
   #:use-module (guix utils)
   #:use-module (ice-9 match)
-  #:export (make-myteam))
+  #:export (make-vkteams))
 
 ;; Patched version, added support of xz
 (define* (url-fetch/tarbomb url hash-algo hash
@@ -68,9 +68,9 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
                       #:local-build? #t)))
 
 
-(define (make-myteam version uri checksum)
+(define (make-vkteams version uri checksum)
   (package
-    (name "myteam")
+    (name "vkteams")
     (version version)
     (source (origin
               (method url-fetch/tarbomb)
@@ -79,7 +79,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
     (build-system copy-build-system)
     (arguments
      `(#:install-plan
-       `(("myteam" "dist/.myteam-real")
+       `(("vkteams" "dist/.vkteams-real")
          ("lib" "dist/lib")
          ("libexec" "dist/libexec")
          ("resources" "dist/resources")
@@ -95,7 +95,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
                  (ncurses-lib
                   (string-append (assoc-ref inputs "ncurses") "/lib"))
                  (patchelf (string-append (assoc-ref inputs "patchelf") "/bin/patchelf"))
-                 (binaries (string-append out "/dist/.myteam-real"
+                 (binaries (string-append out "/dist/.vkteams-real"
                                           " " out "/dist/libexec/*"))
                  (libs (string-append out "/dist/lib/lib*.so*"))
                  (plugins (string-append out "/dist/plugins/*/lib*.so*"))
@@ -113,10 +113,10 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               patchelf " --set-rpath \"" out "/dist/lib:" nss ":$LIBRARY_PATH\" " libs " " plugins))
 
             (mkdir (string-append out "/bin"))
-            (let ((wrapper (string-append out "/bin/myteam")))
+            (let ((wrapper (string-append out "/bin/vkteams")))
               (with-output-to-file wrapper
                 (lambda _
-                  (display (string-append "#! /bin/sh\n\nSOFTWARE_RENDER=1 " out "/dist/.myteam-real\n"))))
+                  (display (string-append "#! /bin/sh\n\nSOFTWARE_RENDER=1 " out "/dist/.vkteams-real\n"))))
               (chmod wrapper #o755))
 
             (let ((qt.conf (string-append
@@ -139,9 +139,9 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
              (string-append out "/dist/lib/libtinfo.so.5"))
 
             #t))))))
-    (synopsis "Myteam")
-    (description "Myteam")
-    (home-page "https://dl.internal.myteam.mail.ru//")
+    (synopsis "Vkteams")
+    (description "Vkteams")
+    (home-page "https://dl.internal.myteam.mail.ru/")
     (native-inputs `(("patchelf" ,patchelf)))
     (inputs `(("libxrandr" ,libxrandr)
               ("libxcomposite" ,libxcomposite)
@@ -164,7 +164,11 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("libxinerama" ,libxinerama)))
     (license gpl3+)))
 
-(define-public myteam-10.0.11725.1
-  (make-myteam "10.0.11725.1" "https://t.bk.ru/1yahJYa/myteam-10.0.11725_64bit.tar.xz" "1806k6nd8zcjqv2aq8jqc5yr4czcagr4hkb2xkhwv167dhyjbp7g"))
+;; (define-public myteam-10.0.11725.1
+;;   (make-myteam "10.0.11725.1" "https://t.bk.ru/1yahJYa/myteam-10.0.11725_64bit.tar.xz" "1806k6nd8zcjqv2aq8jqc5yr4czcagr4hkb2xkhwv167dhyjbp7g"))
 
-(define-public myteam myteam-10.0.11725.1)
+(define-public vkteams-10.0.15729
+  (make-vkteams "10.0.15729" "https://t.bk.ru/0yrQnX2sSGbnrB6/vkteams.tar.xz" "0wbppc3h8sg1s9ba0m120a8qflnwgsipb52aph9lgwwdcbwfa91z"))
+
+
+(define-public vkteams vkteams-10.0.15729)
