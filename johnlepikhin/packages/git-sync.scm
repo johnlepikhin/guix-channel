@@ -28,7 +28,7 @@ as having one.")
     (propagated-inputs `(("git" ,git)))
     (license cc0)))
 
-(define-public git-sync-2021-07-27
-  (make-git-sync "2020-11-09" "12e0b753055f5d7ccb904b556db982ccf7e8aa84" "0wrwmh852a2xjpzsd45fmpg9v1k20fwy5dl7cs5lc5c6k4mhigbi"))
+(define-public git-sync-2022-04-10
+  (make-git-sync "2022-04-10" "8466b77a38b3d5e8b4ed9e3cb1b635e475eeb415" "1bj8zq08272w30js5r43rcdndpn0ngi29kxw102hisymc6kb1c7j"))
 
-(define-public git-sync git-sync-2021-07-27)
+(define-public git-sync git-sync-2022-04-10)
