@@ -135,6 +135,7 @@
     feh
     ;; Doesn't compile
     ;; telegram-desktop
+    emacs-telega
     ungoogled-chromium
     pasystray
     mplayer
