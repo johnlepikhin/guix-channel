@@ -162,7 +162,6 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("alsa-lib" ,alsa-lib)
                ("nss" ,nss)
                ("libxinerama" ,libxinerama)))
-    (propagated-inputs `(("nss-certs" ,nss-certs)))
     (license gpl3+)))
 
 ;; (define-public myteam-10.0.11725.1
