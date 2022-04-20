@@ -29,7 +29,7 @@
            (home-xresources-record-value record))))
 
 (define (add-xresources-file config)
-  `(("config/xresources"
+  `((".config/xresources"
      ,(mixed-text-file
        "config-xresources"
        #~(string-append

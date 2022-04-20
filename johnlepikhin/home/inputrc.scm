@@ -30,7 +30,7 @@
   (records home-inputrc-configuration-records (default '())))
 
 (define (add-inputrc-file config)
-  `(("inputrc"
+  `((".inputrc"
      ,(mixed-text-file
        "inputrc"
        #~(string-append

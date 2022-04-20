@@ -64,7 +64,7 @@
   (string-append (getenv "XDG_CACHE_HOME") "/ssh-connections"))
 
 (define (add-ssh-config-file config)
-  `(("ssh/config"
+  `((".ssh/config"
      ,(mixed-text-file
        "ssh-config"
        #~(string-append
@@ -73,7 +73,7 @@
               (map (lambda (host)
                      (serialize-home-ssh-host-configuration host))
                    (home-ssh-configuration-hosts config))))))))
-  
+
 (define (add-ssh-extensions config extensions)
   (home-ssh-configuration
    (inherit config)

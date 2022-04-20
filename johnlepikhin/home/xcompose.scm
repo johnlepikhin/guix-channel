@@ -41,7 +41,7 @@
        (format #f " # ~a\n" (home-xcompose-record-comment record)) "\n")))
 
 (define (add-xcompose-file config)
-  `(("XCompose"
+  `((".XCompose"
      ,(mixed-text-file
        "XCompose"
        #~(string-append
