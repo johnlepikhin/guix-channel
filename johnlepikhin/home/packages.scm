@@ -167,8 +167,7 @@
     vlc
     password-store
     browserpass-native
-    xmodmap
-    xf86-input-synaptics)))
+    xmodmap)))
 
 (define %tools-packages
   (list
