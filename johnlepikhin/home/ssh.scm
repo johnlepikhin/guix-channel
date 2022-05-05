@@ -24,7 +24,10 @@
   (proxy-jump home-ssh-host-configuration-proxy-jump (default #f))
   (pubkey-accepted-key-types home-ssh-host-configuration-pubkey-accepted-key-types (default #f))
   (host-key-algorithms home-ssh-host-configuration-host-key-algorithms (default #f))
-  (comment home-ssh-host-configuration-comment (default #f)))
+  (comment home-ssh-host-configuration-comment (default #f))
+  (identity-file home-ssh-host-configuration-identity-file (default #f))
+  (add-ssh-keys-to-agent home-ssh-host-configuration-add-ssh-keys-to-agent (default #f))
+  )
 
 (define (serialize-home-ssh-host-configuration val)
   (string-append
@@ -53,6 +56,10 @@
        (format #f "  PubkeyAcceptedKeyTypes ~a\n" (home-ssh-host-configuration-pubkey-accepted-key-types val)) "")
    (if (home-ssh-host-configuration-host-key-algorithms val)
        (format #f "  HostKeyAlgorithms ~a\n" (home-ssh-host-configuration-host-key-algorithms val)) "")
+   (if (home-ssh-host-configuration-host-identity-file val)
+       (format #f "  IdentityFile ~a\n" (home-ssh-host-configuration-identity-file val)) "")
+   (if (home-ssh-host-configuration-add-ssh-keys-to-agent val)
+       "  AddKeysToAgent yes\n" "")
    "\n"))
 
 (define-record-type* <home-ssh-configuration>
