@@ -56,7 +56,7 @@
        (format #f "  PubkeyAcceptedKeyTypes ~a\n" (home-ssh-host-configuration-pubkey-accepted-key-types val)) "")
    (if (home-ssh-host-configuration-host-key-algorithms val)
        (format #f "  HostKeyAlgorithms ~a\n" (home-ssh-host-configuration-host-key-algorithms val)) "")
-   (if (home-ssh-host-configuration-host-identity-file val)
+   (if (home-ssh-host-configuration-identity-file val)
        (format #f "  IdentityFile ~a\n" (home-ssh-host-configuration-identity-file val)) "")
    (if (home-ssh-host-configuration-add-ssh-keys-to-agent val)
        "  AddKeysToAgent yes\n" "")
