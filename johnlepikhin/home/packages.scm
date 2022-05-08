@@ -74,6 +74,7 @@
   #:use-module (gnu packages file)
   #:use-module (gnu packages graphviz)
   #:use-module (gnu packages music)
+  #:use-module (gnu packages virtualization)
   #:export (%devel-common-tools-packages
             %devel-common-libs-packages
             %xmonad-packages
@@ -116,8 +117,6 @@
    liboping
    alsa-lib
    libxcomposite))
-   ;; fontconfig))
-;; (list gcc "lib")))
 
 (define %xmonad-packages
   (list ghc ghc-hostname ghc-xmonad-contrib xmonad xmessage))
@@ -167,7 +166,8 @@
     vlc
     password-store
     browserpass-native
-    xmodmap)))
+    xmodmap
+    virt-manager)))
 
 (define %tools-packages
   (list
