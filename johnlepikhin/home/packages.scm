@@ -109,7 +109,8 @@
    lxc
    tcpdump
    perl-perlcritic
-   socat))
+   socat
+   nmap))
 
 (define %devel-common-libs-packages
   (list
