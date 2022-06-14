@@ -23,7 +23,7 @@
   `((".gnupg/gpg-agent.conf"
      ,(mixed-text-file
        "gnupg-gpg-agent.conf"
-       #~(serialize-home-gpg-agent-configuration config)))))
+       (serialize-home-gpg-agent-configuration config)))))
 
 (define home-gpg-agent-service-type
   (service-type
