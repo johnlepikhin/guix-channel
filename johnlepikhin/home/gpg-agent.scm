@@ -16,8 +16,8 @@
 
 (define (serialize-home-gpg-agent-configuration configuration)
   (string-append
-   (format #f "default-cache-ttl: ~a\n" (home-gpg-agent-configuration-default-cache-ttl configuration))
-   (format #f "max-cache-ttl: ~a\n" (home-gpg-agent-configuration-max-cache-ttl configuration))))
+   (format #f "default-cache-ttl ~a\n" (home-gpg-agent-configuration-default-cache-ttl configuration))
+   (format #f "max-cache-ttl ~a\n" (home-gpg-agent-configuration-max-cache-ttl configuration))))
 
 (define (add-gpg-agent-file config)
   `((".gnupg/gpg-agent.conf"
