@@ -14,6 +14,7 @@
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages haskell)
+  #:use-module (gnu packages inkscape)
   #:use-module (gnu packages haskell-xyz)
   #:use-module (johnlepikhin packages apcalc)
   #:use-module (johnlepikhin packages dbeaver)
