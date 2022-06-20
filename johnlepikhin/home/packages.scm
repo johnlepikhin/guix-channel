@@ -168,7 +168,8 @@
     password-store
     browserpass-native
     xmodmap
-    virt-manager)))
+    virt-manager
+    inkscape)))
 
 (define %tools-packages
   (list
