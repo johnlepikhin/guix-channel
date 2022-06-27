@@ -73,6 +73,7 @@
   #:use-module (gnu packages vim)
   #:use-module (gnu packages check)
   #:use-module (gnu packages file)
+  #:use-module (gnu packages ocr)
   #:use-module (gnu packages graphviz)
   #:use-module (gnu packages music)
   #:use-module (gnu packages virtualization)
@@ -111,7 +112,8 @@
    tcpdump
    perl-perlcritic
    socat
-   nmap))
+   nmap
+   tesseract-ocr))
 
 (define %devel-common-libs-packages
   (list
