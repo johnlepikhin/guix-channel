@@ -2,6 +2,7 @@
   #:use-module (gnu packages admin)
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages linux)
+  #:use-module (gnu packages image)
   #:use-module (gnu packages web)
   #:use-module (gnu packages gdb)
   #:use-module (gnu packages commencement)
