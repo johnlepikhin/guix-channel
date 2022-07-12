@@ -12,6 +12,7 @@
   #:use-module (gnu packages elf)
   #:use-module (gnu packages databases)
   #:use-module (gnu packages code)
+  #:use-module (gnu packages coq)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages haskell)
@@ -115,7 +116,8 @@
    socat
    nmap
    tesseract-ocr
-   leptonica))
+   leptonica
+   coq))
 
 (define %devel-common-libs-packages
   (list
