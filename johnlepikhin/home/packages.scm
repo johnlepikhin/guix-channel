@@ -126,7 +126,8 @@
    pkg-config
    liboping
    alsa-lib
-   libxcomposite))
+   libxcomposite
+   nss-certs))
 
 (define %xmonad-packages
   (list ghc ghc-hostname ghc-xmonad-contrib xmonad xmessage))
