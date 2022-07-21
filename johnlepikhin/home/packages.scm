@@ -117,7 +117,8 @@
    nmap
    tesseract-ocr
    leptonica
-   coq))
+   coq
+   cmake))
 
 (define %devel-common-libs-packages
   (list
