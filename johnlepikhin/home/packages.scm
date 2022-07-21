@@ -24,6 +24,7 @@
   #:use-module (johnlepikhin packages git-sync)
   #:use-module (johnlepikhin packages one-password)
   #:use-module (johnlepikhin packages oping)
+  #:use-module (johnlepikhin packages telegram)
   #:use-module (johnlepikhin packages puppet-lint)
   #:use-module (johnlepikhin packages rust-nightly)
   #:use-module (johnlepikhin packages zoom)
@@ -143,8 +144,7 @@
     network-manager-applet
     xhost
     feh
-    ;; Doesn't compile
-    ;; telegram-desktop
+    telegram-desktop-precompiled
     emacs-telega
     ungoogled-chromium
     pasystray
