@@ -81,7 +81,7 @@
   #:use-module (gnu packages graphviz)
   #:use-module (gnu packages music)
   #:use-module (gnu packages virtualization)
-  #:use-module (gnu packages nss)
+  #:use-module (gnu packages certs)
   #:export (%devel-common-tools-packages
             %devel-common-libs-packages
             %xmonad-packages
