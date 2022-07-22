@@ -164,8 +164,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
                ("libxinerama" ,libxinerama)))
     (license gpl3+)))
 
-(define-public vkteams-10.0.15729
-  (make-vkteams "10.0.15729" "https://dl.internal.myteam.mail.ru/downloads/linux/x64/latest/vkteams.tar.xz" "18c79dgqvjrc4dk7531698fi9bkk3l38v866niha6yszcl6a0yxz"))
+(define-public vkteams-10.0.18761
+  (make-vkteams "10.0.18761" "https://dl.internal.myteam.mail.ru/downloads/linux/x64/latest/vkteams.tar.xz" "18c79dgqvjrc4dk7531698fi9bkk3l38v866niha6yszcl6a0yxz"))
 
-
-(define-public vkteams vkteams-10.0.15729)
+(define-public vkteams vkteams-10.0.18761)
