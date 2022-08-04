@@ -180,7 +180,8 @@
     browserpass-native
     xmodmap
     virt-manager
-    inkscape)))
+    inkscape
+    xf86-input-synaptics)))
 
 (define %tools-packages
   (list
