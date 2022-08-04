@@ -52,8 +52,7 @@ function setup_bash_prompt () {
         __guix_env=\"$__guix_env_color[env]$__reset_color \"
     fi
     local __prompt_tail='$'
-    local __xwindow_title=\"\\033]0;$__cur_location   — shell\\007\\r\"
-    export PS1=\"${__xwindow_title}${__user_and_host} ${__cur_location} ${__git_branch_color}${__git_branch}${__reset_color}${__guix_env}${__prompt_tail} \"
+    export PS1=\${__user_and_host} ${__cur_location} ${__git_branch_color}${__git_branch}${__reset_color}${__guix_env}${__prompt_tail} \"
 }
 setup_bash_prompt")
 
