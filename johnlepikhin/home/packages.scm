@@ -4,6 +4,7 @@
   #:use-module (gnu packages linux)
   #:use-module (gnu packages image)
   #:use-module (gnu packages cmake)
+  #:use-module (gnu packages geo)
   #:use-module (gnu packages web)
   #:use-module (gnu packages gdb)
   #:use-module (gnu packages commencement)
@@ -94,7 +95,8 @@
             %golang-packages
             %editors-packages
             %mail-packages
-            %astro-packages))
+            %astro-packages
+            %mapping-packages))
 
 (define %devel-common-tools-packages
   (list
@@ -272,3 +274,7 @@
   (list
    stellarium
    celestia))
+
+(define %mapping-packages
+  (list
+   josm))
