@@ -82,5 +82,3 @@
   (make-telegram-desktop-precompiled "4.1.0" "0xkvfd3n8k2v93v8h32hl79ynd84ygc6zwbr3cps1ihakzh4rxk0"))
 
 (define-public telegram-desktop-precompiled telegram-desktop-precompiled-4.1.0)
-
-telegram-desktop-precompiled
