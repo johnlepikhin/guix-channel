@@ -233,7 +233,8 @@
    perl-json
    perl-yaml-tiny
    perl-http-tiny
-   perl-uri-escape))
+   perl-uri-escape
+   perl-io-socket-ssl))
 
 (define %python-packages
   (list
