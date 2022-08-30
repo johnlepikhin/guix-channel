@@ -65,6 +65,7 @@
   #:use-module (gnu packages pv)
   #:use-module (gnu packages dns)
   #:use-module (gnu packages perl)
+  #:use-module (gnu packages perl-web)
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages node)
@@ -230,7 +231,9 @@
    perl
    perltidy
    perl-json
-   perl-yaml-tiny))
+   perl-yaml-tiny
+   perl-http-tiny
+   perl-uri-escape))
 
 (define %python-packages
   (list
