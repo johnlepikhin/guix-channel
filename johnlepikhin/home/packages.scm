@@ -118,7 +118,6 @@
    puppet-lint
    lxc
    tcpdump
-   perl-perlcritic
    socat
    nmap
    tesseract-ocr
@@ -230,6 +229,7 @@
   (list
    perl
    perltidy
+   perl-perlcritic
    perl-json
    perl-yaml-tiny
    perl-http-tiny
