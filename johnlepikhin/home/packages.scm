@@ -148,7 +148,6 @@
     xhost
     feh
     telegram-desktop-precompiled
-    emacs-telega
     ungoogled-chromium
     pasystray
     mplayer
