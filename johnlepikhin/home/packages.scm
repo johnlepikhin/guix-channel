@@ -200,7 +200,8 @@
     xmodmap
     virt-manager
     inkscape
-    xf86-input-synaptics)))
+    xf86-input-synaptics
+    papirus-icon-theme)))
 
 (define %tools-packages
   (list
