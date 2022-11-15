@@ -54,6 +54,7 @@
   #:use-module (gnu packages wm)
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages gnome)
+  #:use-module (gnu packages gnome-xyz)
   #:use-module (gnu packages image-viewers)
   #:use-module (gnu packages telegram)
   #:use-module (gnu packages package-management)
