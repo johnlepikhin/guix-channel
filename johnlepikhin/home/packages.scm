@@ -45,6 +45,7 @@
   #:use-module (johnlepikhin packages oping)
   #:use-module (johnlepikhin packages telegram)
   #:use-module (johnlepikhin packages puppet-lint)
+  #:use-module (johnlepikhin packages rdesktop)
   #:use-module (johnlepikhin packages rust-nightly)
   #:use-module (johnlepikhin packages zoom)
   #:use-module (johnlepikhin packages perl)
@@ -202,7 +203,8 @@
     virt-manager
     inkscape
     xf86-input-synaptics
-    papirus-icon-theme)))
+    papirus-icon-theme
+    freedrp)))
 
 (define %tools-packages
   (list
