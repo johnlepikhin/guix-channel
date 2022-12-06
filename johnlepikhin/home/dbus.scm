@@ -1,6 +1,6 @@
 ;; Imported from https://git.sr.ht/~krevedkokun/guix-channel
 
-(define-module (johnlepikin home dbus)
+(define-module (johnlepikhin home dbus)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
   #:use-module (guix gexp))
