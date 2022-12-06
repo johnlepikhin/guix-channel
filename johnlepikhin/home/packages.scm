@@ -204,7 +204,7 @@
     inkscape
     xf86-input-synaptics
     papirus-icon-theme
-    freedrp)))
+    freerdp)))
 
 (define %tools-packages
   (list
