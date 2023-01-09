@@ -59,6 +59,7 @@
   #:use-module (gnu packages telegram)
   #:use-module (gnu packages package-management)
   #:use-module (gnu packages chromium)
+  #:use-module (gnu packages audio)
   #:use-module (gnu packages pulseaudio)
   #:use-module (gnu packages haskell-apps)
   #:use-module (gnu packages video)
@@ -204,7 +205,8 @@
     inkscape
     xf86-input-synaptics
     papirus-icon-theme
-    freerdp)))
+    freerdp
+    libfreeaptx)))
 
 (define %tools-packages
   (list
