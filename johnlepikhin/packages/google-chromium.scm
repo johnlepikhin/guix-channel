@@ -161,7 +161,7 @@
        ("openjpeg" ,openjpeg)                          ;PDFium only
        ("pango" ,pango)
        ("pciutils" ,pciutils)
-       ("pipewire" ,pipewire-0.3)
+       ("pipewire" ,pipewire)
        ("pulseaudio" ,pulseaudio)
        ("snappy" ,snappy)
        ("speech-dispatcher" ,speech-dispatcher)
