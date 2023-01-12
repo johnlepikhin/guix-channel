@@ -168,7 +168,7 @@
     network-manager-applet
     xhost
     feh
-    telegram-desktop-precompiled
+    telegram-desktop
     ungoogled-chromium
     pasystray
     mplayer
