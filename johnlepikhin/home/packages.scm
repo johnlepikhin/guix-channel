@@ -144,7 +144,8 @@
    tesseract-ocr
    leptonica
    coq
-   cmake))
+   cmake
+   ansible))
 
 (define %devel-common-libs-packages
   (list
