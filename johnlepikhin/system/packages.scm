@@ -25,6 +25,7 @@
   #:use-module (gnu packages certs)
   #:use-module (gnu packages tls)
   #:use-module (gnu packages bash)
+  #:use-module (gnu packages rsync)
   #:export (system-packages))
 
 (define system-packages
@@ -37,6 +38,7 @@
    tcpdump
    hostapd
    powertop
+   rsync
    bash-completion
    openssl
    %base-packages))
