@@ -64,7 +64,6 @@
   #:use-module (gnu packages pulseaudio)
   #:use-module (gnu packages haskell-apps)
   #:use-module (gnu packages video)
-  #:use-module (gnu packages stalonetray)
   #:use-module (gnu packages gl)
   #:use-module (gnu packages golang)
   #:use-module (gnu packages dunst)
@@ -180,7 +179,6 @@
     xdotool
     xwininfo
     xautolock
-    stalonetray
     mesa-utils
     dunst
     xsetroot
