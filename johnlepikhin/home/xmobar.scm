@@ -56,7 +56,7 @@
        , pickBroadest = False
        , persistent = False
        , hideOnStart = False
-       , iconRoot = "."
+       , iconRoot = \".\"
        , allDesktops = True
        , overrideRedirect = False
        , commands = [
@@ -93,6 +93,6 @@
      (service-extension
       home-files-service-type add-xmobar-config)
      (service-extension
-      home-profile-service-type add-xmonad-package)))
+      home-profile-service-type add-xmobar-package)))
    (compose concatenate)
    (description "Install xmobar and create @file{~/.xmobarrc}")))
