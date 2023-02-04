@@ -29,7 +29,7 @@
 (define-record-type* <home-gtk-configuration>
   home-gtk-configuration make-home-gtk-configuration
   home-gtk-configuration?
-  (icon-theme-name home-gtk-icon-theme-name) (default "Papirus"))
+  (icon-theme-name home-gtk-icon-theme-name (default "Papirus")))
 
 (define (add-gtk-settings-file config)
   `((".config/gtk-3.0/settings.ini"
