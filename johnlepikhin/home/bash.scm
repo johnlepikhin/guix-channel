@@ -96,8 +96,4 @@ export EDITOR='emacsclient -c'
 
 # Useless in exotic WMs like XMonad
 export _JAVA_AWT_WM_NONREPARENTING=1
-
-# Temporary fix for https://issues.guix.gnu.org/57498
-export BASH_COMPLETION_USER_DIR=$HOME/.guix-home/profile/etc/bash_completion.d/
-
 ")
