@@ -24,7 +24,8 @@
   #:use-module (guix records)
   #:use-module (guix gexp)
   #:export (home-gtk-configuration
-            home-gtk-service-type))
+            home-gtk-service-type
+            home-gtk-icon-theme-name))
 
 (define-record-type* <home-gtk-configuration>
   home-gtk-configuration make-home-gtk-configuration
