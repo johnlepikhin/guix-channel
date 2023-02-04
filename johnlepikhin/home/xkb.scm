@@ -34,16 +34,16 @@
 (define (add-xkb-files config)
   `((".config/kxb/symbols/my_us"
      ,(mixed-text-file
+       "kxb-symbols-my_us"
        #~(string-append
-          "kxb-symbols-my_us"
           "xkb_symbols \"my_us\"  {
         include \"pc+us+inet(evdev)+capslock(menu)+compose(ralt)\"
         key <PRSC> { [ Insert ] };
 };")))
     (".config/kxb/symbols/my_ru"
      ,(mixed-text-file
+       "kxb-symbols-my_ru"
        #~(string-append
-          "kxb-symbols-my_ru"
           "xkb_symbols \"my_ru\"  {
         include \"pc+ru+inet(evdev)+capslock(menu)+compose(ralt)\"
         key <PRSC> { [ Insert ] };
