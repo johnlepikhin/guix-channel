@@ -48,13 +48,16 @@
         key <PRSC> { [ Insert ] };
 };"))))
 
+(define (add-xkb-files config)
+  (list ((add-xkb-us-file config)
+         (add-xkb-ru-file config))))
+
 (define home-xkb-service-type
   (service-type
    (name 'home-xkb)
    (extensions
     (list
      (service-extension
-      home-files-service-type
-      (list add-xkb-us-file add-xkb-ru-file))))
+      home-files-service-type add-xkb-us-file add-xkb-files)))
    (compose concatenate)
    (description "Create @file{~/.config/kxb/*}")))
