@@ -23,6 +23,7 @@
   #:use-module (gnu packages image)
   #:use-module (gnu packages cmake)
   #:use-module (gnu packages geo)
+  #:use-module (gnu packages android)
   #:use-module (gnu packages web)
   #:use-module (gnu packages gdb)
   #:use-module (gnu packages commencement)
@@ -145,7 +146,8 @@
    leptonica
    coq
    cmake
-   ansible))
+   ansible
+   adb))
 
 (define %devel-common-libs-packages
   (list
