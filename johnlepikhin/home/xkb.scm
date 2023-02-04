@@ -53,7 +53,9 @@
    (name 'home-xkb)
    (extensions
     (list
-     (service-extension home-files-service-type add-xkb-us-file)
-     (service-extension home-files-service-type add-xkb-ru-file)))
+     (service-extension
+      home-files-service-type
+      add-xkb-us-file
+      add-xkb-ru-file)))
    (compose concatenate)
    (description "Create @file{~/.config/kxb/*}")))
