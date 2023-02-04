@@ -23,6 +23,7 @@
   #:use-module (gnu packages linux)
   #:use-module (gnu packages admin)
   #:use-module (gnu packages certs)
+  #:use-module (gnu packages tls)
   #:use-module (gnu packages bash)
   #:export (system-packages))
 
@@ -37,4 +38,5 @@
    hostapd
    powertop
    bash-completion
+   openssl
    %base-packages))
