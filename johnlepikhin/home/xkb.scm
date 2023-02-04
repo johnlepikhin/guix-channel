@@ -32,17 +32,17 @@
   home-xkb-configuration?)
 
 (define (add-xkb-files config)
-  `((".config/kxb/symbols/my_us"
+  `((".config/xkb/symbols/my_us"
      ,(mixed-text-file
-       "kxb-symbols-my_us"
+       "xkb-symbols-my_us"
        #~(string-append
           "xkb_symbols \"my_us\"  {
         include \"pc+us+inet(evdev)+capslock(menu)+compose(ralt)\"
         key <PRSC> { [ Insert ] };
 };")))
-    (".config/kxb/symbols/my_ru"
+    (".config/xkb/symbols/my_ru"
      ,(mixed-text-file
-       "kxb-symbols-my_ru"
+       "xkb-symbols-my_ru"
        #~(string-append
           "xkb_symbols \"my_ru\"  {
         include \"pc+ru+inet(evdev)+capslock(menu)+compose(ralt)\"
@@ -62,4 +62,4 @@
      (service-extension
       home-profile-service-type add-xkb-package)))
    (compose concatenate)
-   (description "Create @file{~/.config/kxb/*}")))
+   (description "Create @file{~/.config/xkb/*}")))
