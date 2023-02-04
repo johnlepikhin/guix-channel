@@ -23,6 +23,7 @@
   #:use-module (gnu packages linux)
   #:use-module (gnu packages admin)
   #:use-module (gnu packages certs)
+  #:use-module (gnu packages bash)
   #:export (system-packages))
 
 (define system-packages
@@ -35,4 +36,5 @@
    tcpdump
    hostapd
    powertop
+   bash-completion
    %base-packages))
