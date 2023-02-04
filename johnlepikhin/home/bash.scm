@@ -93,4 +93,7 @@ export XDG_DATA_DIRS=\"/home/evgenii/.local/share/flatpak/exports/share:$XDG_DAT
 
 export LESSHISTFILE=\"$XDG_CACHE_HOME/.lesshst\"
 export EDITOR='emacsclient -c'
+
+# Useless in exotic WMs like XMonad
+export _JAVA_AWT_WM_NONREPARENTING=1
 ")
