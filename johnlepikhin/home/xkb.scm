@@ -50,7 +50,7 @@
 };")))))
 
 (define (add-xkb-package config)
-  (list xkbcomp))
+  (list xkbcomp setxkbmap))
 
 (define home-xkb-service-type
   (service-type

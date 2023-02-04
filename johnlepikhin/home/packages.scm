@@ -180,14 +180,12 @@
     xdotool
     xwininfo
     xautolock
-    setxkbmap
     stalonetray
     mesa-utils
     dunst
     xsetroot
     xev
     xclip
-    xkbcomp
     pavucontrol
     xrandr
     brightnessctl
