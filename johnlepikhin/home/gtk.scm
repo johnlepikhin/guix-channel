@@ -37,7 +37,7 @@
        "gtk-3.0-settings.ini"
        #~(string-append
           "[Settings]\n"
-          "gtk-icon-theme-name = " #$@(home-gtk-icon-theme-name config))))))
+          "gtk-icon-theme-name = " #$(home-gtk-icon-theme-name config) "\n")))))
 
 (define home-gtk-service-type
   (service-type
