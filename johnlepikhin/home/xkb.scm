@@ -20,6 +20,7 @@
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (gnu home services)
+  #:use-module (gnu packages xorg)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (guix gexp)
@@ -52,12 +53,17 @@
   (list ((add-xkb-us-file config)
          (add-xkb-ru-file config))))
 
+(define (add-xkb-package config)
+  (list xkbcomp))
+
 (define home-xkb-service-type
   (service-type
    (name 'home-xkb)
    (extensions
     (list
      (service-extension
-      home-files-service-type add-xkb-us-file add-xkb-files)))
+      home-files-service-type add-xkb-files)
+     (service-extension
+      home-profile-service-type add-xkb-package)))
    (compose concatenate)
    (description "Create @file{~/.config/kxb/*}")))
