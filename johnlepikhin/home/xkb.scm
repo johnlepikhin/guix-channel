@@ -31,7 +31,7 @@
   home-xkb-configuration make-home-xkb-configuration
   home-xkb-configuration?)
 
-(define (add-xkb-us-file config)
+(define (add-xkb-files config)
   `((".config/kxb/symbols/my_us"
      ,(mixed-text-file
        #~(string-append
@@ -39,10 +39,8 @@
           "xkb_symbols \"my_us\"  {
         include \"pc+us+inet(evdev)+capslock(menu)+compose(ralt)\"
         key <PRSC> { [ Insert ] };
-};")))))
-
-(define (add-xkb-ru-file config)
-  `((".config/kxb/symbols/my_ru"
+};")))
+    (".config/kxb/symbols/my_ru"
      ,(mixed-text-file
        #~(string-append
           "kxb-symbols-my_ru"
@@ -50,10 +48,6 @@
         include \"pc+ru+inet(evdev)+capslock(menu)+compose(ralt)\"
         key <PRSC> { [ Insert ] };
 };")))))
-
-(define (add-xkb-files config)
-  (list ((add-xkb-us-file config)
-         (add-xkb-ru-file config))))
 
 (define (add-xkb-package config)
   (list xkbcomp))
