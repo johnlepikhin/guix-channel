@@ -33,7 +33,7 @@
   (package home-xmobar-configuration-package (default xmobar))
   (weather-id home-xmobar-configuration-weather-id (default "UCFM"))
   (screen-width home-xmobar-configuration-screen-width (default 1920))
-  (screen-width home-xmobar-configuration-height (default 32)))
+  (height home-xmobar-configuration-height (default 32)))
 
 (define (add-xmobar-config config)
   `((".xmobarrc"
