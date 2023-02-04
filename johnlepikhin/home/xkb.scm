@@ -33,7 +33,7 @@
 
 (define (add-xkb-us-file config)
   `((".config/kxb/symbols/my_us"
-     (plain-file
+     ,(plain-file
        "kxb-symbols-my_us"
        "xkb_symbols \"my_us\"  {
         include \"pc+us+inet(evdev)+capslock(menu)+compose(ralt)\"
@@ -42,7 +42,7 @@
 
 (define (add-xkb-ru-file config)
   `((".config/kxb/symbols/my_ru"
-     (plain-file
+     ,(plain-file
        "kxb-symbols-my_ru"
        "xkb_symbols \"my_ru\"  {
         include \"pc+ru+inet(evdev)+capslock(menu)+compose(ralt)\"
