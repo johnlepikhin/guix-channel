@@ -32,6 +32,7 @@
   home-xmobar-configuration?
   (package home-xmobar-configuration-package (default xmobar))
   (weather-id home-xmobar-configuration-weather-id (default "UCFM"))
+  (battery-id home-xmobar-configuration-battery-id (default "BAT0"))
   (screen-width home-xmobar-configuration-screen-width (default 1920))
   (height home-xmobar-configuration-height (default 32)))
 
@@ -60,7 +61,9 @@
        , allDesktops = True
        , overrideRedirect = False
        , commands = [
-          Run Weather \"" #$(home-xmobar-configuration-weather-id config) "\" [\"-t\", \"<tempC>C\"
+          Run Weather \""
+          #$(home-xmobar-configuration-weather-id config)
+          "\" [\"-t\", \"<tempC>C\"
                              , \"-L\", \"18\", \"-H\", \"30\"
                              , \"--normal\", \"green\"
                              , \"--high\", \"red\"
@@ -69,7 +72,9 @@
          , Run Date \"%_d/%m %H:%M:%S\" \"date\" 10
          , Run StdinReader
 
-, Run BatteryP [\"BAT0\"]
+, Run BatteryP [\""
+          #$(home-xmobar-configuration-battery-id config)
+          "\"]
   [
     \"-t\", \"<acstatus>\"
   , \"-L\", \"20\"
