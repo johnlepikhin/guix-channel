@@ -44,7 +44,7 @@
                (home-xsession-components config)))
          "\n"
          (home-xsession-root-process config)
-         "\n")))))
+         "\n"))))))
 
 (define (add-xsession-extensions config extensions)
   (home-xsession-configuration
