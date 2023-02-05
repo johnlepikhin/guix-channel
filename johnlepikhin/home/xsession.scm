@@ -44,10 +44,10 @@
                        (string-append
                         "#! /bin/sh\n\n"
                         (string-concatenate
-                         (map (lambda (component) (string-append component "\n"))
-                              (home-xsession-components config)))
+                         (ungexp (map (lambda (component) (string-append component "\n"))
+                                      (home-xsession-components config))))
                         "\n"
-                        (home-xsession-root-process config)
+                        (ungexp (home-xsession-root-process config))
                         "\n"))))
           (chmod #$output #o755)))))))
 
