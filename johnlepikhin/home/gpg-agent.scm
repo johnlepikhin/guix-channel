@@ -19,6 +19,7 @@
 (define-module (johnlepikhin home gpg-agent)
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
+  #:use-module (gnu packages gnupg)
   #:use-module (gnu home services)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
