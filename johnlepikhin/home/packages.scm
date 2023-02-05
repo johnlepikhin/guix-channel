@@ -164,7 +164,6 @@
    %xmonad-packages
    (list
     xmobar
-    rxvt-unicode
     xrdb
     copyq
     network-manager-applet
