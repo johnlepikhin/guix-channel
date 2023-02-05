@@ -52,7 +52,7 @@
    (home-xresources-record (name "URxvt*foreground") (value "gray"))
    (home-xresources-record (name "URxvt*scrollstyle") (value "rxvt"))
    (home-xresources-record (name "URxvt*termName") (value "xterm"))
-   (home-xresources-record (name "URxvt*perl-ext-common") (value "default,el-public-snippets,el-public-set-font-size,matcher"))
+   (home-xresources-record (name "URxvt*perl-ext-common") (value "default,set-font-size,edit-screen,matcher"))
    (home-xresources-record (name "URxvt.url-launcher") (value "xdg-open"))
    (home-xresources-record (name "URxvt.matcher.button") (value "3"))
    (home-xresources-record (name "URxvt.colorUL") (value "#86a2be"))))
