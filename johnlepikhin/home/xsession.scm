@@ -37,11 +37,13 @@
   `(((home-xsession-file-name config)
      ,(mixed-text-file
        "xsession"
-       "#! /bin/sh\n"
+       "#! /bin/sh\n\n"
        (gexp
         (string-append
-         (map (lambda (component) (string-append compontent "\n"))
-              (home-xsession-components config))))
+         (ungexp
+          (map (lambda (component) (string-append compontent "\n"))
+               (home-xsession-components config)))))
+       "\n"
        (home-xsession-root-process config)
        "\n"))))
 
