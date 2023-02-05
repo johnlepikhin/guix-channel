@@ -197,6 +197,7 @@
     recordmydesktop
     vlc
     password-store
+    gnupg
     browserpass-native
     xmodmap
     virt-manager
