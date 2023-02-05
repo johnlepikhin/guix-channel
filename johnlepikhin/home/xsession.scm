@@ -34,7 +34,7 @@
 
 (define (add-xsession-file config)
   `((".xsession"
-     ,(mixed-text-file
+     ,(program-file
        "xsession"
        "#! /bin/sh\n\n"
        (string-concatenate
