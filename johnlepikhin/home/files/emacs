@@ -1,0 +1,22 @@
+
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/") t)
+
+(package-initialize)
+
+(require 'org)
+
+(defun my-load-org-config (subpath)
+  (let ((ini-file (expand-file-name subpath user-emacs-directory)))
+	(condition-case errinfo (org-babel-load-file ini-file)
+	  (error (message "Cannot load settings for file %s: %s" ini-file errinfo)))))
+
+(my-load-org-config "public/settings.org")
+
+(custom-set-variables
+ '(package-selected-packages '(use-package)))
+
+(put 'upcase-region 'disabled nil)
+
+(put 'downcase-region 'disabled nil)

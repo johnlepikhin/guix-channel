@@ -287,7 +287,6 @@
 
 (define %editors-packages
   (list
-   emacs
    vim
    emacs-geiser
    emacs-geiser-guile
