@@ -38,11 +38,9 @@
      ,(mixed-text-file
        "xsession"
        "#! /bin/sh\n\n"
-       (gexp
-        (string-concatenate
-         (ungexp
-          (map (lambda (component) (string-append component "\n"))
-               (home-xsession-components config)))))
+       (string-concatenate
+        (map (lambda (component) (string-append component "\n"))
+             (home-xsession-components config)))
        "\n"
        (home-xsession-root-process config)
        "\n"))))
@@ -59,7 +57,7 @@
     (list
      (service-extension
       home-files-service-type add-xsession-file)))
-   (compose concatenate)
+   (compose identity)
    (extend add-xsession-extensions)
    (default-value (home-xsession-configuration))
    (description "Create @file{~/.xsession}")))
