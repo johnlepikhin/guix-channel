@@ -32,26 +32,7 @@
   home-stalonetray-configuration?)
 
 (define (add-stalonetray-settings-file config)
-  `((".stalonetrayrc"
-     ,(mixed-text-file
-       "stalonetray-3.0-settings.ini"
-       #~(string-append
-          "decorations none
-transparent false
-dockapp_mode none
-geometry 10x1+1250+0
-max_geometry 5x1-325-10
-background \"#000000\"
-kludges force_icons_size
-grow_gravity NE
-icon_gravity NE
-icon_size 16
-slot_size 22
-sticky true
-window_type dock
-window_layer bottom
-#no_shrink false
-skip_taskbar true\n")))))
+  `((".stalonetrayrc" ,(local-file "files/stalonetrayrc"))))
 
 (define (add-stalonetray-package config)
   (list stalonetray))
