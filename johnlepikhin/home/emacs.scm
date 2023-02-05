@@ -56,6 +56,6 @@
      (service-extension
       home-profile-service-type add-emacs-package)
      (service-extension
-      home-activation-service-type git-clone-configs))
+      home-activation-service-type git-clone-configs)))
    (compose concatenate)
    (description "Install emacs and add configs")))
