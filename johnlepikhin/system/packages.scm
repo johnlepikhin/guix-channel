@@ -26,6 +26,7 @@
   #:use-module (gnu packages tls)
   #:use-module (gnu packages bash)
   #:use-module (gnu packages rsync)
+  #:use-module (gnu packages vim)
   #:export (system-packages))
 
 (define system-packages
@@ -42,4 +43,6 @@
    bash-completion
    openssl
    efibootmgr
+   tlp
+   vim
    %base-packages))
