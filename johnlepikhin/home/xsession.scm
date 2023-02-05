@@ -41,7 +41,7 @@
        (gexp
         (string-append
          (ungexp
-          (map (lambda (component) (string-append compontent "\n"))
+          (map (lambda (component) (string-append component "\n"))
                (home-xsession-components config)))))
        "\n"
        (home-xsession-root-process config)
