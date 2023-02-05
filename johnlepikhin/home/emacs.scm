@@ -44,7 +44,7 @@
   (gexp
    (begin
      (let ((clone-path (string-append (getenv "HOME") "/.emacs.d/public")))
-       (mkdir-p clone-papth)
+       (mkdir-p clone-path)
        (system*
         (ungexp (file-append git "/bin/git"))
         "clone"
