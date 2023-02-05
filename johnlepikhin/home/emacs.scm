@@ -20,6 +20,7 @@
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (gnu packages emacs)
+  #:use-module (gnu packages version-control)
   #:use-module (gnu home services)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
@@ -40,12 +41,15 @@
   (list (home-emacs-configuration-package config)))
 
 (define (git-clone-configs config)
-  (gexp (system*
-         (ungexp (string-append
-                  "git clone "
-                  (home-emacs-configuration-configs-git-repo config)
-                  " "
-                  (getenv "HOME") "/.emacs.d/public")))))
+  (gexp
+   (begin
+     (let ((clone-path (string-append (getenv "HOME") "/.emacs.d/public")))
+       (mkdir-p clone-papth)
+       (system*
+        (ungexp (file-append git "/bin/git"))
+        "clone"
+        (home-emacs-configuration-configs-git-repo config)
+        clone-path)))))
 
 (define home-emacs-service-type
   (service-type
