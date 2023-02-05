@@ -30,7 +30,7 @@
   home-xsession-configuration make-xsession-configuration
   home-xsession-configuration?
   (root-process home-xsession-root-process (default "xmonad"))
-  (components home-xsession-components '()))
+  (components home-xsession-components (default '())))
 
 (define (add-xsession-file config)
   `((".xsession"
