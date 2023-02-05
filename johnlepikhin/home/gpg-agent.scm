@@ -33,20 +33,17 @@
   (default-cache-ttl home-gpg-agent-configuration-default-cache-ttl (default 600))
   (max-cache-ttl home-gpg-agent-configuration-max-cache-ttl (default 7200)))
 
-(define (serialize-home-gpg-agent-configuration configuration)
-  (string-append
-   (format #f "default-cache-ttl ~a\n" (home-gpg-agent-configuration-default-cache-ttl configuration))
-   (format #f "max-cache-ttl ~a\n" (home-gpg-agent-configuration-max-cache-ttl configuration))
-   (format #f "pinentry-program ~a\n" (file-append pinentry "/bin/pinentry"))))
-
 (define (add-gpg-agent-file config)
   `((".gnupg/gpg-agent.conf"
      ,(mixed-text-file
        "gnupg-gpg-agent.conf"
-       (serialize-home-gpg-agent-configuration config)))))
+       #~(string-append
+          (format #f "default-cache-ttl ~a\n" #$(home-gpg-agent-configuration-default-cache-ttl config))
+          (format #f "max-cache-ttl ~a\n" #$(home-gpg-agent-configuration-max-cache-ttl config))
+          (format #f "pinentry-program ~a\n" #$(file-append pinentry "/bin/pinentry")))))))
 
 (define (add-packages config)
-  (list (gnupg pinentry)))
+  (list gnupg pinentry))
 
 (define home-gpg-agent-service-type
   (service-type
