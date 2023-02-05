@@ -134,7 +134,7 @@ host    all all ::1/128     md5")))))))
          (provision '(public-backlight-brightness))
          (documentation "Grant R/W to /sys/class/backlight/*/brightness for all users")
          (one-shot? #t)
-         (start #~(lambda _ (system "chmod 666 /sys/class/backlight/*/brightness >/tmp/brightness.log 2>&1"))))))
+         (start #~(lambda _ (system "/run/current-system/profile/bin/chmod 666 /sys/class/backlight/*/brightness"))))))
 
 (define (add-brightnessctl-package config)
   (list brightnessctl))
