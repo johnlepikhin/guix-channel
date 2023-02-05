@@ -36,13 +36,15 @@
   `((".xsession"
      ,(program-file
        "xsession"
-       "#! /bin/sh\n\n"
-       (string-concatenate
-        (map (lambda (component) (string-append component "\n"))
-             (home-xsession-components config)))
-       "\n"
-       (home-xsession-root-process config)
-       "\n"))))
+       (gexp
+        (string-append
+         "#! /bin/sh\n\n"
+         (string-concatenate
+          (map (lambda (component) (string-append component "\n"))
+               (home-xsession-components config)))
+         "\n"
+         (home-xsession-root-process config)
+         "\n")))))
 
 (define (add-xsession-extensions config extensions)
   (home-xsession-configuration
