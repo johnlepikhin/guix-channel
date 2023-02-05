@@ -37,7 +37,7 @@
   (string-append
    (format #f "default-cache-ttl ~a\n" (home-gpg-agent-configuration-default-cache-ttl configuration))
    (format #f "max-cache-ttl ~a\n" (home-gpg-agent-configuration-max-cache-ttl configuration))
-   (format #f "pinentry-program ~a\n" (file-append pinentry "/bin/pinentry"))))
+   (format #f "pinentry-program ~a\n" #$(file-append pinentry "/bin/pinentry"))))
 
 (define (add-gpg-agent-file config)
   `((".gnupg/gpg-agent.conf"
