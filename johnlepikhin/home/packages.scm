@@ -81,7 +81,6 @@
   #:use-module (gnu packages networking)
   #:use-module (gnu packages aspell)
   #:use-module (gnu packages tex)
-  #:use-module (gnu packages gnupg)
   #:use-module (gnu packages rust-apps)
   #:use-module (gnu packages pv)
   #:use-module (gnu packages dns)
@@ -197,7 +196,6 @@
     recordmydesktop
     vlc
     password-store
-    gnupg
     browserpass-native
     xmodmap
     virt-manager
@@ -222,7 +220,6 @@
    ispell
    aspell-dict-ru
    texlive
-   pinentry
    ripgrep
    pigz
    pv
