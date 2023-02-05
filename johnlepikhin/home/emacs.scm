@@ -48,7 +48,7 @@
        (system*
         (ungexp (file-append git "/bin/git"))
         "clone"
-        (home-emacs-configuration-configs-git-repo config)
+        (ungexp (home-emacs-configuration-configs-git-repo config))
         clone-path)))))
 
 (define home-emacs-service-type
