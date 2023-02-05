@@ -44,8 +44,8 @@
                        (string-append
                         "#! /bin/sh\n\n"
                         (string-concatenate
-                         (ungexp (map (lambda (component) (string-append component "\n"))
-                                      (home-xsession-components config))))
+                         #$@(map (lambda (component) (string-append component "\n"))
+                                 (home-xsession-components config)))
                         "\n"
                         (ungexp (home-xsession-root-process config))
                         "\n"))))
