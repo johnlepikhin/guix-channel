@@ -39,7 +39,7 @@
        "xsession"
        "#! /bin/sh\n\n"
        (gexp
-        (string-append
+        (string-concatenate
          (ungexp
           (map (lambda (component) (string-append component "\n"))
                (home-xsession-components config)))))
