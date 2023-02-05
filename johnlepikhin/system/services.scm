@@ -40,6 +40,7 @@
   #:use-module (gnu packages networking)
   #:use-module (gnu packages cups)
   #:use-module (gnu packages xorg)
+  #:use-module (gnu packages linux)
   #:use-module (guix gexp)
   #:export (make-system-services
             postgresql-dev-service))
@@ -135,6 +136,9 @@ host    all all ::1/128     md5")))))))
          (one-shot? #t)
          (start #~(lambda _ (system "chmod 666 /sys/class/backlight/*/brightness"))))))
 
+(define (add-brightnessctl-package config)
+  (list brightnessctl))
+
 (define public-backlight-brightness-service-type
   (service-type
    (name 'public-backlight-brightness)
@@ -142,8 +146,9 @@ host    all all ::1/128     md5")))))))
    (extensions
     (list
      (service-extension
-      shepherd-root-service-type
-      public-backlight-brightness-service)))))
+      profile-service-type add-brightnessctl-package)
+     (service-extension
+      shepherd-root-service-type public-backlight-brightness-service)))))
 
 (define guix-pull-job
   #~(job "30 5   * * *"
