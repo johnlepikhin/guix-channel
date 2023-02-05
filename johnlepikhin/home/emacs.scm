@@ -45,11 +45,12 @@
    (begin
      (let ((clone-path (string-append (getenv "HOME") "/.emacs.d/public")))
        (mkdir-p clone-path)
-       (system*
-        (ungexp (file-append git "/bin/git"))
-        "clone"
-        (ungexp (home-emacs-configuration-configs-git-repo config))
-        clone-path)))))
+       (when (not (file-exists? clone-path))
+         (system*
+          (ungexp (file-append git "/bin/git"))
+          "clone"
+          (ungexp (home-emacs-configuration-configs-git-repo config))
+          clone-path))))))
 
 (define home-emacs-service-type
   (service-type
