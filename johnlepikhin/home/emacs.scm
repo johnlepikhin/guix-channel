@@ -38,7 +38,7 @@
   `((".emacs" ,(local-file "files/emacs"))))
 
 (define (add-emacs-package config)
-  (list (home-emacs-configuration-package config)))
+  (list (home-emacs-configuration-package config) git))
 
 (define (git-clone-configs config)
   (gexp
