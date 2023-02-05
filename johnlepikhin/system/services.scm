@@ -133,7 +133,7 @@ host    all all ::1/128     md5")))))))
          (provision '(public-backlight-brightness))
          (documentation "Grant R/W to /sys/class/backlight/*/brightness for all users")
          (one-shot? #t)
-         (start #~(lambda _ (system "/bin/sh" "-c" "chmod 666 /sys/class/backlight/*/brightness"))))))
+         (start #~(lambda _ (system "chmod 666 /sys/class/backlight/*/brightness"))))))
 
 (define public-backlight-brightness-service-type
   (service-type
