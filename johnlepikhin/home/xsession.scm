@@ -50,7 +50,7 @@
 (define (add-xsession-extensions config extensions)
   (home-xsession-configuration
    (inherit config)
-   (components (append (home-xsession-compontents config) extensions))))
+   (components (append (home-xsession-components config) extensions))))
 
 (define home-xsession-service-type
   (service-type
