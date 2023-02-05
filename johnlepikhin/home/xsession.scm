@@ -43,6 +43,7 @@
             (lambda _ (display
                        (string-append
                         "#! /bin/sh\n\n"
+                        ". ~/.profile"
                         #$@(map (lambda (component) (string-append component "\n"))
                                 (home-xsession-components config))
                         "\n"
