@@ -41,4 +41,5 @@
    rsync
    bash-completion
    openssl
+   efibootmgr
    %base-packages))
