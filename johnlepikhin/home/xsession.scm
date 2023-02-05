@@ -29,11 +29,12 @@
 (define-record-type* <home-xsession-configuration>
   home-xsession-configuration make-xsession-configuration
   home-xsession-configuration?
+  (xsession-file-name home-xsession-file-name (default ".xsession"))
   (root-process home-xsession-root-process (default "xmonad"))
   (components home-xsession-components (default '())))
 
 (define (add-xsession-file config)
-  `((".xsession"
+  `(((home-xsession-file-name config)
      ,(mixed-text-file
        "xsession"
        "#! /bin/sh\n"
