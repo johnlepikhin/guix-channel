@@ -132,9 +132,8 @@ host    all all ::1/128     md5")))))))
   (list (shepherd-service
          (provision '(public-backlight-brightness))
          (documentation "Grant R/W to /sys/class/backlight/*/brightness for all users")
-         (requirement '(xorg-server))
          (one-shot? #t)
-         (start #~(lambda _ (chmod "/sys/class/backlight/intel_backlight/brightness" #o666))))))
+         (start #~(lambda _ (system "/bin/sh" "-c" "chmod 666 /sys/class/backlight/*/brightness"))))))
 
 (define public-backlight-brightness-service-type
   (service-type
