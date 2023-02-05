@@ -44,7 +44,8 @@
          (ungexp (string-append
                   "git clone "
                   (home-emacs-configuration-configs-git-repo config)
-                  (file-append (getenv "HOME") "/.emacs.d/public"))))))
+                  " "
+                  (getenv "HOME") "/.emacs.d/public")))))
 
 (define home-emacs-service-type
   (service-type
