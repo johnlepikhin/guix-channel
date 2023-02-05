@@ -67,7 +67,7 @@
    (home-xresources-record (name "URxvt*keysym.0xff57") (value "\\033OF"))
    (home-xresources-record (name "!URxvt*keysym.0xff55") (value "\\033[5~"))
    (home-xresources-record (name "!URxvt*keysym.0xff56") (value "\\033[6~"))
-   (home-xresources-record (name "URxvt*keysym.0xffff") (value "\033[3"))
+   (home-xresources-record (name "URxvt*keysym.0xffff") (value "\\033[3"))
    (home-xresources-record (name "*Rxvt*meta8") (value "false"))
    (home-xresources-record (name "*Rxvt.keysym.C-Left") (value "\\033[1;5D"))
    (home-xresources-record (name "*Rxvt.keysym.C-Right") (value "\\033[1;5C"))
