@@ -46,24 +46,24 @@
   home-inputrc-configuration make-home-inputrc-configuration
   home-inputrc-configuration?
   (records home-inputrc-configuration-records
-           (default '((home-inputrc-record
-                       (comment "Ctrl-B deletes backward to first space or slash")
-                       (key "C-b")
-                       (function "unix-filename-rubout"))
-                      (home-inputrc-record
-                       (comment "Ctrl-left move left by one word")
-                       (key "\"\\eOd\"")
-                       (function "backward-word"))
-                      (home-inputrc-record
-                       (comment "Ctrl-left move left by one word")
-                       (key "\"\\eOc\"")
-                       (function "forward-word"))
-                      (home-inputrc-record
-                       (key "\"\\e[7~\"")
-                       (function "beginning-of-line"))
-                      (home-inputrc-record
-                       (key "\"\\e[8~\"")
-                       (function "end-of-line"))))))
+           (default (list (home-inputrc-record
+                           (comment "Ctrl-B deletes backward to first space or slash")
+                           (key "C-b")
+                           (function "unix-filename-rubout"))
+                          (home-inputrc-record
+                           (comment "Ctrl-left move left by one word")
+                           (key "\"\\eOd\"")
+                           (function "backward-word"))
+                          (home-inputrc-record
+                           (comment "Ctrl-left move left by one word")
+                           (key "\"\\eOc\"")
+                           (function "forward-word"))
+                          (home-inputrc-record
+                           (key "\"\\e[7~\"")
+                           (function "beginning-of-line"))
+                          (home-inputrc-record
+                           (key "\"\\e[8~\"")
+                           (function "end-of-line"))))))
 
 (define (add-inputrc-file config)
   `((".inputrc"

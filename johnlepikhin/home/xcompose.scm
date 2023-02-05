@@ -42,17 +42,17 @@
   home-xcompose-configuration make-xcompose-configuration
   home-xcompose-configuration?
   (includes home-xcompose-configuration-includes
-            (default '((home-xcompose-include (value "%S/en_US.UTF-8/Compose"))
-                       (home-xcompose-include (value "%L")))))
+            (default (list (home-xcompose-include (value "%S/en_US.UTF-8/Compose"))
+                           (home-xcompose-include (value "%L")))))
   (records home-xcompose-configuration-records
-           (default '((home-xcompose-record (value "<Multi_key> <Cyrillic_yu> <Cyrillic_yu>     : \"…\"   ellipsis")
-                                            (comment "HORIZONTAL ELLIPSIS"))
-                      (home-xcompose-record (value "<Multi_key> <minus> <minus>                 : \"–\"   U2013")
-                                            (comment "EN DASH"))
-                      (home-xcompose-record (value "<Multi_key> <Cyrillic_BE> <Cyrillic_BE>     : \"«\""))
-                      (home-xcompose-record (value "<Multi_key> <Cyrillic_YU> <Cyrillic_YU>     : \"»\""))
-                      (home-xcompose-record (value "<Multi_key> <grave>                         : \"́\"")
-                                            (comment "ударение (комбинирующееся)"))))))
+           (default (list (home-xcompose-record (value "<Multi_key> <Cyrillic_yu> <Cyrillic_yu>     : \"…\"   ellipsis")
+                                                (comment "HORIZONTAL ELLIPSIS"))
+                          (home-xcompose-record (value "<Multi_key> <minus> <minus>                 : \"–\"   U2013")
+                                                (comment "EN DASH"))
+                          (home-xcompose-record (value "<Multi_key> <Cyrillic_BE> <Cyrillic_BE>     : \"«\""))
+                          (home-xcompose-record (value "<Multi_key> <Cyrillic_YU> <Cyrillic_YU>     : \"»\""))
+                          (home-xcompose-record (value "<Multi_key> <grave>                         : \"́\"")
+                                                (comment "ударение (комбинирующееся)"))))))
 
 (define (serialize-home-xcompose-include include)
   (string-append
