@@ -5,6 +5,10 @@
 
 (package-initialize)
 
+(dolist (package '(use-package))
+   (unless (package-installed-p package)
+       (package-install package)))
+
 (require 'org)
 
 (defun my-load-org-config (subpath)
