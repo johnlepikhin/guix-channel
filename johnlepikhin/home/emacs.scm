@@ -22,6 +22,7 @@
   #:use-module (gnu packages emacs)
   #:use-module (gnu packages version-control)
   #:use-module (gnu home services)
+  #:use-module (johnlepikhin home xsession)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (guix gexp)
@@ -52,6 +53,9 @@
           (ungexp (home-emacs-configuration-configs-git-repo config))
           clone-path))))))
 
+(define (add-xsession-component config)
+  "emacs --daemon &")
+
 (define home-emacs-service-type
   (service-type
    (name 'home-emacs)
@@ -62,6 +66,9 @@
      (service-extension
       home-profile-service-type add-emacs-package)
      (service-extension
-      home-activation-service-type git-clone-configs)))
+      home-activation-service-type git-clone-configs)
+     (service-extension
+      home-xsession-service-type
+      add-xsession-component)))
    (compose concatenate)
    (description "Install emacs and add configs")))
