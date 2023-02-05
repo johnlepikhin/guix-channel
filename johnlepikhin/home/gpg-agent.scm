@@ -52,8 +52,7 @@
    (name 'home-gpg-agent)
    (extensions
     (list
-     (service-extension
-      home-profile-service-type add-packages)))
+     (service-extension home-profile-service-type add-packages)
      (service-extension home-files-service-type add-gpg-agent-file)))
    (compose concatenate)
    (description "Create @file{~/.gnupg/gpg-agent.conf}")))
