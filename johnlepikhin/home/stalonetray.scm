@@ -20,6 +20,7 @@
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (gnu home services)
+  #:use-module (johnlepikhin home xsession)
   #:use-module (gnu packages stalonetray)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
@@ -37,12 +38,16 @@
 (define (add-stalonetray-package config)
   (list stalonetray))
 
+(define (add-xsession-component config)
+  "(sleep 2; stalonetray) &")
+
 (define home-stalonetray-service-type
   (service-type
    (name 'home-stalonetray)
    (extensions
     (list
      (service-extension home-files-service-type add-stalonetray-settings-file)
-     (service-extension home-profile-service-type add-stalonetray-package)))
+     (service-extension home-profile-service-type add-stalonetray-package)
+     (service-extension home-xsession-service-type add-xsession-component)))
    (compose concatenate)
    (description "Install stalonetray and create @file{~/.stalonetrayrc}")))
