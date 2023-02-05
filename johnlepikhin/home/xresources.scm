@@ -22,6 +22,7 @@
   #:use-module (guix records)
   #:use-module (guix gexp)
   #:use-module (gnu home services shells)
+  #:use-module (johnlepikhin home xsession)
   #:export (home-xresources-service-type
             home-xresources-configuration
             home-xresources-record))
@@ -62,11 +63,19 @@
     (append (home-xresources-configuration-records config)
             extensions))))
 
-(define (add-xresources-to-shell-profile config)
-  (list (plain-file "xrdb-merge-xresources.sh" (string-append "xrdb -merge <" (getenv "HOME") "/.config/xresources"))))
+(define (merge-command _)
+  (string-append "xrdb -merge <" (getenv "HOME") "/.config/xresources"))
 
 (define (home-xresources-activation config)
-  `(("files/xresources" ,#~(system #$(string-append "xrdb -merge <" (getenv "HOME") "/.config/xresources")))))
+  `(("files/xresources" ,#~(system #$(merge-command ())))))
+
+(define (add-xsession-component config)
+  (home-xsession-configuration
+   (inherit config)
+   (components
+    (cons
+     (merge-command ())
+     (home-xsession-configuration-components config)))))
 
 (define home-xresources-service-type
   (service-type
@@ -74,8 +83,8 @@
    (extensions
     (list
      (service-extension home-files-service-type add-xresources-file)
-     (service-extension home-shell-profile-service-type add-xresources-to-shell-profile)
-     (service-extension home-run-on-change-service-type home-xresources-activation)))
+     (service-extension home-run-on-change-service-type home-xresources-activation)
+     (service-extension home-xsession-service-type add-xsession-component)))
    (compose concatenate)
    (extend add-xresources-extensions)
    (description "Creates @file{~/.config/xresources} and configures autoloading for it")))
