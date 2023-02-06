@@ -67,7 +67,7 @@
   (string-append "xrdb -merge <" (getenv "HOME") "/.config/xresources"))
 
 (define (home-xresources-activation config)
-  `(("files/xresources" ,#~(system #$(merge-command #t)))))
+  `(("files/.config/xresources" ,#~(system #$(merge-command #t)))))
 
 (define (add-xsession-component config)
   (merge-command #t))
