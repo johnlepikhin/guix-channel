@@ -26,7 +26,7 @@
   "\
 shopt -s histappend
 shopt -s cmdhist
-export HISTIGNORE='ls:ls -l:ls -a:pwd:clear:history'
+export HISTIGNORE='pwd:clear:history'
 export HISTFILE=$XDG_CACHE_HOME/.bash_history
 export HISTSIZE=10000
 export HISTTIMEFORMAT='%F %T '
