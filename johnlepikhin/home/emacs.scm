@@ -33,10 +33,15 @@
   home-emacs-configuration make-home-emacs-configuration
   home-emacs-configuration?
   (package home-emacs-configuration-package (default emacs))
-  (configs-git-repo home-emacs-configuration-configs-git-repo))
+  (configs-git-repo home-emacs-configuration-configs-git-repo)
+  (local-config home-emacs-configuration-local-config (default #f)))
 
 (define (add-emacs-config config)
-  `((".emacs" ,(local-file "files/emacs"))))
+  (let ((local-config (home-emacs-configuration-local-config config)))
+    (if local-config
+        `((".emacs" ,(local-file "files/emacs"))
+          (".emacs.d/local.org" ,local-config))
+        `((".emacs" ,(local-file "files/emacs"))))))
 
 (define (add-emacs-package config)
   (list (home-emacs-configuration-package config) git))
