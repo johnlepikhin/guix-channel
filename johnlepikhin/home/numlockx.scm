@@ -42,7 +42,7 @@
    (home-numlockx-configuration-status config)))
 
 (define (home-numlockx-activation config)
-  # TODO monitor dedicated file
+  ;; TODO monitor dedicated file
   `(("files/.xsession" ,#~(system #$(activation-command config)))))
 
 (define home-numlockx-service-type
