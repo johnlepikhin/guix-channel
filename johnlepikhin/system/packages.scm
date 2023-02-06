@@ -42,6 +42,7 @@
    rsync
    bash-completion
    openssl
+   nss-certs
    efibootmgr
    tlp
    vim
