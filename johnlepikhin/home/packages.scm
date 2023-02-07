@@ -47,7 +47,6 @@
   #:use-module (johnlepikhin packages telegram)
   #:use-module (johnlepikhin packages puppet-lint)
   #:use-module (johnlepikhin packages rust-nightly)
-  #:use-module (johnlepikhin packages zoom)
   #:use-module (johnlepikhin packages perl)
   #:use-module (johnlepikhin home bash)
   #:use-module (johnlepikhin home ssh)
