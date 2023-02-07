@@ -22,6 +22,7 @@
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu home services)
   #:use-module (johnlepikhin home xsession)
+  #:use-module (johnlepikhin home run-on-unlock)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (guix gexp)
@@ -54,6 +55,8 @@
       home-profile-service-type add-numlockx-package)
      (service-extension
       home-xsession-service-type activation-command)
+     (service-extension
+      home-run-on-unlock-service-type activation-command)
      (service-extension
       home-run-on-change-service-type home-numlockx-activation)))
    (compose concatenate)
