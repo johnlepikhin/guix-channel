@@ -46,7 +46,6 @@
             (lambda _ (display
                        (string-append
                         "#! /bin/sh\n\n"
-                        ". ~/.profile\n"
                         #$@(map (lambda (component) (string-append component "\n"))
                                 (home-run-on-unlock-components config))))))
           (chmod #$output #o755)))))))
