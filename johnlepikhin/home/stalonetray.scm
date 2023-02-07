@@ -39,7 +39,7 @@
   (list stalonetray))
 
 (define (add-xsession-component config)
-  "(sleep 2; stalonetray) &")
+  "stalonetray &")
 
 (define home-stalonetray-service-type
   (service-type
