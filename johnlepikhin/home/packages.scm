@@ -120,7 +120,7 @@
 
 (define %devel-common-tools-packages
   (list
-   make
+   gnu-make
    git
    git-lfs
    (list git "send-email")
