@@ -51,6 +51,7 @@
   #:use-module (johnlepikhin packages perl)
   #:use-module (johnlepikhin home bash)
   #:use-module (johnlepikhin home ssh)
+  #:use-module (johnlepikhin home shadowplay)
   #:use-module (gnu packages virtualization)
   #:use-module (gnu packages wm)
   #:use-module (gnu packages xdisorg)
@@ -291,7 +292,8 @@
    emacs-geiser
    shellcheck
    openjdk
-   rpm))
+   rpm
+   shadowplay))
 
 (define %rust-packages
   (list
