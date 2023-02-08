@@ -34,7 +34,7 @@
 
 (define (add-xkb-files config)
   `((".config/xkb/symbols/my_us" ,(local-file "files/xkb/symbols/my_ru"))
-    (".config/xkb/symbols/my_ru" ,(local-file "files/xkb/symbols/my_en"))))
+    (".config/xkb/symbols/my_ru" ,(local-file "files/xkb/symbols/my_us"))))
 
 (define (add-xkb-package config)
   (list xkbcomp setxkbmap))
