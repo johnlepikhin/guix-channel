@@ -25,7 +25,9 @@
   #:use-module (gnu packages geo)
   #:use-module (gnu packages android)
   #:use-module (gnu packages web)
+  #:use-module (gnu packages gcc)
   #:use-module (gnu packages gdb)
+  #:use-module (gnu packages autotools)
   #:use-module (gnu packages commencement)
   #:use-module (gnu packages astronomy)
   #:use-module (gnu packages lsof)
@@ -42,7 +44,6 @@
   #:use-module (johnlepikhin packages apcalc)
   #:use-module (johnlepikhin packages dbeaver)
   #:use-module (johnlepikhin packages git-sync)
-  #:use-module (johnlepikhin packages one-password)
   #:use-module (johnlepikhin packages oping)
   #:use-module (johnlepikhin packages telegram)
   #:use-module (johnlepikhin packages puppet-lint)
@@ -103,6 +104,11 @@
   #:use-module (gnu packages music)
   #:use-module (gnu packages virtualization)
   #:use-module (gnu packages certs)
+  #:use-module (gnu packages m4)
+  #:use-module (gnu packages bittorrent)
+  #:use-module (gnu packages unicode)
+  #:use-module (gnu packages fonts)
+  #:use-module (gnu packages package-management)
   #:export (%devel-common-tools-packages
             %devel-common-libs-packages
             %xmonad-packages
@@ -150,6 +156,12 @@
 (define %devel-common-libs-packages
   (list
    pkg-config
+   m4
+   cloc
+   gcc
+   autoconf
+   automake
+   libtool
    liboping
    alsa-lib
    libxcomposite
@@ -203,6 +215,10 @@
     xf86-input-synaptics
     papirus-icon-theme
     freerdp
+    qbittorrent
+    unicode-emoji
+    font-google-noto
+    flatpak
     libfreeaptx)))
 
 (define %tools-packages
@@ -227,7 +243,6 @@
    (list isc-bind "utils")
    file
    unzip
-   1password-cli
    graphviz
    tgcli
    apcalc
@@ -260,7 +275,9 @@
   (list
    python
    python-pytest
-   python-language-server))
+   python-language-server
+   python-black
+   python-virtualenv))
 
 (define %golang-packages
   (list
@@ -272,7 +289,9 @@
    guile-3.0
    emacs-guix
    emacs-geiser
-   shellcheck))
+   shellcheck
+   openjdk
+   rpm))
 
 (define %rust-packages
   (list
