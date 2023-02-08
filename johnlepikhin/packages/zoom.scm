@@ -32,11 +32,15 @@
   #:use-module (gnu packages glib)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages gtk)
+  #:use-module (gnu packages video)
   #:use-module (gnu packages linux)
+  #:use-module (gnu packages nss)
   #:use-module (gnu packages pulseaudio)
   #:use-module (gnu packages qt)
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages xorg)
+  #:use-module (gnu packages cups)
+  #:use-module (gnu packages kerberos)
   #:use-module (guix store)
   #:use-module (guix gexp)
   #:use-module (guix build-system copy)
@@ -46,6 +50,7 @@
   (non-copyleft "Proprietary Zoom.us license"
                 "https://zoom.us/ru/terms.html"))
 
+;; TODO broken
 (define (make-zoom version checksum)
   (package
    (name "zoom")
@@ -57,118 +62,60 @@
    (build-system copy-build-system)
    (arguments
     `(#:install-plan
+      ;; binaries
       `(("zoom" "zoom/bin/")
         ("zopen" "zoom/bin/")
         ("ZoomLauncher" "zoom/bin/")
-        ("libfdkaac2.so" "zoom/bin/")
-        ("libicudata.so" "zoom/bin/")
-        ("libicudata.so.56" "zoom/bin/")
-        ("libicudata.so.56.1" "zoom/bin/")
-        ("libicui18n.so" "zoom/bin/")
-        ("libicui18n.so.56" "zoom/bin/")
-        ("libicui18n.so.56.1" "zoom/bin/")
-        ("libicuuc.so" "zoom/bin/")
-        ("libicuuc.so.56" "zoom/bin/")
-        ("libicuuc.so.56.1" "zoom/bin/")
-        ("libmpg123.so" "zoom/bin/")
-        ("libQt5Core.so" "zoom/bin/")
-        ("libQt5Core.so.5" "zoom/bin/")
-        ("libQt5Core.so.5.12" "zoom/bin/")
-        ("libQt5Core.so.5.12.10" "zoom/bin/")
-        ("libQt5DBus.so" "zoom/bin/")
-        ("libQt5DBus.so.5" "zoom/bin/")
-        ("libQt5DBus.so.5.12" "zoom/bin/")
-        ("libQt5DBus.so.5.12.10" "zoom/bin/")
-        ("libQt5Gui.so" "zoom/bin/")
-        ("libQt5Gui.so.5" "zoom/bin/")
-        ("libQt5Gui.so.5.12" "zoom/bin/")
-        ("libQt5Gui.so.5.12.10" "zoom/bin/")
-        ("libQt5Network.so" "zoom/bin/")
-        ("libQt5Network.so.5" "zoom/bin/")
-        ("libQt5Network.so.5.12" "zoom/bin/")
-        ("libQt5Network.so.5.12.10" "zoom/bin/")
-        ("libQt5OpenGL.so" "zoom/bin/")
-        ("libQt5OpenGL.so.5" "zoom/bin/")
-        ("libQt5OpenGL.so.5.12" "zoom/bin/")
-        ("libQt5OpenGL.so.5.12.10" "zoom/bin/")
-        ("libQt5Qml.so" "zoom/bin/")
-        ("libQt5Qml.so.5" "zoom/bin/")
-        ("libQt5Qml.so.5.12" "zoom/bin/")
-        ("libQt5Qml.so.5.12.10" "zoom/bin/")
-        ("libQt5QuickControls2.so" "zoom/bin/")
-        ("libQt5QuickControls2.so.5" "zoom/bin/")
-        ("libQt5QuickControls2.so.5.12" "zoom/bin/")
-        ("libQt5QuickControls2.so.5.12.10" "zoom/bin/")
-        ("libQt5QuickShapes.so" "zoom/bin/")
-        ("libQt5QuickShapes.so.5" "zoom/bin/")
-        ("libQt5QuickShapes.so.5.12" "zoom/bin/")
-        ("libQt5QuickShapes.so.5.12.10" "zoom/bin/")
-        ("libQt5Quick.so" "zoom/bin/")
-        ("libQt5Quick.so.5" "zoom/bin/")
-        ("libQt5Quick.so.5.12" "zoom/bin/")
-        ("libQt5Quick.so.5.12.10" "zoom/bin/")
-        ("libQt5QuickTemplates2.so" "zoom/bin/")
-        ("libQt5QuickTemplates2.so.5" "zoom/bin/")
-        ("libQt5QuickTemplates2.so.5.12" "zoom/bin/")
-        ("libQt5QuickTemplates2.so.5.12.10" "zoom/bin/")
-        ("libQt5QuickWidgets.so" "zoom/bin/")
-        ("libQt5QuickWidgets.so.5" "zoom/bin/")
-        ("libQt5QuickWidgets.so.5.12" "zoom/bin/")
-        ("libQt5QuickWidgets.so.5.12.10" "zoom/bin/")
-        ("libQt5Svg.so" "zoom/bin/")
-        ("libQt5Svg.so.5" "zoom/bin/")
-        ("libQt5Svg.so.5.12" "zoom/bin/")
-        ("libQt5Svg.so.5.12.10" "zoom/bin/")
-        ("libQt5WaylandClient.so" "zoom/bin/")
-        ("libQt5WaylandClient.so.5" "zoom/bin/")
-        ("libQt5WaylandClient.so.5.12" "zoom/bin/")
-        ("libQt5WaylandClient.so.5.12.10" "zoom/bin/")
-        ("libQt5WaylandCompositor.so" "zoom/bin/")
-        ("libQt5WaylandCompositor.so.5" "zoom/bin/")
-        ("libQt5WaylandCompositor.so.5.12" "zoom/bin/")
-        ("libQt5WaylandCompositor.so.5.12.10" "zoom/bin/")
-        ("libQt5Widgets.so" "zoom/bin/")
-        ("libQt5Widgets.so.5" "zoom/bin/")
-        ("libQt5Widgets.so.5.12" "zoom/bin/")
-        ("libQt5Widgets.so.5.12.10" "zoom/bin/")
-        ("libQt5X11Extras.so" "zoom/bin/")
-        ("libQt5X11Extras.so.5" "zoom/bin/")
-        ("libQt5X11Extras.so.5.12" "zoom/bin/")
-        ("libQt5X11Extras.so.5.12.10" "zoom/bin/")
-        ("libQt5XcbQpa.so" "zoom/bin/")
-        ("libQt5XcbQpa.so.5" "zoom/bin/")
-        ("libQt5XcbQpa.so.5.12" "zoom/bin/")
-        ("libQt5XcbQpa.so.5.12.10" "zoom/bin/")
-        ("libquazip.so" "zoom/bin/")
-        ("libturbojpeg.so" "zoom/bin/")
-        ("audio" "zoom/bin/")
-        ("platforms" "zoom/bin/")
-        ("imageformats" "zoom/bin/")
-        ("iconengines" "zoom/bin/")
-        ("dingdong1.pcm", "zoom/bin/")
-        ("dingdong.pcm", "zoom/bin/")
-        ("double_beep.pcm", "zoom/bin/")
-        ("Droplet.pcm", "zoom/bin/")
-        ("Embedded.properties", "zoom/bin/")
-        ("leave.pcm", "zoom/bin/")
-        ("meeting_chat_chime.pcm", "zoom/bin/")
-        ("meeting_raisehand_chime.pcm", "zoom/bin/")
-        ("record_start.pcm", "zoom/bin/")
-        ("record_stop.pcm", "zoom/bin/")
-        ("ring.pcm", "zoom/bin/")
-        ("wr_ding.pcm", "zoom/bin/")
-        ("ringtone", "zoom/bin/")
-        ("qt.conf", "zoom/bin/")
-        ("xcbglintegrations", "zoom/bin/")
-        ("Qt" "zoom/bin/")
-        ("QtGraphicalEffects" "zoom/bin/")
-        ("QtQuick" "zoom/bin/")
-        ("QtQuick.2" "zoom/bin/")
-        ("QtQml" "zoom/bin/")
+        ("aomhost" "zoom/bin/")
+
+        ;; directories
+        ("calendar" "zoom/bin/")
+        ("email" "zoom/bin/")
         ("json" "zoom/bin/")
+        ("ringtone" "zoom/bin/")
+        ("scheduler" "zoom/bin/")
         ("sip" "zoom/bin/")
         ("timezones" "zoom/bin/")
         ("translations" "zoom/bin/")
+        ("cef" "zoom/bin/")
+        ("Qt" "zoom/bin/")
+
+        ;; libraries
+        ("libfdkaac2.so" "zoom/bin/")
+        ("libmkldnn.so" "zoom/bin/")
+        ("libdvf.so" "zoom/bin/")
+        ("libswresample.so.3" "zoom/bin/")
+        ("libavformat.so.58" "zoom/bin/")
+        ("libmpg123.so" "zoom/bin/")
+        ("libavutil.so.56" "zoom/bin/")
+        ("libavcodec.so.58" "zoom/bin/")
+        ("libquazip.so" "zoom/bin/")
+        ("libaomagent.so" "zoom/bin/")
+        ("libOpenCL.so.1" "zoom/bin/")
+        ("libclDNN64.so" "zoom/bin/")
+        ("libturbojpeg.so" "zoom/bin/")
+
+        ;; other files
+        ("Beep-intercom.pcm" "zoom/bin/")
+        ("clap-high.pcm" "zoom/bin/")
+        ("clap-low.pcm" "zoom/bin/")
+        ("clap-medium.pcm" "zoom/bin/")
+        ("clap-very-low.pcm" "zoom/bin/")
+        ("dingdong1.pcm" "zoom/bin/")
+        ("dingdong.pcm" "zoom/bin/")
+        ("double_beep.pcm" "zoom/bin/")
+        ("Droplet.pcm" "zoom/bin/")
+        ("Embedded.properties" "zoom/bin/")
+        ("getbssid.sh" "zoom/bin/")
+        ("leave.pcm" "zoom/bin/")
+        ("meeting_chat_chime.pcm" "zoom/bin/")
+        ("meeting_raisehand_chime.pcm" "zoom/bin/")
+        ("qt.conf" "zoom/bin/")
+        ("record_start.pcm" "zoom/bin/")
+        ("record_stop.pcm" "zoom/bin/")
+        ("ring.pcm" "zoom/bin/")
+        ("version.txt" "zoom/bin/")
+        ("wr_ding.pcm" "zoom/bin/")
         )
       #:phases
       (modify-phases
@@ -179,29 +126,42 @@
             (#:key outputs inputs #:allow-other-keys)
           (let* ((out (assoc-ref outputs "out"))
                  (patchelf (string-append (assoc-ref inputs "patchelf") "/bin/patchelf"))
-                 (binary (string-append 
+                 (binary (string-append
                           out "/zoom/bin/zoom"
                           " " out "/zoom/bin/zopen"
-                          " " out "/zoom/bin/ZoomLauncher"))
-                 (libs (string-append 
-                        out "/zoom/bin/lib*.so"
-                        " " out "/zoom/bin/*/lib*.so"
-                        " " out "/zoom/bin/*/*/lib*.so"
-                        " " out "/zoom/bin/*/*/*/lib*.so"
-                        " " out "/zoom/bin/*/*/*/*/lib*.so"
+                          " " out "/zoom/bin/ZoomLauncher"
+                          " " out "/zoom/bin/aomhost"))
+                 (libs (string-append
+                        out "/zoom/bin/lib*.so*"
+                        " " out "/zoom/bin/*/lib*.so*"
+                        " " out "/zoom/bin/*/*/lib*.so*"
+                        " " out "/zoom/bin/*/*/*/lib*.so*"
+                        " " out "/zoom/bin/*/*/*/*/lib*.so*"
                         ))
                  (dynamic-linker (string-append (assoc-ref inputs "libc") ,(glibc-dynamic-linker))))
-            (system (string-append patchelf " --set-rpath \"" out "/zoom/bin:$LIBRARY_PATH\" --set-interpreter " dynamic-linker " " binary))
-            (system (string-append patchelf " --set-rpath \"" out "/zoom/bin:$LIBRARY_PATH\" " libs))
+            (system
+             (string-append patchelf
+                            " --set-rpath \""
+                            out "/zoom/bin:"
+                            out "/zoom/bin/cef:"
+                            out "/zoom/bin/Qt/lib:"
+                            "$LIBRARY_PATH\" --set-interpreter "
+                            dynamic-linker
+                            " "
+                            binary))
+            (system (string-append patchelf
+                                   " --set-rpath \""
+                                   out "/zoom/bin:"
+                                   out "/zoom/bin/cef:"
+                                   out "/zoom/bin/Qt/lib:"
+                                   "$LIBRARY_PATH\" " libs))
             (system (string-append "rm -rf"
-                                   " " out "/zoom/bin/QtQuick/Scene3D"
-                                   " " out "/zoom/bin/QtQuick/Scene2D"
-                                   " " out "/zoom/bin/QtQuick/Particles.2"
-                                   " " out "/zoom/bin/Qt/labs/location"
-                                   " " out "/zoom/bin/QtQuick/LocalStorage"
-                                   " " out "/zoom/bin/QtQuick/XmlListModel"
-                                   " " out "/zoom/bin/egldeviceintegrations"
-                                   " " out "/zoom/bin/platforms/libqeglfs.so"))
+                                   " " out "/zoom/bin/Qt/qml/QtQuick/Scene3D"
+                                   " " out "/zoom/bin/Qt/qml/QtQuick/Scene2D"
+                                   " " out "/zoom/bin/Qt/qml/QtQuick/Particles.2"
+                                   " " out "/zoom/bin/Qt/qml/QtQuick/LocalStorage"
+                                   " " out "/zoom/bin/Qt/qml/QtQuick/XmlListModel"
+                                   " " out "/zoom/bin/Qt/plugins/egldeviceintegrations"))
             (mkdir-p (string-append out "/bin"))
             (system (string-append "ln -s " out "/zoom/bin/zoom " out "/bin/zoom"))
             (system (string-append "ln -s " out "/zoom/bin/ZoomLauncher " out "/bin/ZoomLauncher"))
@@ -241,6 +201,9 @@
       ("gcc:lib" ,(canonical-package gcc) "lib")
       ("librsvg" ,librsvg)
       ("glib" ,glib)
+      ("libnss" ,nss)
+      ("libnspr4" ,nspr)
+      ("libva" ,libva)
       ("gtk+" ,gtk+)
       ("libdrm" ,libdrm)
       ("libx11" ,libx11)
@@ -251,6 +214,8 @@
       ("libxkbcommon" ,libxkbcommon)
       ("libxrender" ,libxrender)
       ("libxtst" ,libxtst)
+      ("libcups" ,cups)
+      ("mit-krb5" ,mit-krb5)
       ("mesa" ,mesa)
       ("pango" ,pango)
       ("pulseaudio" ,pulseaudio)
@@ -261,6 +226,6 @@
       ("zlib" ,zlib)))
    (license license:zoomus)))
 
-(define-public zoom-5.9.1.1380 (make-zoom "5.9.1.1380" "1z7msgqjhnhlw8gfzkxva4928zjrgq7djyak3ks3w7pdk3s377dr"))
+(define-public zoom-5.13.7.683 (make-zoom "5.13.7.683" "0rg6hbdaajfll1v7fjxlasrb65lhishmm7fz6c43dhznlh3xsy1f"))
 
-(define-public zoom zoom-5.9.1.1380)
+(define-public zoom zoom-5.13.7.683)
