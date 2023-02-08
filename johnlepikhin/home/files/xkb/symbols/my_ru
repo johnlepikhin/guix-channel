@@ -1,5 +1,8 @@
 xkb_symbols "my_ru"  {
   include "pc+ru+inet(evdev)+capslock(menu)+compose(ralt)"
+
+  key.type = "ONE_LEVEL";
+
   key <PRSC> { [ Insert ] };
 
   key <KP8> { [ KP_Up ] };

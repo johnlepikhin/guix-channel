@@ -2,6 +2,7 @@ xkb_symbols "my_us" {
   include "pc+us+inet(evdev)+capslock(menu)+compose(ralt)"
 
   key.type = "ONE_LEVEL";
+
   key <PRSC> { [ Insert ] };
 
   key <KP8> { [ KP_Up ] };
