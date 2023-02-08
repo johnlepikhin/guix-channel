@@ -33,8 +33,8 @@
   home-xkb-configuration?)
 
 (define (add-xkb-files config)
-  `((".config/xkb/symbols/my_us" ,(local-file "files/xkb/symbols/my_ru"))
-    (".config/xkb/symbols/my_ru" ,(local-file "files/xkb/symbols/my_us"))))
+  `((".config/xkb/symbols/my_us" ,(local-file "files/xkb/symbols/my_us"))
+    (".config/xkb/symbols/my_ru" ,(local-file "files/xkb/symbols/my_ru"))))
 
 (define (add-xkb-package config)
   (list xkbcomp setxkbmap))
