@@ -1,0 +1,6 @@
+xkb_symbols "my_ru"  {
+  include "pc+ru+inet(evdev)+capslock(menu)+compose(ralt)"
+  key <PRSC> { [ Insert ] };
+ key <KPAD> { [ Prior ] };
+ key <KPEN> { [ Next ] };
+};

@@ -21,6 +21,7 @@
   #:use-module (gnu services configuration)
   #:use-module (gnu home services)
   #:use-module (gnu packages xorg)
+  #:use-module (johnlepikhin home xsession)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (guix gexp)
@@ -32,25 +33,20 @@
   home-xkb-configuration?)
 
 (define (add-xkb-files config)
-  `((".config/xkb/symbols/my_us"
-     ,(mixed-text-file
-       "xkb-symbols-my_us"
-       #~(string-append
-          "xkb_symbols \"my_us\"  {
-        include \"pc+us+inet(evdev)+capslock(menu)+compose(ralt)\"
-        key <PRSC> { [ Insert ] };
-};")))
-    (".config/xkb/symbols/my_ru"
-     ,(mixed-text-file
-       "xkb-symbols-my_ru"
-       #~(string-append
-          "xkb_symbols \"my_ru\"  {
-        include \"pc+ru+inet(evdev)+capslock(menu)+compose(ralt)\"
-        key <PRSC> { [ Insert ] };
-};")))))
+  `((".config/xkb/symbols/my_us" ,(local-file "files/xkb/symbols/my_ru"))
+    (".config/xkb/symbols/my_ru" ,(local-file "files/xkb/symbols/my_ru"))))
 
 (define (add-xkb-package config)
   (list xkbcomp setxkbmap))
+
+(define (activation-command _)
+  (string-append "setxkbmap -symbols my_us -print | xkbcomp -I" (getenv "HOME") "/.config/xkb - $DISPLAY"))
+
+(define (home-xkb-activation config)
+  `(("files/.config/xresources" ,#~(system #$(activation-command #t)))))
+
+(define (add-xsession-component config)
+  (activation-command #t))
 
 (define home-xkb-service-type
   (service-type
@@ -60,6 +56,10 @@
      (service-extension
       home-files-service-type add-xkb-files)
      (service-extension
-      home-profile-service-type add-xkb-package)))
+      home-profile-service-type add-xkb-package)
+     (service-extension
+      home-run-on-change-service-type home-xkb-activation)
+     (service-extension
+      home-xsession-service-type add-xsession-component)))
    (compose concatenate)
    (description "Create @file{~/.config/xkb/*}")))
