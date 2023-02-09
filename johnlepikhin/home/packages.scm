@@ -202,8 +202,6 @@
     xdg-utils
     xdg-desktop-portal-gtk
     xdg-desktop-portal
-    qtbase
-    mesa
     gimp
     evince
     recordmydesktop
