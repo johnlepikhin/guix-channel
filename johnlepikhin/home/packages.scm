@@ -234,7 +234,8 @@
    xz
    netcat
    blueman
-   ispell
+   aspell
+   aspell-dict-en
    aspell-dict-ru
    texlive
    ripgrep
