@@ -26,27 +26,35 @@
   #:use-module (guix records)
   #:use-module (guix gexp)
   #:export (home-xkb-configuration
-            home-xkb-service-type))
+            home-xkb-service-type
+            xkb-symbols-us-path
+            xkb-symbols-ru-path))
+
+(define xkb-symbols-us-path ".config/xkb/symbols/my_us")
+(define xkb-symbols-ru-path ".config/xkb/symbols/my_ru")
 
 (define-record-type* <home-xkb-configuration>
   home-xkb-configuration make-home-xkb-configuration
-  home-xkb-configuration?)
+  home-xkb-configuration?
+  (symbols-us home-xkb-symbols-us (default (local-file "my_us")))
+  (symbols-ru home-xkb-symbols-ru (default (local-file "my_ru"))))
 
 (define (add-xkb-files config)
-  `((".config/xkb/symbols/my_us" ,(local-file "files/xkb/symbols/my_us"))
-    (".config/xkb/symbols/my_ru" ,(local-file "files/xkb/symbols/my_ru"))))
+  `((,xkb-symbols-us-path ,(home-xkb-symbols-us config))
+    (,xkb-symbols-ru-path ,(home-xkb-symbols-ru config))))
 
 (define (add-xkb-package config)
   (list xkbcomp setxkbmap))
 
 (define (activation-command _)
-  (string-append "setxkbmap -symbols my_us -print | xkbcomp -I" (getenv "HOME") "/.config/xkb - $DISPLAY"))
-
-(define (home-xkb-activation config)
-  `(("files/.config/xresources" ,#~(system #$(activation-command #t)))))
+  "setxkbmap -model pc105 -symbols my_us -print | xkbcomp -I$HOME/.config/xkb - $DISPLAY 2>/dev/null")
 
 (define (add-xsession-component config)
   (activation-command #t))
+
+(define (home-xkb-activation config)
+  `((,(string-append "files/" xkb-symbols-us-path) ,#~(system #$(activation-command #t)))
+    (,(string-append "files/" xkb-symbols-ru-path) ,#~(system #$(activation-command #t)))))
 
 (define home-xkb-service-type
   (service-type
