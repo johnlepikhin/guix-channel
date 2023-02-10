@@ -36,8 +36,8 @@
 (define-record-type* <home-xkb-configuration>
   home-xkb-configuration make-home-xkb-configuration
   home-xkb-configuration?
-  (symbols-us home-xkb-symbols-us (default (local-file "my_us")))
-  (symbols-ru home-xkb-symbols-ru (default (local-file "my_ru"))))
+  (symbols-us home-xkb-symbols-us (default (local-file "files/xkb/symbols/my_us")))
+  (symbols-ru home-xkb-symbols-ru (default (local-file "files/xkb/symbols/my_ru"))))
 
 (define (add-xkb-files config)
   `((,xkb-symbols-us-path ,(home-xkb-symbols-us config))
