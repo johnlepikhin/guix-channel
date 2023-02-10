@@ -33,11 +33,14 @@
 (define xkb-symbols-us-path ".config/xkb/symbols/my_us")
 (define xkb-symbols-ru-path ".config/xkb/symbols/my_ru")
 
+(define default-symbols-us (local-file "files/xkb/symbols/my_us"))
+(define default-symbols-ru (local-file "files/xkb/symbols/my_ru"))
+
 (define-record-type* <home-xkb-configuration>
   home-xkb-configuration make-home-xkb-configuration
   home-xkb-configuration?
-  (symbols-us home-xkb-symbols-us (default (local-file "files/xkb/symbols/my_us")))
-  (symbols-ru home-xkb-symbols-ru (default (local-file "files/xkb/symbols/my_ru"))))
+  (symbols-us home-xkb-symbols-us (default default-symbols-us))
+  (symbols-ru home-xkb-symbols-ru (default default-symbols-ru)))
 
 (define (add-xkb-files config)
   `((,xkb-symbols-us-path ,(home-xkb-symbols-us config))
