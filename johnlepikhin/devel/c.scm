@@ -21,6 +21,7 @@
   #:use-module (gnu services configuration)
   #:use-module (gnu home services)
   #:use-module (gnu packages autotools)
+  #:use-module (gnu packages base)
   #:use-module (gnu packages cmake)
   #:use-module (gnu packages gcc)
   #:use-module (gnu packages gdb)
