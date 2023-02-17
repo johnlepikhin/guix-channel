@@ -38,7 +38,8 @@
   home-devel-c-configuration?)
 
 (define (add-devel-c-packages config)
-  '(gcc
+  (list
+   (gcc
     clang
     cmake
     gnu-make
@@ -47,7 +48,7 @@
     m4
     autoconf
     automake
-    libtool))
+    libtool)))
 
 (define home-devel-c-service-type
   (service-type
