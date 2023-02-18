@@ -154,6 +154,10 @@ host    all all ::1/128     md5")))))))
   #~(job "30 5   * * *"
          "guix pull"))
 
+(define guix-pull-job
+  #~(job "30 4   * * *"
+         "guix gc"))
+
 (define* (make-system-services
           #:key
           (zram-size "2G"))
@@ -196,7 +200,8 @@ host    all all ::1/128     md5")))))))
             (mcron-configuration
              (jobs
               (list
-               guix-pull-job))))
+               guix-pull-job
+               guix-gc-job))))
    (service cups-service-type
             (cups-configuration
              (default-language "en")
