@@ -77,4 +77,4 @@
       home-profile-service-type add-devel-c-packages)
      (service-extension home-files-service-type add-files)))
    (compose concatenate)
-   (description "Install packages required for C developement")))
+   (description "Install packages required for C development")))
