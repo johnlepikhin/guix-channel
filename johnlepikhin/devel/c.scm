@@ -23,9 +23,10 @@
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages base)
   #:use-module (gnu packages cmake)
-  #:use-module (gnu packages gcc)
+  #:use-module (gnu packages commencement)
   #:use-module (gnu packages gdb)
   #:use-module (gnu packages llvm)
+  #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages m4)
   #:use-module (gnu packages valgrind)
   #:use-module (srfi srfi-1)
@@ -40,7 +41,7 @@
 
 (define (add-devel-c-packages config)
   (list
-   (gcc
+   (gcc-toolchain
     clang
     cmake
     gnu-make
@@ -49,7 +50,8 @@
     m4
     autoconf
     automake
-    libtool)))
+    libtool
+    pkg-config)))
 
 (define home-devel-c-service-type
   (service-type
