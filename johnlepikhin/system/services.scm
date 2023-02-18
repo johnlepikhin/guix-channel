@@ -39,6 +39,7 @@
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages networking)
   #:use-module (gnu packages cups)
+  #:use-module (gnu packages docker)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages linux)
   #:use-module (guix gexp)
@@ -231,5 +232,7 @@ host    all all ::1/128     md5")))))))
             (earlyoom-configuration
              (prefer-regexp "(cc1(plus)?|.rustc-real|ghc|Web Content|rust-analyzer)")
              (avoid-regexp "xmonad")))
+
+   (service docker-service-type)
 
    tuned-desktop-services))
