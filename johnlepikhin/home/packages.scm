@@ -21,22 +21,17 @@
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages image)
-  #:use-module (gnu packages cmake)
   #:use-module (gnu packages geo)
   #:use-module (gnu packages android)
   #:use-module (gnu packages web)
-  #:use-module (gnu packages gcc)
-  #:use-module (gnu packages gdb)
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages commencement)
   #:use-module (gnu packages astronomy)
   #:use-module (gnu packages lsof)
-  #:use-module (gnu packages valgrind)
   #:use-module (gnu packages elf)
   #:use-module (gnu packages databases)
   #:use-module (gnu packages code)
   #:use-module (gnu packages coq)
-  #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages haskell)
   #:use-module (gnu packages inkscape)
@@ -127,17 +122,13 @@
 
 (define %devel-common-tools-packages
   (list
-   gnu-make
    git
    git-lfs
    (list git "send-email")
    (list git "credential-netrc")
    strace
    jq
-   gdb
-   gcc-toolchain
    lsof
-   valgrind
    patchelf
    postgresql
    global
@@ -150,19 +141,12 @@
    tesseract-ocr
    leptonica
    coq
-   cmake
    ansible
    adb))
 
 (define %devel-common-libs-packages
   (list
-   pkg-config
-   m4
    cloc
-   gcc
-   autoconf
-   automake
-   libtool
    liboping
    alsa-lib
    libxcomposite
