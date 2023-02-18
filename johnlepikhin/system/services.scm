@@ -154,7 +154,7 @@ host    all all ::1/128     md5")))))))
   #~(job "30 5   * * *"
          "guix pull"))
 
-(define guix-pull-job
+(define guix-gc-job
   #~(job "30 4   * * *"
          "guix gc"))
 
