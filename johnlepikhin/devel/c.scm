@@ -55,14 +55,18 @@
 
 (define (add-files config)
   `((".local/bin/cc"
-     (begin
-       (with-output-to-file
-           #$output
-         (lambda _ (display
-                    (string-append
-                     "#! /bin/sh\n\n"
-                     (file-append #$gcc-toolset "/bin/gcc")))))
-       (chmod #$output #o755)))))
+     ,(computed-file
+       "bin-cc"
+       (gexp
+        (begin
+          (with-output-to-file
+              #$output
+            (lambda _ (display
+                       (string-append
+                        "#! /bin/sh\n\n"
+                        #$(file-append gcc-toolchain "/bin/gcc")
+                        " $*"))))
+          (chmod #$output #o755)))))))
 
 (define home-devel-c-service-type
   (service-type
