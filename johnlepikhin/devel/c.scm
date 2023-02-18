@@ -41,7 +41,7 @@
 
 (define (add-devel-c-packages config)
   (list
-   (gcc-toolchain
+   (gcc-toolchain-12
     clang
     cmake
     gnu-make
