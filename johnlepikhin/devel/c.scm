@@ -54,7 +54,7 @@
     pkg-config)))
 
 (define (add-files config)
-  `((".local/bin/cc" ,(file-append gcc-toolset "/bin/gcc"))))
+  `((".local/bin/cc" ,(file-append #$gcc-toolset "/bin/gcc"))))
 
 (define home-devel-c-service-type
   (service-type
