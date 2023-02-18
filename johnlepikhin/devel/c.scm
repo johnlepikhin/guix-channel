@@ -41,17 +41,17 @@
 
 (define (add-devel-c-packages config)
   (list
-   (gcc-toolchain-12
-    clang
-    cmake
-    gnu-make
-    gdb
-    valgrind
-    m4
-    autoconf
-    automake
-    libtool
-    pkg-config)))
+   gcc-toolchain
+   clang
+   cmake
+   gnu-make
+   gdb
+   valgrind
+   m4
+   autoconf
+   automake
+   libtool
+   pkg-config))
 
 (define (add-files config)
   `((".local/bin/cc"
