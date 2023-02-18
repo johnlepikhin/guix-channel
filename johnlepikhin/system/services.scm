@@ -24,6 +24,7 @@
   #:use-module (gnu packages networking)
   #:use-module (gnu packages xorg)
   #:use-module (gnu services admin)
+  #:use-module (gnu services authentication)
   #:use-module (gnu services avahi)
   #:use-module (gnu services base)
   #:use-module (gnu services cups)
@@ -234,5 +235,7 @@ host    all all ::1/128     md5")))))))
              (avoid-regexp "xmonad")))
 
    (service docker-service-type)
+
+   (service fprintd-service-type)
 
    tuned-desktop-services))
