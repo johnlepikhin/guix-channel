@@ -41,7 +41,7 @@
    (home-devel-rust-configuration-package-src config)))
 
 (define (add-env-variables config)
-  `(("RUST_SRC_PATH" . ,(file-append (home-devel-rust-configuration-package-src config) "/rust/library"))))
+  `(("RUST_SRC_PATH" . ,(file-append (getenv "HOME") "/.guix-home/profile/lib/rustlib/src/rust/library"))))
 
 (define home-devel-rust-service-type
   (service-type
