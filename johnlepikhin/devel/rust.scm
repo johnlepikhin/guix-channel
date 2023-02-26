@@ -41,8 +41,8 @@
    (home-devel-rust-configuration-package-src config)))
 
 (define (add-env-variables config)
-  `(("RUST_SRC_PATH" . ,(file-append (getenv "HOME") "/.guix-home/profile/lib/rustlib/src/rust/library"))
-    ("LIBCLANG_PATH" . ,(file-append (getenv "HOME") "/.guix-home/profile/lib"))))
+  `(("RUST_SRC_PATH" . ,(string-append (getenv "HOME") "/.guix-home/profile/lib/rustlib/src/rust/library"))
+    ("LIBCLANG_PATH" . ,(string-append (getenv "HOME") "/.guix-home/profile/lib"))))
 
 (define home-devel-rust-service-type
   (service-type
