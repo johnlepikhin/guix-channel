@@ -23,6 +23,7 @@
   #:use-module (gnu services)
   #:use-module (guix gexp)
   #:use-module (guix records)
+  #:use-module (johnlepikhin home xsession)
   #:use-module (srfi srfi-1)
   #:export (home-synaptics-configuration
             home-synaptics-record
