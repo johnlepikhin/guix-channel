@@ -30,15 +30,32 @@
   #:export (make-desktop-operating-system))
 
 (define* (make-desktop-operating-system
-                #:key
-                cryptroot-uuid
-                efi-uuid
-                hostname
-                users
-                services
-                packages
-                (linux-kernel linux-lts)
-                (timezone "Europe/Moscow"))
+          #:key
+          cryptroot-uuid
+          efi-uuid
+          hostname
+          users
+          services
+          packages
+          (linux-kernel linux-lts)
+          (timezone "Europe/Moscow")
+          (mapped-devices
+           (list (mapped-device
+                  (source
+                   (uuid cryptroot-uuid))
+                  (target "cryptroot")
+                  (type luks-device-mapping))))
+          (file-systems
+           (cons* (file-system
+                   (mount-point "/boot/efi")
+                   (device (uuid efi-uuid 'fat32))
+                   (type "vfat"))
+                  (file-system
+                   (mount-point "/")
+                   (device "/dev/mapper/cryptroot")
+                   (type "ext4")
+                   (dependencies mapped-devices))
+                  %base-file-systems)))
   (operating-system
    (kernel linux-kernel)
    (kernel-arguments '("modprobe.blacklist=pcspkr,snd_pcsp"))
@@ -75,20 +92,5 @@
      (bootloader grub-efi-bootloader)
      (targets (list "/boot/efi"))
      (keyboard-layout keyboard-layout)))
-   (mapped-devices
-    (list (mapped-device
-           (source
-            (uuid cryptroot-uuid))
-           (target "cryptroot")
-           (type luks-device-mapping))))
-   (file-systems
-    (cons* (file-system
-            (mount-point "/boot/efi")
-            (device (uuid efi-uuid 'fat32))
-            (type "vfat"))
-           (file-system
-            (mount-point "/")
-            (device "/dev/mapper/cryptroot")
-            (type "ext4")
-            (dependencies mapped-devices))
-           %base-file-systems))))
+   (mapped-devices mapped-devices)
+   (file-systems file-systems)))
