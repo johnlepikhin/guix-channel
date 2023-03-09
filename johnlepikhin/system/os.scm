@@ -31,8 +31,6 @@
 
 (define* (make-desktop-operating-system
           #:key
-          cryptroot-uuid
-          efi-uuid
           hostname
           users
           services
