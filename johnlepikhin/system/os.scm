@@ -37,42 +37,27 @@
           users
           services
           packages
+          file-systems
           (linux-kernel linux-lts)
+          (firmware
+           (list
+            sof-firmware
+            linux-firmware
+            realtek-firmware
+            iwlwifi-firmware
+            amdgpu-firmware
+            radeon-firmware
+            ibt-hw-firmware
+            i915-firmware
+            intel-microcode
+            amd-microcode))
           (timezone "Europe/Moscow")
-          (mapped-devices
-           (list (mapped-device
-                  (source
-                   (uuid cryptroot-uuid))
-                  (target "cryptroot")
-                  (type luks-device-mapping))))
-          (file-systems
-           (cons* (file-system
-                   (mount-point "/boot/efi")
-                   (device (uuid efi-uuid 'fat32))
-                   (type "vfat"))
-                  (file-system
-                   (mount-point "/")
-                   (device "/dev/mapper/cryptroot")
-                   (type "ext4")
-                   (dependencies mapped-devices))
-                  %base-file-systems)))
+          (mapped-devices '()))
   (operating-system
    (kernel linux-kernel)
    (kernel-arguments '("modprobe.blacklist=pcspkr,snd_pcsp"))
    (initrd microcode-initrd)
-   (firmware
-    (list
-     sof-firmware
-     linux-firmware
-     realtek-firmware
-     iwlwifi-firmware
-     amdgpu-firmware
-     radeon-firmware
-     ibt-hw-firmware
-     i915-firmware
-     intel-microcode
-     amd-microcode))
-
+   (firmware firmware)
    (locale "en_US.utf8")
    (locale-definitions
     (list (locale-definition (source "en_US")
