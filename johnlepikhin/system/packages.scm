@@ -18,14 +18,16 @@
 
 (define-module (johnlepikhin system packages)
   #:use-module (gnu system)
-  #:use-module (gnu packages networking)
+  #:use-module (gnu packages admin)
+  #:use-module (gnu packages bash)
+  #:use-module (gnu packages certs)
+  #:use-module (gnu packages file)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages linux)
-  #:use-module (gnu packages admin)
-  #:use-module (gnu packages certs)
-  #:use-module (gnu packages tls)
-  #:use-module (gnu packages bash)
+  #:use-module (gnu packages networking)
   #:use-module (gnu packages rsync)
+  #:use-module (gnu packages rust-apps)
+  #:use-module (gnu packages tls)
   #:use-module (gnu packages vim)
   #:export (system-packages))
 
@@ -46,4 +48,6 @@
    efibootmgr
    tlp
    vim
+   file
+   rg
    %base-packages))
