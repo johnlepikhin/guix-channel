@@ -49,5 +49,5 @@
    tlp
    vim
    file
-   rg
+   ripgrep
    %base-packages))
