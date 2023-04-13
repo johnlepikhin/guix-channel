@@ -235,6 +235,7 @@
    macchanger
    wireshark
    zip
+   zstd
    grep
    sed
    psmisc
