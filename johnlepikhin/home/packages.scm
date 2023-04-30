@@ -250,7 +250,7 @@
   (list
    perl
    perltidy
-   perl-critic
+   perl-perlcritic
    perl-json
    perl-yaml-tiny
    perl-http-tiny
