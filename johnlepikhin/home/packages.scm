@@ -76,6 +76,7 @@
   #:use-module (gnu packages compression)
   #:use-module (gnu packages networking)
   #:use-module (gnu packages aspell)
+  #:use-module (gnu packages perl)
   #:use-module (gnu packages tex)
   #:use-module (gnu packages rust-apps)
   #:use-module (gnu packages pv)
@@ -249,7 +250,7 @@
   (list
    perl
    perltidy
-   perl-perlcritic
+   perl-critic
    perl-json
    perl-yaml-tiny
    perl-http-tiny
