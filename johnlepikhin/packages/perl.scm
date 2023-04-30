@@ -37,7 +37,7 @@
        (uri (string-append "mirror://cpan/authors/id/R/RU/RURBAN/B-Keywords-"
                            version ".tar.gz"))
        (sha256
-        (base32 "0i2ksp0w9wv1qc22hrdl3k48cww64syhmv8zf6x0kgyd4081hr56"))))
+        (base32 "0vk0d48hw90x67p5sfhmshzj2x5j7dr3ny17wb71fvfhhnr6pkx5"))))
     (build-system perl-build-system)
     (home-page "https://metacpan.org/release/B-Keywords")
     (synopsis "Lists of reserved barewords and symbol names")
