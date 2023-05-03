@@ -182,7 +182,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
                ("libxinerama" ,libxinerama)))
     (license gpl3+)))
 
-(define-public vkteams-23.01.0
-  (make-vkteams "23.01.0" "https://t.bk.ru/t8KsGC9SCwPa003/vkteams.tar.xz" "03n55007z7lzagf6pmbzh1y8nfyy83k8as95q6x2x04m3r7gpdxk"))
+(define-public vkteams-23.02.0
+  (make-vkteams "23.02.0" "https://t.bk.ru/lQ8MG7Buvx1ugDI/vkteams.tar.xz" "0kjng9rm89b8iz574p6ykvjvdhs8w5dn85da66mdsxkp9gkcka0x"))
 
-(define-public vkteams vkteams-23.01.0)
+(define-public vkteams vkteams-23.02.0)
