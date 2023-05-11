@@ -134,7 +134,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
             (let ((wrapper (string-append out "/bin/vkteams")))
               (with-output-to-file wrapper
                 (lambda _
-                  (display (string-append "#! /bin/sh\n\nSOFTWARE_RENDER=1 " out "/dist/.vkteams-real\n"))))
+                  (display (string-append "#! /bin/sh\n\nSOFTWARE_RENDER=1 " out "/dist/.vkteams-real $*\n"))))
               (chmod wrapper #o755))
 
             (let ((qt.conf (string-append
@@ -156,9 +156,30 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
                                (version-major+minor (string-take v d))))
              (string-append out "/dist/lib/libtinfo.so.5"))
 
-            #t))))))
-    (synopsis "Vkteams")
-    (description "Vkteams")
+            #t)))
+        (add-after
+         'install 'finalize-install
+         (lambda* (#:key outputs #:allow-other-keys)
+           (let ((out (assoc-ref outputs "out")))
+             (let ((apps (string-append out "/share/applications")))
+               (mkdir-p apps)
+               (make-desktop-entry-file
+                (string-append apps "/vkteams.desktop")
+                #:name "VK Teams"
+                #:exec (string-append out "/bin/vkteams -urlcommand %U")
+                #:mime-type (list
+                             "x-scheme-handler/myteam-messenger"
+                             "x-scheme-handler/vkteams-messenger"
+                             "x-scheme-handler/vkteams"
+                             "x-scheme-handler/callto"
+                             "x-scheme-handler/zoomphonecall")
+                #:categories '("Network" "Application")
+                #:comment
+                '(("en" "VK Teams messenger")
+                  (#f "VK Teams messenger")))
+               #t)))))))
+    (synopsis "VK Teams")
+    (description "VK Teams")
     (home-page "https://dl.internal.myteam.mail.ru/")
     (native-inputs `(("patchelf" ,patchelf)))
     (inputs `(("libxrandr" ,libxrandr)
