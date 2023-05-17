@@ -587,7 +587,7 @@ use by the C++ Core Guidelines maintained by the Standard C++ Foundation.")
       (patches
        (search-patches
         ;; https://github.com/telegramdesktop/tdesktop/pull/24126
-        "telegram-desktop-allow-disable-libtgvoip.patch"))
+        "telegram-desktop-allow-disable-libtgvoip-rev2.patch"))
        (modules '((guix build utils)
                   (ice-9 ftw)
                   (srfi srfi-1)))
