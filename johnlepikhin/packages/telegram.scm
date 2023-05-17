@@ -19,7 +19,7 @@
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (johnlepikhin packages telegram)
-  #:use-module (johnlepikhin packages)
+  #:use-module (gnu packages)
   #:use-module (gnu packages admin)
   #:use-module (gnu packages aidc)
   #:use-module (gnu packages animation)
