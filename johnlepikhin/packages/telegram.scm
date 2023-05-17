@@ -584,10 +584,15 @@ use by the C++ Core Guidelines maintained by the Standard C++ Foundation.")
         (git-file-name name version))
        (sha256
         (base32 "0g47ffamh1csp79yzkv28v3qjkhjacj0c7pjf53n1ks80j5hc2j0"))
-      (patches
-       (search-patches
-        ;; https://github.com/telegramdesktop/tdesktop/pull/24126
-        "telegram-desktop-allow-disable-libtgvoip-rev2.patch"))
+       (patches
+	(parameterize
+            ((%patch-path
+              (map (lambda (directory)
+                     (string-append directory "/johnlepikhin/packages/patches"))
+                   %load-path)))
+	  (search-patches
+           ;; https://github.com/telegramdesktop/tdesktop/pull/24126
+           "telegram-desktop-allow-disable-libtgvoip-rev2.patch")))
        (modules '((guix build utils)
                   (ice-9 ftw)
                   (srfi srfi-1)))
