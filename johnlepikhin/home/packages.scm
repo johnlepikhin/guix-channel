@@ -53,7 +53,6 @@
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages gnome-xyz)
   #:use-module (gnu packages image-viewers)
-  #:use-module (gnu packages telegram)
   #:use-module (gnu packages package-management)
   #:use-module (gnu packages chromium)
   #:use-module (gnu packages audio)
