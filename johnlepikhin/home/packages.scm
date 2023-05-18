@@ -196,7 +196,6 @@
     inkscape
     xf86-input-synaptics
     papirus-icon-theme
-    freerdp
     qbittorrent
     unicode-emoji
     font-google-noto
