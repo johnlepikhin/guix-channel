@@ -17,25 +17,29 @@
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (johnlepikhin devel rust)
-  #:use-module (gnu services)
-  #:use-module (gnu services configuration)
   #:use-module (gnu home services)
+  #:use-module (gnu packages llvm)
+  #:use-module (gnu packages tls)
+  #:use-module (gnu services configuration)
+  #:use-module (gnu services)
+  #:use-module (guix gexp)
+  #:use-module (guix records)
   #:use-module (johnlepikhin packages rust-nightly)
   #:use-module (srfi srfi-1)
-  #:use-module (guix records)
-  #:use-module (guix gexp)
   #:export (home-devel-rust-configuration
             home-devel-rust-service-type))
 
 (define-record-type* <home-devel-rust-configuration>
   home-devel-rust-configuration make-home-devel-rust-configuration
   home-devel-rust-configuration?
-  (package home-devel-rust-configuration-package (default rust-nightly-2022.08.31))
-  (package-clippy home-devel-rust-configuration-package-clippy (default clippy-nightly-2022.08.31))
-  (package-src home-devel-rust-configuration-package-src (default rust-src-nightly-2022.08.31)))
+  (package home-devel-rust-configuration-package (default rust-nightly-2023.05.15))
+  (package-clippy home-devel-rust-configuration-package-clippy (default clippy-nightly-2023.05.15))
+  (package-src home-devel-rust-configuration-package-src (default rust-src-nightly-2023.05.15)))
 
 (define (add-devel-rust-packages config)
   (list
+   clang
+   openssl
    (home-devel-rust-configuration-package config)
    (home-devel-rust-configuration-package-clippy config)
    (home-devel-rust-configuration-package-src config)))

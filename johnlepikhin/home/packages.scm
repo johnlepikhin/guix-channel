@@ -113,7 +113,6 @@
             %perl-packages
             %python-packages
             %devel-other-packages
-            %rust-packages
             %golang-packages
             %editors-packages
             %mail-packages
@@ -279,14 +278,6 @@
    openjdk
    rpm
    shadowplay))
-
-(define %rust-packages
-  (list
-   rust-nightly-2023.05.15
-   clippy-nightly-2023.05.15
-   rust-src-nightly-2023.05.15
-   clang
-   openssl))
 
 (define %editors-packages
   (list
