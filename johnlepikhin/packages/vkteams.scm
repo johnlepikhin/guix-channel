@@ -186,6 +186,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("libxcomposite" ,libxcomposite)
               ("libxcursor" ,libxcursor)
               ("libxdamage" ,libxdamage)
+              ("gcc:lib" ,gcc-5 "lib")
               ("gcc" ,gcc)
               ("libgpg-error" ,libgpg-error)
               ("glibc" ,glibc)
@@ -205,6 +206,6 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
     (license gpl3+)))
 
 (define-public vkteams-23.02
-  (make-vkteams "23.02.1" "https://t.bk.ru/lQ8MG7Buvx1ugDI/vkteams.tar.xz" "0kjng9rm89b8iz574p6ykvjvdhs8w5dn85da66mdsxkp9gkcka0x"))
+  (make-vkteams "23.02.2" "https://t.bk.ru/lQ8MG7Buvx1ugDI/vkteams.tar.xz" "0kjng9rm89b8iz574p6ykvjvdhs8w5dn85da66mdsxkp9gkcka0x"))
 
 (define-public vkteams vkteams-23.02)
