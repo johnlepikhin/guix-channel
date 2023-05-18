@@ -86,6 +86,9 @@ function whereis_guix {
 
 export PATH=\"$HOME/bin:$HOME/.cargo/bin:$HOME/go/bin:$HOME/.local/bin:$PATH\"
 
+# temporary fix for https://issues.guix.gnu.org/63238
+export LIBRARY_PATH=\"$HOME/lib:$LIBRARY_PATH\"
+
 # Именно такое значение выставляется в emacs (надо разобраться)
 export XDG_DATA_DIRS=\"/home/evgenii/.local/share/flatpak/exports/share:$XDG_DATA_DIRS\"
 
