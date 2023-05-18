@@ -208,3 +208,14 @@
 
 (define-public clippy-nightly-2022.08.31
   (make-clippy-nightly "2022-08-31" "1spbfsvszy3laqpf6804gxhfdsn3z86y20rhdz5f0hn7gzyggz1m" rust-nightly-2022.08.31))
+
+;;
+
+(define-public rust-nightly-2023.05.15
+  (make-rust-nightly "2023-05-15" "0h7sgfn4dr14vahq9v5qzaviyjcsvn2plkk752qb2pj5dqkmr0vx"))
+
+(define-public rust-src-nightly-2023.05.15
+  (make-rust-src-nightly "2023-05-15" "10ppnq9y74a2j8glndhcb31iipw6maw4f8w2iyf4fpckp4zlggdp"))
+
+(define-public clippy-nightly-2023.05.15
+  (make-clippy-nightly "2023-05-15" "1c0x6y6maw165rnxkjjn0pq3nzxrw7m1ha4wnxbs8ajxd711lfj7" rust-nightly-2023.05.15))
