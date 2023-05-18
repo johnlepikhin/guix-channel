@@ -21,12 +21,15 @@
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module (guix utils)
-  #:use-module (gnu packages gcc)
   #:use-module (gnu packages base)
-  #:use-module (gnu packages elf)
-  #:use-module (gnu packages cmake)
   #:use-module (gnu packages bootstrap)
+  #:use-module (gnu packages cmake)
   #:use-module (gnu packages compression)
+  #:use-module (gnu packages curl)
+  #:use-module (gnu packages elf)
+  #:use-module (gnu packages gcc)
+  #:use-module (gnu packages llvm)
+  #:use-module (gnu packages tls)
   #:use-module (guix build-system copy)
   #:export (make-rust-nightly
             make-rust-src-nightly))
@@ -91,9 +94,11 @@
         ("rust-std-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib"
          "lib/rustlib/x86_64-unknown-linux-gnu/lib"))))
    (native-inputs `(("patchelf" ,patchelf)
-                    ("cmake" ,cmake)))
+                    ("cmake-minimal" ,cmake-minimal)))
    (inputs
-    `(("libstdc++" ,(make-libstdc++ gcc))
+    `(("libcurl" ,curl)
+      ("llvm" ,llvm-15)
+      ("openssl" ,openssl-1.1)
       ("gcc:lib" ,(canonical-package gcc) "lib")
       ("glibc" ,glibc)
       ("zlib" ,zlib)))
@@ -211,11 +216,11 @@
 
 ;;
 
-(define-public rust-nightly-2023.05.15
-  (make-rust-nightly "2023-05-15" "0h7sgfn4dr14vahq9v5qzaviyjcsvn2plkk752qb2pj5dqkmr0vx"))
+(define-public rust-nightly-2023.03.06
+  (make-rust-nightly "2023-03-06" "03f5dbizwrzalj4yjgpcs78b2psdahhzs6k3lg4ps1y6vv1xsik7"))
 
-(define-public rust-src-nightly-2023.05.15
-  (make-rust-src-nightly "2023-05-15" "10ppnq9y74a2j8glndhcb31iipw6maw4f8w2iyf4fpckp4zlggdp"))
+(define-public rust-src-nightly-2023.03.06
+  (make-rust-src-nightly "2023-03-06" "174iz7gcwri7q6d3m98pb6fnvigd4i7vcv8gx1pnqb9s070bqj2b"))
 
-(define-public clippy-nightly-2023.05.15
-  (make-clippy-nightly "2023-05-15" "1c0x6y6maw165rnxkjjn0pq3nzxrw7m1ha4wnxbs8ajxd711lfj7" rust-nightly-2023.05.15))
+(define-public clippy-nightly-2023.03.06
+  (make-clippy-nightly "2023-03-06" "15mh0zm9s06zd2r3sa966pyki4b2afgdzl8lp43a3290273z4i3n" rust-nightly-2023.03.06))
