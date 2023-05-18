@@ -39,7 +39,7 @@
 (define (add-devel-rust-packages config)
   (list
    clang
-   openssl
+   openssl-1.1
    (home-devel-rust-configuration-package config)
    (home-devel-rust-configuration-package-clippy config)
    (home-devel-rust-configuration-package-src config)))
