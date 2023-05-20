@@ -76,7 +76,7 @@
 ;;;
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
-(define-module (johnlepikhin packages maths)
+(define-module (johnlepikhin packages frama-c)
   #:use-module (ice-9 regex)
   #:use-module (ice-9 match)
   #:use-module (gnu packages)
