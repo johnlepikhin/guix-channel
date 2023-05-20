@@ -142,6 +142,4 @@
 to source-code analysis of C software.  The Frama-C analyzers assist you in
 various source-code-related activities, from the navigation through unfamiliar
 projects up to the certification of critical software.")
-    (license license:lgpl2.1+))
-
-  frama-c)
+    (license license:lgpl2.1+)))
