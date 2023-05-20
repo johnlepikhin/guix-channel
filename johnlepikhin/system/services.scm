@@ -236,6 +236,6 @@ host    all all ::1/128     md5")))))))
 
    (service docker-service-type)
 
-   (service fprintd-service-type)
+   ;; (service fprintd-service-type)
 
    tuned-desktop-services))
