@@ -94,14 +94,16 @@
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-26))
 
+(define %frama-c-version "24.0")
+
 (define-public frama-c
   (package
     (name "frama-c")
-    (version "24.0-patch1")
+    (version (string-join %frama-c-version "-patch1"))
     (source (origin
               (method url-fetch)
               (uri (string-append "http://frama-c.com/download/frama-c-"
-                                  version "-Chromium.tar.gz"))
+                                  %frama-c-version "-Chromium.tar.gz"))
               (sha256
                (base32
                 "0x1xgip50jdz1phsb9rzwf2ra8lshn1hmd9g967xia402wrg3sjf"))))
