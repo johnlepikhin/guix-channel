@@ -31,6 +31,7 @@ export HISTFILE=$XDG_CACHE_HOME/.bash_history
 export HISTSIZE=10000
 export HISTTIMEFORMAT='%F %T '
 export HISTCONTROL=ignorespace:ignoredups")
+export PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
 
 (define-public bashrc-ssh-agent
   "\
