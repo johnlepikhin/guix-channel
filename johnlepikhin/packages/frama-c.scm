@@ -99,7 +99,7 @@
 (define-public frama-c
   (package
     (name "frama-c")
-    (version (string-join %frama-c-version "-patch1"))
+    (version (string-append %frama-c-version "-patch1"))
     (source (origin
               (method url-fetch)
               (uri (string-append "http://frama-c.com/download/frama-c-"
