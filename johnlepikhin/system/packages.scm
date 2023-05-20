@@ -24,6 +24,7 @@
   #:use-module (gnu packages file)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages linux)
+  #:use-module (gnu packages lsof)
   #:use-module (gnu packages networking)
   #:use-module (gnu packages rsync)
   #:use-module (gnu packages rust-apps)
@@ -50,4 +51,6 @@
    vim
    file
    ripgrep
+   lsof
+   strace
    %base-packages))
