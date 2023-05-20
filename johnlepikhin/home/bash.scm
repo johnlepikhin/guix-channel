@@ -20,7 +20,8 @@
   #:export (bashrc-history
             bashrc-ssh-agent
             bashrc-bash-prompt
-            bashrc-helpers))
+            bashrc-helpers
+            bash_profile-helpers))
 
 (define-public bashrc-history
   "\
@@ -84,6 +85,11 @@ function whereis_guix {
   fi
   ls -l `which $1` | sed -r 's/.* (.+)\\/bin\\/[^\\/]+/\\1/'
 }
+
+")
+
+(define-public bash_profile-helpers
+"\
 
 export PATH=\"$HOME/bin:$HOME/.cargo/bin:$HOME/go/bin:$HOME/.local/bin:$PATH\"
 
