@@ -29,6 +29,7 @@
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages m4)
   #:use-module (gnu packages valgrind)
+  #:use-module (johnlepikhin packages frama-c)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (guix gexp)
@@ -51,7 +52,8 @@
    autoconf
    automake
    libtool
-   pkg-config))
+   pkg-config
+   frama-c))
 
 (define (add-files config)
   `((".local/bin/cc"
