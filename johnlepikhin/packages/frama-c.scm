@@ -97,7 +97,7 @@
 (define-public frama-c
   (package
     (name "frama-c")
-    (version "24.0")
+    (version "24.0-patch1")
     (source (origin
               (method url-fetch)
               (uri (string-append "http://frama-c.com/download/frama-c-"
@@ -120,10 +120,11 @@
     (propagated-inputs
      (list ocaml-biniou
            ocaml-easy-format
+           ocaml-findlib
            ocaml-graph
+           ocaml-lablgtk3-sourceview3
            ocaml-yojson
            ocaml-zarith
-           ocaml-lablgtk3-sourceview3
            lablgtk3
            why3))
 
