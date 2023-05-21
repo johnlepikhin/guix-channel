@@ -105,6 +105,7 @@
   #:use-module (gnu packages unicode)
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages package-management)
+  #:use-module (nongnu packages messaging)
   #:export (%devel-common-tools-packages
             %devel-common-libs-packages
             %xmonad-packages
@@ -200,6 +201,7 @@
     unicode-emoji
     font-google-noto
     flatpak
+    zoom
     libfreeaptx)))
 
 (define %tools-packages
