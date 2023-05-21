@@ -23,6 +23,7 @@
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages base)
   #:use-module (gnu packages cmake)
+  #:use-module (gnu packages check)
   #:use-module (gnu packages commencement)
   #:use-module (gnu packages gdb)
   #:use-module (gnu packages llvm)
@@ -53,7 +54,8 @@
    automake
    libtool
    pkg-config
-   frama-c))
+   frama-c
+   cppcheck))
 
 (define (add-files config)
   `((".local/bin/cc"
