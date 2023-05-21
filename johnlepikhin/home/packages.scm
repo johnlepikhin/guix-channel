@@ -92,6 +92,7 @@
   #:use-module (gnu packages emacs)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages mail)
+  #:use-module (gnu packages messaging)
   #:use-module (gnu packages vim)
   #:use-module (gnu packages check)
   #:use-module (gnu packages file)
@@ -202,6 +203,7 @@
     font-google-noto
     flatpak
     zoom
+    quaternion
     libfreeaptx)))
 
 (define %tools-packages
