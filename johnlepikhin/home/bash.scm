@@ -86,6 +86,8 @@ function whereis_guix {
   ls -l `which $1` | sed -r 's/.* (.+)\\/bin\\/[^\\/]+/\\1/'
 }
 
+# temporary fix for https://issues.guix.gnu.org/63238
+export LIBRARY_PATH=\"$HOME/lib:$LIBRARY_PATH\"
 ")
 
 (define-public bash_profile-helpers
