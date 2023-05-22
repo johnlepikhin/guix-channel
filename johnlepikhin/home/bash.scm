@@ -76,8 +76,8 @@ function setup_bash_prompt () {
 }
 setup_bash_prompt")
 
-(define-public bashrc-helpers
-  "\
+(define-public bash-helpers
+"\
 function whereis_guix {
   if [[ -z \"$1\" ]]; then
     echo \"Argument is required\" >2
@@ -86,14 +86,7 @@ function whereis_guix {
   ls -l `which $1` | sed -r 's/.* (.+)\\/bin\\/[^\\/]+/\\1/'
 }
 
-# temporary fix for https://issues.guix.gnu.org/63238
-export LIBRARY_PATH=\"$HOME/lib:$LIBRARY_PATH\"
-")
-
-(define-public bash_profile-helpers
-"\
-
-export PATH=\"$HOME/bin:$HOME/.cargo/bin:$HOME/go/bin:$HOME/.local/bin:$PATH\"
+export PATH=\"$HOME/.cargo/bin:$HOME/go/bin:$HOME/.local/bin:$PATH\"
 
 # temporary fix for https://issues.guix.gnu.org/63238
 export LIBRARY_PATH=\"$HOME/lib:$LIBRARY_PATH\"
