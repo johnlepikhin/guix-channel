@@ -58,6 +58,10 @@
           (ungexp (home-emacs-configuration-configs-git-repo config))
           clone-path))))))
 
+(define (remove-generated-local.el config)
+  (gexp
+   (remove-file (string-append (getenv "HOME") "/.emacs.d/local.el"))))
+
 (define (add-xsession-component config)
   "emacs --daemon &")
 
@@ -72,6 +76,8 @@
       home-profile-service-type add-emacs-package)
      (service-extension
       home-activation-service-type git-clone-configs)
+     (service-extension
+      home-activation-service-type remove-generated-local.el)
      (service-extension
       home-xsession-service-type
       add-xsession-component)))
