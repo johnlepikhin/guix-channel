@@ -67,7 +67,6 @@
   #:use-module (gnu packages rdesktop)
   #:use-module (gnu packages qt)
   #:use-module (gnu packages gimp)
-  #:use-module (gnu packages password-utils)
   #:use-module (gnu packages base)
   #:use-module (gnu packages rsync)
   #:use-module (gnu packages curl)
@@ -191,8 +190,6 @@
     evince
     recordmydesktop
     vlc
-    password-store
-    browserpass-native
     xmodmap
     virt-manager
     inkscape
