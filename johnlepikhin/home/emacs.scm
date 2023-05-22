@@ -46,9 +46,14 @@
 (define (add-emacs-package config)
   (list (home-emacs-configuration-package config) git))
 
-(define (git-clone-configs config)
+(define (activate-service config)
   (gexp
    (begin
+     ;; Remove compiled by Emacs local.el
+     (let ((local.el (string-append (getenv "HOME") "/.emacs.d/local.el")))
+       (when (file-exists? local.el)
+         (delete-file local.el)))
+     ;; Clone main config repository
      (let ((clone-path (string-append (getenv "HOME") "/.emacs.d/public")))
        (mkdir-p clone-path)
        (when (not (file-exists? clone-path))
@@ -58,10 +63,6 @@
           (ungexp (home-emacs-configuration-configs-git-repo config))
           clone-path))))))
 
-(define (remove-generated-local.el config)
-  (gexp
-   (remove-file (string-append (getenv "HOME") "/.emacs.d/local.el"))))
-
 (define (add-xsession-component config)
   "emacs --daemon &")
 
@@ -70,16 +71,13 @@
    (name 'home-emacs)
    (extensions
     (list
-     (service-extension
-      home-files-service-type add-emacs-config)
-     (service-extension
-      home-profile-service-type add-emacs-package)
-     (service-extension
-      home-activation-service-type git-clone-configs)
-     (service-extension
-      home-activation-service-type remove-generated-local.el)
-     (service-extension
-      home-xsession-service-type
-      add-xsession-component)))
+     (service-extension home-files-service-type
+                        add-emacs-config)
+     (service-extension home-profile-service-type
+                        add-emacs-package)
+     (service-extension home-activation-service-type
+                        activate-service)
+     (service-extension home-xsession-service-type
+                        add-xsession-component)))
    (compose concatenate)
    (description "Install emacs and add configs")))
