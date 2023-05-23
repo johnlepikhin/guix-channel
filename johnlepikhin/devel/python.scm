@@ -39,6 +39,7 @@
    python-flake8
    python-flake8-bugbear
    python-flake8-quotes
+   python-isort
    python-language-server
    python-mccabe
    python-mypy
