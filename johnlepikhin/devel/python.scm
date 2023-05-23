@@ -34,12 +34,21 @@
 
 (define (add-packages config)
   (list
+   python
+   python-black
+   python-flake8
+   python-flake8-bugbear
+   python-flake8-quotes
+   python-language-server
+   python-mccabe
    python-mypy
-   python-flake8))
+   python-pep8-naming
+   python-pytest-flake8
+   python-virtualenv))
 
 (define home-devel-python-service-type
   (service-type
-   (name 'home-devel-c)
+   (name 'home-devel-python)
    (extensions
     (list
      (service-extension home-profile-service-type

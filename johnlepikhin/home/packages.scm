@@ -82,8 +82,6 @@
   #:use-module (gnu packages dns)
   #:use-module (gnu packages perl)
   #:use-module (gnu packages perl-web)
-  #:use-module (gnu packages python)
-  #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages node)
   #:use-module (gnu packages guile)
   #:use-module (gnu packages java)
@@ -113,7 +111,6 @@
             %xdesktop-packages
             %tools-packages
             %perl-packages
-            %python-packages
             %devel-other-packages
             %golang-packages
             %editors-packages
@@ -255,14 +252,6 @@
    perl-http-tiny
    perl-uri-escape
    perl-io-socket-ssl))
-
-(define %python-packages
-  (list
-   python
-   python-pytest
-   python-language-server
-   python-black
-   python-virtualenv))
 
 (define %golang-packages
   (list
