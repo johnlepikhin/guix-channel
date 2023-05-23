@@ -44,6 +44,7 @@
    python-mccabe
    python-mypy
    python-pep8-naming
+   python-pylint
    python-pytest-flake8
    python-virtualenv))
 
