@@ -21,6 +21,7 @@
   #:use-module (gnu services configuration)
   #:use-module (gnu home services)
   #:use-module (gnu packages python)
+  #:use-module (gnu packages check)
   #:use-module (gnu packages python-check)
   #:use-module (gnu packages python-xyz)
   #:use-module (srfi srfi-1)
