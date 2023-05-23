@@ -48,6 +48,7 @@
    python-pep8-naming
    python-pylint
    python-pytest-flake8
+   python-tomlkit
    python-virtualenv))
 
 (define home-devel-python-service-type
