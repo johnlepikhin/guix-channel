@@ -44,6 +44,7 @@
   #:use-module (gnu services xorg)
   #:use-module (gnu services)
   #:use-module (guix gexp)
+  #:use-module (srfi srfi-1)
   #:export (make-system-services
             postgresql-dev-service))
 
