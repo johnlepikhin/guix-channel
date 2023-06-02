@@ -221,6 +221,11 @@ host    all all ::1/128     md5")))))))
              (unix-sock-group "libvirt")))
    (service virtlog-service-type)
    (service openvswitch-service-type)
+   (service qemu-binfmt-service-type
+            (qemu-binfmt-configuration
+             (platforms
+              (fold delete %qemu-platforms
+                    (lookup-qemu-platforms "i386" "x86_64")))))
 
    (service guix-publish-service-type
             (guix-publish-configuration
