@@ -220,6 +220,7 @@ host    all all ::1/128     md5")))))))
             (libvirt-configuration
              (unix-sock-group "libvirt")))
    (service virtlog-service-type)
+   (service openvswitch-service-type)
 
    (service guix-publish-service-type
             (guix-publish-configuration
