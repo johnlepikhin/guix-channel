@@ -39,7 +39,8 @@
   home-synaptics-configuration make-synaptics-configuration
   home-synaptics-configuration?
   (package home-synaptics-configuration-package (default xf86-input-synaptics))
-  (records home-synaptics-configuration-records (default '())))
+  (records home-synaptics-configuration-records (default '()))
+  (syndaemon-args home-synaptics-configuration-syndaemon-args (default "-i 0.3")))
 
 (define (add-synaptics-extensions config extensions)
   (home-synaptics-configuration
@@ -55,13 +56,12 @@
    "="
    (home-synaptics-record-value record)))
 
-(define (generate-command config)
-  (string-append
-   "synclient"
-   (apply string-append (map serialize-record (home-synaptics-configuration-records config)))))
-
-(define (add-xsession-component config)
-  (generate-command config))
+(define (add-xsession-components config)
+  (list
+   (string-append
+    "synclient"
+    (apply string-append (map serialize-record (home-synaptics-configuration-records config))))
+   (string-append "syndaemon " (home-synaptics-configuration-syndaemon-args config))))
 
 (define (add-synaptics-package config)
   (list (home-synaptics-configuration-package config)))
@@ -71,7 +71,7 @@
    (name 'home-synaptics)
    (extensions
     (list
-     (service-extension home-xsession-service-type add-xsession-component)
+     (service-extension home-xsession-service-type add-xsession-components)
      (service-extension home-profile-service-type add-synaptics-package)))
    (compose concatenate)
    (extend add-synaptics-extensions)
