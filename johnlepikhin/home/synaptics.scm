@@ -56,12 +56,13 @@
    "="
    (home-synaptics-record-value record)))
 
-(define (add-xsession-components config)
-  (list
-   (string-append
-    "synclient"
-    (apply string-append (map serialize-record (home-synaptics-configuration-records config))))
-   (string-append "syndaemon " (home-synaptics-configuration-syndaemon-args config))))
+(define (add-xsession-synclient config)
+  (string-append
+   "synclient"
+   (apply string-append (map serialize-record (home-synaptics-configuration-records config)))))
+
+(define (add-xsession-syndaemon config)
+  (string-append "syndaemon " (home-synaptics-configuration-syndaemon-args config)))
 
 (define (add-synaptics-package config)
   (list (home-synaptics-configuration-package config)))
@@ -71,7 +72,8 @@
    (name 'home-synaptics)
    (extensions
     (list
-     (service-extension home-xsession-service-type add-xsession-components)
+     (service-extension home-xsession-service-type add-xsession-synclient)
+     (service-extension home-xsession-service-type add-xsession-syndaemon)
      (service-extension home-profile-service-type add-synaptics-package)))
    (compose concatenate)
    (extend add-synaptics-extensions)
