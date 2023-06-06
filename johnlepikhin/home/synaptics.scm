@@ -62,7 +62,7 @@
    (apply string-append (map serialize-record (home-synaptics-configuration-records config)))))
 
 (define (add-xsession-syndaemon config)
-  (string-append "syndaemon " (home-synaptics-configuration-syndaemon-args config)))
+  (string-append "syndaemon -d " (home-synaptics-configuration-syndaemon-args config)))
 
 (define (add-synaptics-package config)
   (list (home-synaptics-configuration-package config)))
