@@ -61,9 +61,6 @@
    "synclient"
    (apply string-append (map serialize-record (home-synaptics-configuration-records config)))))
 
-(define (add-xsession-syndaemon config)
-  (string-append "syndaemon -d " (home-synaptics-configuration-syndaemon-args config)))
-
 (define (add-synaptics-package config)
   (list (home-synaptics-configuration-package config)))
 
@@ -73,7 +70,6 @@
    (extensions
     (list
      (service-extension home-xsession-service-type add-xsession-synclient)
-     (service-extension home-xsession-service-type add-xsession-syndaemon)
      (service-extension home-profile-service-type add-synaptics-package)))
    (compose concatenate)
    (extend add-synaptics-extensions)
