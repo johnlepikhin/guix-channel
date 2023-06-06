@@ -51,11 +51,6 @@
                         "\n"))))
           (chmod #$output #o755)))))))
 
-(define (add-xsession-extensions config extensions)
-  (home-xsession-configuration
-   (inherit config)
-   (components (append (home-xsession-components config) extensions))))
-
 (define home-xsession-service-type
   (service-type
    (name 'home-xsession)
@@ -64,6 +59,6 @@
      (service-extension
       home-files-service-type add-xsession-file)))
    (compose identity)
-   (extend add-xsession-extensions)
+   (extend append)
    (default-value (home-xsession-configuration))
    (description "Create @file{~/.xsession}")))
