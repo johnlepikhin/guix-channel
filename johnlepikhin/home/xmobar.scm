@@ -63,7 +63,7 @@
        , commands = [
           Run Weather \""
           #$(home-xmobar-configuration-weather-id config)
-          "\" [\"-t\", \"<tempC>C\"
+          "\" [\"-t\", \"<tempC>C, <windMs> <windCardinal>\"
                              , \"-L\", \"18\", \"-H\", \"30\"
                              , \"--normal\", \"green\"
                              , \"--high\", \"red\"
