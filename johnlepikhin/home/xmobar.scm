@@ -42,7 +42,7 @@
        "xmobarrc"
        #~(string-append
           "Config {
-         font = \"xft:Monospace-Bold:size=9\"
+         font = \"xft:Monospace-10\"
        , borderColor = \"#303030\"
        , border = BottomBM 3
        , borderWidth = 1
