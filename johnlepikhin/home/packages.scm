@@ -199,7 +199,8 @@
     flatpak
     zoom
     quaternion
-    libfreeaptx)))
+    libfreeaptx
+    autocutsel)))
 
 (define %tools-packages
   (list
