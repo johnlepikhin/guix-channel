@@ -45,6 +45,7 @@
   (comment home-ssh-host-configuration-comment (default #f))
   (identity-file home-ssh-host-configuration-identity-file (default (list)))
   (add-ssh-keys-to-agent home-ssh-host-configuration-add-ssh-keys-to-agent (default #f))
+  (forward-agent home-ssh-host-configuration-forward-agent (default #f))
   )
 
 (define (serialize-home-ssh-host-configuration val)
@@ -80,6 +81,8 @@
      (home-ssh-host-configuration-identity-file val)))
    (if (home-ssh-host-configuration-add-ssh-keys-to-agent val)
        "  AddKeysToAgent yes\n" "")
+   (if (home-ssh-host-configuration-forward-agent val)
+       "  ForwardAgent yes\n" "")
    "\n"))
 
 (define-record-type* <home-ssh-configuration>
