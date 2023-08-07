@@ -43,7 +43,7 @@
   (pubkey-accepted-key-types home-ssh-host-configuration-pubkey-accepted-key-types (default #f))
   (host-key-algorithms home-ssh-host-configuration-host-key-algorithms (default #f))
   (comment home-ssh-host-configuration-comment (default #f))
-  (identity-file home-ssh-host-configuration-identity-file (default #f))
+  (identity-file home-ssh-host-configuration-identity-file (default (list)))
   (add-ssh-keys-to-agent home-ssh-host-configuration-add-ssh-keys-to-agent (default #f))
   )
 
@@ -74,8 +74,10 @@
        (format #f "  PubkeyAcceptedKeyTypes ~a\n" (home-ssh-host-configuration-pubkey-accepted-key-types val)) "")
    (if (home-ssh-host-configuration-host-key-algorithms val)
        (format #f "  HostKeyAlgorithms ~a\n" (home-ssh-host-configuration-host-key-algorithms val)) "")
-   (if (home-ssh-host-configuration-identity-file val)
-       (format #f "  IdentityFile ~a\n" (home-ssh-host-configuration-identity-file val)) "")
+   (string-concatenate
+    (map
+     (lambda (file) (string-append "  IdentityFile " file "\n"))
+     (home-ssh-host-configuration-identity-file val)))
    (if (home-ssh-host-configuration-add-ssh-keys-to-agent val)
        "  AddKeysToAgent yes\n" "")
    "\n"))
