@@ -65,7 +65,7 @@
 (define-public postgresql-dev-service
   (service postgresql-service-type
            (postgresql-configuration
-            (postgresql postgresql-10)
+            (postgresql postgresql-15)
             (config-file
              (postgresql-config-file
               (log-destination "stderr")
