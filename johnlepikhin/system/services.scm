@@ -159,7 +159,7 @@ host    all all ::1/128     md5")))))))
 
 (define guix-gc-job
   #~(job "30 4   * * *"
-         "guix gc"))
+         "guix gc -F 30G"))
 
 (define* (make-system-services
           #:key
