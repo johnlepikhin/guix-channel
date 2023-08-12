@@ -53,4 +53,5 @@
    ripgrep
    lsof
    strace
+   lm-sensors
    %base-packages))
