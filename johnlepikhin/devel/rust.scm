@@ -34,7 +34,8 @@
   home-devel-rust-configuration?
   (package home-devel-rust-configuration-package (default rust-nightly-2023.03.06))
   (package-clippy home-devel-rust-configuration-package-clippy (default clippy-nightly-2023.03.06))
-  (package-src home-devel-rust-configuration-package-src (default rust-src-nightly-2023.03.06)))
+  (package-src home-devel-rust-configuration-package-src (default rust-src-nightly-2023.03.06))
+  (edition home-devel-rust-configuration-edition (default "2021")))
 
 (define (add-devel-rust-packages config)
   (list
@@ -48,12 +49,19 @@
   `(("RUST_SRC_PATH" . ,(string-append (getenv "HOME") "/.guix-home/profile/lib/rustlib/src/rust/library"))
     ("LIBCLANG_PATH" . ,(string-append (getenv "HOME") "/.guix-home/profile/lib"))))
 
+(define (add-files config)
+  `((".rustfmt.toml"
+     ,(plain-file "rustfmt.toml"
+                  (format #f "edition = \"~a\"\n"
+                          (home-devel-rust-configuration-edition config))))))
+
 (define home-devel-rust-service-type
   (service-type
    (name 'home-devel-rust)
    (extensions
     (list
      (service-extension home-profile-service-type add-devel-rust-packages)
-     (service-extension home-environment-variables-service-type add-env-variables)))
+     (service-extension home-environment-variables-service-type add-env-variables)
+     (service-extension home-files-service-type add-files)))
    (compose concatenate)
    (description "Install packages required for Rust development")))
