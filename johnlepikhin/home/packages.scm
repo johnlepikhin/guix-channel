@@ -76,7 +76,7 @@
   #:use-module (gnu packages networking)
   #:use-module (gnu packages aspell)
   #:use-module (gnu packages perl)
-  #:use-module (gnu packages tex)
+  #:use-module (gnu packages texlive)
   #:use-module (gnu packages rust-apps)
   #:use-module (gnu packages pv)
   #:use-module (gnu packages dns)
