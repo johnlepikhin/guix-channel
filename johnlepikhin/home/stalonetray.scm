@@ -21,7 +21,7 @@
   #:use-module (gnu services configuration)
   #:use-module (gnu home services)
   #:use-module (johnlepikhin home xsession)
-  #:use-module (gnu xdisorg stalonetray)
+  #:use-module (gnu packages xdisorg)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (guix gexp)
