@@ -21,6 +21,7 @@
   #:use-module (gnu packages admin)
   #:use-module (gnu packages bash)
   #:use-module (gnu packages certs)
+  #:use-module (gnu packages disk)
   #:use-module (gnu packages file)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages linux)
@@ -54,4 +55,5 @@
    lsof
    strace
    lm-sensors
+   parted
    %base-packages))
