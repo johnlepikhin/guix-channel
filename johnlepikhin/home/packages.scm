@@ -256,7 +256,7 @@
 
 (define %golang-packages
   (list
-   go-1.18
+   go-1.20
    gopls))
 
 (define %devel-other-packages
