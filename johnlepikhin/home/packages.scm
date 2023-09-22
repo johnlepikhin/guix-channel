@@ -36,6 +36,7 @@
   #:use-module (gnu packages haskell)
   #:use-module (gnu packages inkscape)
   #:use-module (gnu packages haskell-xyz)
+  #:use-module (gnu packages python-xyz)
   #:use-module (johnlepikhin packages apcalc)
   #:use-module (johnlepikhin packages dbeaver)
   #:use-module (johnlepikhin packages git-sync)
@@ -140,7 +141,8 @@
    leptonica
    coq
    ansible
-   adb))
+   adb
+   python-yamllint))
 
 (define %devel-common-libs-packages
   (list
