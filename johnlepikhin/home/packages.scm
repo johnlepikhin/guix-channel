@@ -200,7 +200,8 @@
     zoom
     quaternion
     libfreeaptx
-    autocutsel)))
+    autocutsel
+    flameshot)))
 
 (define %tools-packages
   (list
