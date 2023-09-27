@@ -776,10 +776,11 @@ safety and thread safety guarantees.")
 ;;;
 ;;; Here we take the latest included Rust, make it public, and re-enable tests
 ;;; and extra components such as rustfm.
-(define-public rust
+(define-public rust-next
   (let ((base-rust rust-1.71))
     (package
       (inherit base-rust)
+      (name "rust-next")
       (outputs (cons "rustfmt" (package-outputs base-rust)))
       (arguments
        (substitute-keyword-arguments (package-arguments base-rust)
