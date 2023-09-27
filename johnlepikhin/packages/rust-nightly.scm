@@ -36,8 +36,8 @@
 
 (define (make-rust-nightly timestamp checksum)
   (package
-   (name "rust")
-   (version (string-append "nightly-" timestamp))
+   (name "rust-nightly")
+   (version timestamp)
    (source (origin
             (method url-fetch)
             (uri (string-append
