@@ -32,9 +32,8 @@
 (define-record-type* <home-devel-rust-configuration>
   home-devel-rust-configuration make-home-devel-rust-configuration
   home-devel-rust-configuration?
-  (package home-devel-rust-configuration-package (default rust-nightly-2023.09.27))
-  (package-clippy home-devel-rust-configuration-package-clippy (default clippy-nightly-2023.09.27))
-  (package-src home-devel-rust-configuration-package-src (default rust-src-nightly-2023.09.27))
+  (package home-devel-rust-configuration-package (default rust))
+  (package-clippy home-devel-rust-configuration-package-clippy (default rust-clippy))
   (edition home-devel-rust-configuration-edition (default "2021")))
 
 (define (add-devel-rust-packages config)
