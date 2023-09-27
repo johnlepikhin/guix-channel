@@ -227,11 +227,11 @@
 
 ;;
 
-(define-public rust-nightly-2023.09.26
-  (make-rust-nightly "2023-09-26" "1fd16k5jva11ykq4gr24glmcqxswkvvvz2vyqqnxbjr45fpa6pkv"))
+(define-public rust-nightly-2023.09.27
+  (make-rust-nightly "2023-09-27" "0mc3g2qbbnk11pxaqjk3nddha9ag05ffm4g9cjq6yqvs3kfmyxxv"))
 
-(define-public rust-src-nightly-2023.09.26
-  (make-rust-src-nightly "2023-09-26" "174dwgvnp9vf8a545gi1c8ndmbnh9sa9xdsvcnzdzqf1n1lqs7vb"))
+(define-public rust-src-nightly-2023.09.27
+  (make-rust-src-nightly "2023-09-27" "0skijhzmq11n3mzb78ylw1kbqph1j7n35sbppix2w3lz1h0xb46c"))
 
-(define-public clippy-nightly-2023.09.26
-  (make-clippy-nightly "2023-09-26" "1bn0ydamwbndq9h53zf28zgwa354qin3y44wrcjj3a3f9mnz63iq" rust-nightly-2023.09.26))
+(define-public clippy-nightly-2023.09.27
+  (make-clippy-nightly "2023-09-27" "0xz97fl9qxrzqrfip7g9yyhfih5qh14plpicfggjk0ldji60pb2f" rust-nightly-2023.09.27))
