@@ -744,7 +744,13 @@ safety and thread safety guarantees.")
         ;; crate. The fd-lock crate uses Outline assembly which expects a precompiled
         ;; static library. Enabling the "cc" feature tells the build.rs script to
         ;; compile the assembly files instead of searching for a precompiled library.
-        (patches (search-patches "rust-1.70-fix-rustix-build.patch"))
+        (patches
+         (parameterize
+             ((%patch-path
+               (map (lambda (directory)
+                      (string-append directory "/johnlepikhin/packages/patches"))
+                    %load-path)))
+           (search-patches "rust-1.70-fix-rustix-build.patch")))
         (patch-flags '("-p1")))))))
 
 (define rust-1.71
