@@ -20,6 +20,7 @@
   #:use-module (gnu home services)
   #:use-module (gnu packages llvm)
   #:use-module (gnu packages rust)
+  #:use-module (gnu packages tls)
 
   #:use-module (gnu services configuration)
   #:use-module (gnu services)
@@ -39,7 +40,7 @@
 (define (add-devel-rust-packages config)
   (list
    clang
-   openssl-1.1
+   openssl
    (home-devel-rust-configuration-package config)))
 
 (define (add-env-variables config)
