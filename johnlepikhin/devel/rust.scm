@@ -40,8 +40,7 @@
   (list
    clang
    openssl-1.1
-   rust-cargo-0.69
-   (list (home-devel-rust-configuration-package config) "rustfmt" "cargo")))
+   (home-devel-rust-configuration-package config)))
 
 (define (add-env-variables config)
   `(("RUST_SRC_PATH" . ,(string-append (getenv "HOME") "/.guix-home/profile/lib/rustlib/src/rust/library"))
