@@ -18,6 +18,7 @@
 
 (define-module (johnlepikhin devel rust)
   #:use-module (gnu home services)
+  #:use-module (gnu packages crates-io)
   #:use-module (gnu packages llvm)
   #:use-module (gnu packages tls)
   #:use-module (gnu services configuration)
@@ -39,6 +40,7 @@
   (list
    clang
    openssl-1.1
+   rust-cargo
    (home-devel-rust-configuration-package config)))
 
 (define (add-env-variables config)
