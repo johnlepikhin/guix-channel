@@ -37,10 +37,14 @@
   (edition home-devel-rust-configuration-edition (default "2021")))
 
 (define (add-devel-rust-packages config)
-  (list
-   clang
-   openssl-1.1
-   (home-devel-rust-configuration-package config)))
+  (let ((rust-package (home-devel-rust-configuration-package config)))
+    (list
+     clang
+     openssl-1.1
+     rust-package
+     (list rust-package "rustfmt")
+     (list rust-package "cargo")
+     (list rust-package "clippy"))))
 
 (define (add-env-variables config)
   `(("RUST_SRC_PATH" . ,(string-append (getenv "HOME") "/.guix-home/profile/lib/rustlib/src/rust/library"))
