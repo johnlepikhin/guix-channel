@@ -40,7 +40,7 @@
   (list
    clang
    openssl-1.1
-   (rust-cargo-0.69 "rustfmt" "cargo")
+   (list rust-cargo-0.69 "rustfmt" "cargo")
    (home-devel-rust-configuration-package config)))
 
 (define (add-env-variables config)

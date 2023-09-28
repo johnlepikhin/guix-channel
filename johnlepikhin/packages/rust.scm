@@ -787,7 +787,7 @@ safety and thread safety guarantees.")
     (package
       (inherit base-rust)
       (name "rust-next")
-      (outputs (cons "rustfmt" (package-outputs base-rust)))
+      (outputs (append (list "rustfmt" "cargo" "clippy") (package-outputs base-rust)))
       (arguments
        (substitute-keyword-arguments (package-arguments base-rust)
          ((#:tests? _ #f)
@@ -955,6 +955,7 @@ safety and thread safety guarantees.")
                    (invoke "./x.py" job-spec "build"
                            "library/std" ;rustc
                            "src/tools/cargo"
+                           "src/tools/clippy"
                            "src/tools/rustfmt"))))
              (replace 'check
                ;; Phase overridden to also test rustfmt.
@@ -967,6 +968,7 @@ safety and thread safety guarantees.")
                      (invoke "./x.py" job-spec "test" "-vv"
                              "library/std"
                              "src/tools/cargo"
+                             "src/tools/clippy"
                              "src/tools/rustfmt")))))
              (replace 'install
                ;; Phase overridden to also install rustfmt.
@@ -977,6 +979,11 @@ safety and thread safety guarantees.")
                    (("prefix = \"[^\"]*\"")
                     (format #f "prefix = ~s" (assoc-ref outputs "cargo"))))
                  (invoke "./x.py" "install" "cargo")
+                 (substitute* "config.toml"
+                   ;; Adjust the prefix to the 'clippy' output.
+                   (("prefix = \"[^\"]*\"")
+                    (format #f "prefix = ~s" (assoc-ref outputs "clippy"))))
+                 (invoke "./x.py" "install" "clippy")
                  (substitute* "config.toml"
                    ;; Adjust the prefix to the 'rustfmt' output.
                    (("prefix = \"[^\"]*\"")
