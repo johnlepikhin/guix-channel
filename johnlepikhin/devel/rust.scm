@@ -39,8 +39,7 @@
   (list
    clang
    openssl-1.1
-   (home-devel-rust-configuration-package config)
-   (home-devel-rust-configuration-package-src config)))
+   (home-devel-rust-configuration-package config)))
 
 (define (add-env-variables config)
   `(("RUST_SRC_PATH" . ,(string-append (getenv "HOME") "/.guix-home/profile/lib/rustlib/src/rust/library"))
