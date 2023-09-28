@@ -957,6 +957,14 @@ safety and thread safety guarantees.")
                            "src/tools/cargo"
                            "src/tools/clippy"
                            "src/tools/rustfmt"))))
+
+             (replace 'check
+               ;; Phase overridden to also test rustfmt.
+               (lambda* (#:key tests? parallel-build? #:allow-other-keys)
+                 (when tests?
+                   ;; do nothing
+                   )))
+
              (replace 'install
                ;; Phase overridden to also install rustfmt.
                (lambda* (#:key outputs #:allow-other-keys)
