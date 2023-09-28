@@ -968,8 +968,7 @@ safety and thread safety guarantees.")
                      (invoke "./x.py" job-spec "test" "-vv"
                              "library/std"
                              "src/tools/cargo"
-                             "src/tools/clippy"
-                             "src/tools/rustfmt")))))
+                             "src/tools/clippy")))))
              (replace 'install
                ;; Phase overridden to also install rustfmt.
                (lambda* (#:key outputs #:allow-other-keys)
