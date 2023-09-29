@@ -56,4 +56,6 @@
    strace
    lm-sensors
    parted
+   smartmontools
+   nvme-cli
    %base-packages))
