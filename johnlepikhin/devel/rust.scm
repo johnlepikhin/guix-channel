@@ -43,6 +43,7 @@
      openssl-1.1
      rust-package
      (list rust-package "rustfmt")
+     (list rust-package "rust-analyzer")
      (list rust-package "cargo")
      (list rust-package "clippy"))))
 
