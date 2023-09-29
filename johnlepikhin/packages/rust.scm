@@ -347,7 +347,7 @@
                     (rustc (string-append bin "/rustc"))
                     (cargo-bin (string-append cargo "/bin"))
                     (lib (string-append out "/lib"))
-                    (src (string-append list "rustlib/src/rust"))
+                    (src (string-append lib "rustlib/src/rust"))
                     (gnu-triplet ,(or (%current-target-system)
                                       (nix-system->gnu-triplet-for-rust)))
                     (system-lib-prefix (string-append lib "/rustlib/"
