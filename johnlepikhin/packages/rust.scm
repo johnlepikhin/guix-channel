@@ -347,6 +347,7 @@
                     (rustc (string-append bin "/rustc"))
                     (cargo-bin (string-append cargo "/bin"))
                     (lib (string-append out "/lib"))
+                    (src (string-append list "rustlib/src/rust"))
                     (gnu-triplet ,(or (%current-target-system)
                                       (nix-system->gnu-triplet-for-rust)))
                     (system-lib-prefix (string-append lib "/rustlib/"
@@ -355,8 +356,10 @@
                (copy-file "run_rustc/output/prefix/bin/rustc_binary" rustc)
                (wrap-program rustc
                  `("LD_LIBRARY_PATH" = (,system-lib-prefix)))
-               (mkdir-p lib)
+               (mkdir-p src)
                (copy-recursively "run_rustc/output/prefix/lib" lib)
+               (copy-recursively "library" (string-append src "/library"))
+               (copy-recursively "src" (string-append src "/src"))
                (install-file "run_rustc/output/prefix/bin/cargo" cargo-bin)))))))
     (synopsis "Compiler for the Rust programming language")
     (description "Rust is a systems programming language that provides memory
