@@ -1,0 +1,58 @@
+xkb_keymap {
+  xkb_keycodes  { include "evdev+aliases(qwerty)" };
+  xkb_compat    { include "complete" };
+  xkb_geometry  { include "pc(pc104)" };
+
+  xkb_types    {
+    include "complete"
+    type "THREE_GROUPS" {
+      modifiers = Shift+Control+Alt;
+      map[None] = Level1;
+      map[Control] = Level2;
+      map[Shift] = Level3;
+      level_name[Level1] = "Base";
+      level_name[Level2] = "Ctrl";
+      level_name[Level3] = "Shift";
+    };
+  };
+
+  xkb_symbols "custom" {
+    include "pc+us"
+    include "ru:2"
+    include "us(dvorak):3"
+    include "inet(evdev)"
+    include "compose(ralt)"
+
+    name[group1]="EN";
+    name[group2]="RU";
+    name[group3]="EN(DV)";
+
+    replace key <CAPS> {
+      type = "THREE_GROUPS",
+      actions[Group1]=[LockGroup(group=1), LockGroup(group=2), LockGroup(group=3), LockMods(modifiers=Lock)]
+    };
+
+    key.type = "ONE_LEVEL";
+  
+    key <PRSC> { [ Insert ] };
+  
+    key <KP8> { [ KP_Up ] };
+    key <KP5> { [ KP_Down ] };
+    key <KP4> { [ KP_Left ] };
+    key <KP6> { [ KP_Right ] };
+  
+    key <KP7> { [ Home ] };
+    key <KP9> { [ End ] };
+  
+    key <KPAD> { [ Prior ] };
+    key <KPEN> { [ Next ] };
+  
+    key <KP0> { [ Insert ] };
+    key <KPDL> { [ Undo ] };
+  
+    key <KP1> { [ BackSpace ] };
+    key <KP3> { [ Delete ] };
+  
+    key <KP2> { [ NoSymbol ] };
+  };
+};
