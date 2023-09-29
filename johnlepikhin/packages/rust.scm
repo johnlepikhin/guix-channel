@@ -956,6 +956,7 @@ safety and thread safety guarantees.")
                            "library/std" ;rustc
                            "src/tools/cargo"
                            "src/tools/clippy"
+                           "src/tools/rust-analyzer"
                            "src/tools/rustfmt"))))
              (replace 'check
                ;; Phase overridden to also test rustfmt.
@@ -974,6 +975,11 @@ safety and thread safety guarantees.")
                    (("prefix = \"[^\"]*\"")
                     (format #f "prefix = ~s" (assoc-ref outputs "clippy"))))
                  (invoke "./x.py" "install" "clippy")
+                 (substitute* "config.toml"
+                   ;; Adjust the prefix to the 'rust-analyzer' output.
+                   (("prefix = \"[^\"]*\"")
+                    (format #f "prefix = ~s" (assoc-ref outputs "rust-analyzer"))))
+                 (invoke "./x.py" "install" "rust-analyzer")
                  (substitute* "config.toml"
                    ;; Adjust the prefix to the 'rustfmt' output.
                    (("prefix = \"[^\"]*\"")
