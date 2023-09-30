@@ -27,7 +27,10 @@
   #:use-module (gnu system pam)
   #:use-module (gnu system nss)
   #:use-module (guix channels)
-  #:export (make-desktop-operating-system))
+  #:export (make-desktop-operating-system
+            default-kernel-arguments))
+
+(define default-kernel-arguments '("modprobe.blacklist=pcspkr,snd_pcsp"))
 
 (define* (make-desktop-operating-system
           #:key
@@ -50,10 +53,11 @@
             intel-microcode
             amd-microcode))
           (timezone "Europe/Moscow")
+          (kernel-arguments default-kernel-arguments)
           (mapped-devices '()))
   (operating-system
    (kernel linux-kernel)
-   (kernel-arguments '("modprobe.blacklist=pcspkr,snd_pcsp"))
+   (kernel-arguments kernel-arguments)
    (initrd microcode-initrd)
    (firmware firmware)
    (locale "en_US.utf8")
