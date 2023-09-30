@@ -29,7 +29,7 @@
 (define-record-type* <home-xsession-configuration>
   home-xsession-configuration make-xsession-configuration
   home-xsession-configuration?
-  (root-process home-xsession-root-process (default "xmonad >$HOME/var/log/xmonad.log 2>&1"))
+  (root-process home-xsession-root-process (default "xmonad >$XDG_STATE_HOME/log/xmonad.log 2>&1"))
   (components home-xsession-components (default '())))
 
 (define (add-xsession-file config)
