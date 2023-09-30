@@ -967,6 +967,13 @@ safety and thread safety guarantees.")
              (replace 'install
                ;; Phase overridden to also install rustfmt.
                (lambda* (#:key outputs #:allow-other-keys)
+                 ;; Copy source code required by rust-analyzer
+                 (let* ((out (assoc-ref outputs "out"))
+                        (src (string-append out "/lib/rustlib/src/rust")))
+                   (mkdir-p src)
+                   (copy-recursively "library" (string-append src "/library"))
+                   (copy-recursively "src" (string-append src "/src")))
+
                  (invoke "./x.py" "install")
                  (substitute* "config.toml"
                    ;; Adjust the prefix to the 'cargo' output.
