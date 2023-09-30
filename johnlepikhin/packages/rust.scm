@@ -790,7 +790,7 @@ safety and thread safety guarantees.")
     (package
       (inherit base-rust)
       (name "rust-next")
-      (outputs (append (list "rustfmt" "cargo" "clippy") (package-outputs base-rust)))
+      (outputs (append (list "rustfmt" "cargo" "clippy", "rust-analyzer") (package-outputs base-rust)))
       (arguments
        (substitute-keyword-arguments (package-arguments base-rust)
          ((#:tests? _ #f)
