@@ -249,12 +249,13 @@
 (define %perl-packages
   (list
    perl
-   perltidy
-   perl-perlcritic
-   perl-json
-   perl-yaml-tiny
+   perl-file-slurp
    perl-http-tiny
+   perl-json
+   perl-perlcritic
    perl-uri-escape
+   perl-yaml-tiny
+   perltidy
    perl-io-socket-ssl))
 
 (define %golang-packages
