@@ -161,6 +161,10 @@ host    all all ::1/128     md5")))))))
   #~(job "30 4   * * *"
          "guix gc -F 30G"))
 
+;; trim free blocks on SSD
+(define fstrim-job
+  #~(job "40 2   * * *" "fstrim -v /"))
+
 (define* (make-system-services
           #:key
           (zram-size "2G"))
@@ -204,7 +208,8 @@ host    all all ::1/128     md5")))))))
              (jobs
               (list
                guix-pull-job
-               guix-gc-job))))
+               guix-gc-job
+               fstrim-job))))
    (service cups-service-type
             (cups-configuration
              (default-language "en")
