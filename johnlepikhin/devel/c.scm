@@ -54,7 +54,7 @@
    automake
    libtool
    pkg-config
-   frama-c
+   ;; frama-c
    cppcheck))
 
 (define (add-files config)
