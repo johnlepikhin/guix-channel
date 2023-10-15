@@ -194,7 +194,7 @@
     virt-manager
     inkscape
     xf86-input-synaptics
-    ;; papirus-icon-theme
+    qogir-icon-theme
     qbittorrent
     unicode-emoji
     font-google-noto
