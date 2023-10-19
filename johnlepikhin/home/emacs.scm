@@ -20,6 +20,7 @@
   #:use-module (gnu services)
   #:use-module (gnu services configuration)
   #:use-module (gnu packages emacs)
+  #:use-module (gnu packages mail)
   #:use-module (gnu packages version-control)
   #:use-module (gnu home services)
   #:use-module (johnlepikhin home xsession)
@@ -44,7 +45,10 @@
         `((".emacs" ,(local-file "files/emacs"))))))
 
 (define (add-emacs-package config)
-  (list (home-emacs-configuration-package config) git))
+  (list
+   (home-emacs-configuration-package config)
+   git
+   notmuch))
 
 (define (activate-service config)
   (gexp
