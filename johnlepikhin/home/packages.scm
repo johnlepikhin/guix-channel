@@ -24,6 +24,7 @@
   #:use-module (gnu packages geo)
   #:use-module (gnu packages android)
   #:use-module (gnu packages web)
+  #:use-module (gnu packages maths)
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages commencement)
   #:use-module (gnu packages astronomy)
@@ -228,6 +229,7 @@
    file
    unzip
    graphviz
+   gnuplot
    tgcli
    apcalc
    playerctl
