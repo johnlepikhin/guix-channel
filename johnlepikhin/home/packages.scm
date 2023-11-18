@@ -142,7 +142,6 @@
    coq
    ansible
    adb
-   fuse
    python-yamllint))
 
 (define %devel-common-libs-packages
