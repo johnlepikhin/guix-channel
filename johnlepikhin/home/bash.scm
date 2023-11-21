@@ -88,6 +88,8 @@ function whereis_guix {
 
 export PATH=\"$HOME/.cargo/bin:$HOME/go/bin:$HOME/.local/bin:$PATH\"
 
+export PERL5LIB=\"$HOME/perl5/lib/perl5:$PERL5LIB\"
+
 # temporary fix for https://issues.guix.gnu.org/63238
 export LIBRARY_PATH=\"$HOME/lib:$LIBRARY_PATH\"
 
