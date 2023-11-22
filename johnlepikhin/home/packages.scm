@@ -32,6 +32,7 @@
   #:use-module (gnu packages elf)
   #:use-module (gnu packages databases)
   #:use-module (gnu packages code)
+  #:use-module (gnu packages docker)
   #:use-module (gnu packages coq)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages haskell)
@@ -69,6 +70,7 @@
   #:use-module (gnu packages rdesktop)
   #:use-module (gnu packages qt)
   #:use-module (gnu packages gimp)
+  #:use-module (gnu packages diffoscope)
   #:use-module (gnu packages base)
   #:use-module (gnu packages rsync)
   #:use-module (gnu packages curl)
@@ -142,7 +144,8 @@
    coq
    ansible
    adb
-   python-yamllint))
+   python-yamllint
+   docker-compose))
 
 (define %devel-common-libs-packages
   (list
@@ -245,7 +248,8 @@
    powertop
    yt-dlp
    (make-git-sync "2020-11-09" "aa420e3f9681ce54cb3e2de10bd118f2664621ea" "0wrwmh852a2xjpzsd45fmpg9v1k20fwy5dl7cs5lc5c6k4mhigbi")
-   tlp))
+   tlp
+   diffoscope))
 
 (define %perl-packages
   (list
