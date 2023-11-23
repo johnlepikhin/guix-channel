@@ -37,7 +37,7 @@
             (default (list perl-file-slurp
                            perl-http-tiny
                            perl-json
-                           perl-perlcritic
+                           ;; perl-perlcritic
                            perl-uri-escape
                            perl-yaml-tiny
                            perltidy
