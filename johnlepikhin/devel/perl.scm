@@ -25,7 +25,7 @@
   #:use-module (gnu services)
   #:use-module (guix gexp)
   #:use-module (guix records)
-  #:use-module (johnlepikhin packages web)
+  #:use-module (johnlepikhin packages perl)
   #:use-module (srfi srfi-1)
   #:export (home-devel-perl-configuration
             home-devel-perl-service-type))
