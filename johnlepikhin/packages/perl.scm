@@ -254,5 +254,3 @@ identify awkward, hard to read, error-prone, or unconventional constructs in you
 Perl Best Practices. However, perlcritic is not limited to enforcing PBP, and it will even support rules that contradict Conway. All rules
 can easily be configured or disabled to your liking.")
     (license perl-license)))
-
-perl-perlcritic
