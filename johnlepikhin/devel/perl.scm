@@ -37,7 +37,7 @@
             (default (list perl-file-slurp
                            perl-http-tiny
                            perl-json
-                           ;; perl-perlcritic
+                           perl-perlcritic
                            perl-uri-escape
                            perl-yaml-tiny
                            perltidy
@@ -45,8 +45,7 @@
 
 (define (add-devel-perl-packages config)
   (append (home-devel-perl-configuration-packages config)
-          (list perl
-                perl-critic)))
+          (list perl)))
 
 (define (add-env-variables config)
   `(("PERL5LIB" . ,(string-append (getenv "HOME") "/perl5/lib/perl5:$PERL5LIB"))))
