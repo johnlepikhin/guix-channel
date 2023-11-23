@@ -32,14 +32,14 @@
   home-devel-perl-configuration make-home-devel-perl-configuration
   home-devel-perl-configuration?
   (packages home-devel-perl-configuration-packages
-            (default '(perl-file-slurp
-                       perl-http-tiny
-                       perl-json
-                       perl-perlcritic
-                       perl-uri-escape
-                       perl-yaml-tiny
-                       perltidy
-                       perl-io-socket-ssl))))
+            (default (list perl-file-slurp
+                           perl-http-tiny
+                           perl-json
+                           perl-perlcritic
+                           perl-uri-escape
+                           perl-yaml-tiny
+                           perltidy
+                           perl-io-socket-ssl))))
 
 (define (add-devel-perl-packages config)
   (append (home-devel-perl-configuration-packages config)
