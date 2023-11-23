@@ -74,9 +74,6 @@
   #:use-module (gnu packages package-management)
   #:use-module (gnu packages package-management)
   #:use-module (gnu packages password-utils)
-  #:use-module (gnu packages perl)
-  #:use-module (gnu packages perl)
-  #:use-module (gnu packages perl-web)
   #:use-module (gnu packages pulseaudio)
   #:use-module (gnu packages pv)
   #:use-module (gnu packages python-xyz)
@@ -103,7 +100,6 @@
   #:use-module (johnlepikhin packages dbeaver)
   #:use-module (johnlepikhin packages git-sync)
   #:use-module (johnlepikhin packages oping)
-  #:use-module (johnlepikhin packages perl)
   #:use-module (johnlepikhin packages puppet-lint)
   #:use-module (johnlepikhin packages rust-nightly)
   #:use-module (johnlepikhin packages shadowplay)
@@ -113,7 +109,6 @@
             %xmonad-packages
             %xdesktop-packages
             %tools-packages
-            %perl-packages
             %devel-other-packages
             %golang-packages
             %editors-packages
@@ -250,18 +245,6 @@
    (make-git-sync "2020-11-09" "aa420e3f9681ce54cb3e2de10bd118f2664621ea" "0wrwmh852a2xjpzsd45fmpg9v1k20fwy5dl7cs5lc5c6k4mhigbi")
    tlp
    diffoscope))
-
-(define %perl-packages
-  (list
-   perl
-   perl-file-slurp
-   perl-http-tiny
-   perl-json
-   perl-perlcritic
-   perl-uri-escape
-   perl-yaml-tiny
-   perltidy
-   perl-io-socket-ssl))
 
 (define %golang-packages
   (list

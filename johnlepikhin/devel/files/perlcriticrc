@@ -1,0 +1,30 @@
+severity = 1
+theme = bugs + maintenance + security + complexity + pbp + cosmetic + core
+
+#This one must be disabled, since flymake will create temp files which
+#by definition never match the specified package name
+[-Modules::RequireFilenameMatchesPackage]
+
+[-Subroutines::ProhibitSubroutinePrototypes]
+[-Subroutines::ProhibitExplicitReturnUndef]
+[-Subroutines::RequireArgUnpacking]
+[-InputOutput::RequireCheckedSyscalls]
+[-ValuesAndExpressions::ProhibitInterpolationOfLiterals]
+[-ValuesAndExpressions::ProhibitMagicNumbers]
+[-RegularExpressions::RequireDotMatchAnything]
+[-RegularExpressions::RequireExtendedFormatting]
+[-RegularExpressions::RequireLineBoundaryMatching]
+[-Modules::RequireVersionVar]
+[-Modules::ProhibitMultiplePackages]
+[-RegularExpressions::ProhibitComplexRegexes]
+[-ValuesAndExpressions::ProhibitLongChainsOfMethodCalls]
+[-InputOutput::RequireCheckedClose]
+[-Variables::ProhibitPunctuationVars]
+[-ControlStructures::ProhibitDeepNests]
+
+[-Documentation::RequirePodAtEnd]
+[-Documentation::RequirePodSections]
+[-Documentation::PodSpelling]
+
+[InputOutput::RequireBriefOpen]
+lines = 20
