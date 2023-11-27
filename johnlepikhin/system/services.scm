@@ -21,6 +21,7 @@
   #:use-module (gnu packages databases)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages linux)
+  #:use-module (gnu packages geo)
   #:use-module (gnu packages networking)
   #:use-module (gnu packages xorg)
   #:use-module (gnu services admin)
@@ -66,6 +67,7 @@
   (service postgresql-service-type
            (postgresql-configuration
             (postgresql postgresql-15)
+            (extension-packages (list postgis))
             (config-file
              (postgresql-config-file
               (log-destination "stderr")
