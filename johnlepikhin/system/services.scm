@@ -66,7 +66,7 @@
 (define-public postgresql-dev-service
   (service postgresql-service-type
            (postgresql-configuration
-            (postgresql postgresql-15)
+            (postgresql postgresql-14)
             (extension-packages (list postgis))
             (config-file
              (postgresql-config-file
