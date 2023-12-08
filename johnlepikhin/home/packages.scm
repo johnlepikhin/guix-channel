@@ -99,6 +99,7 @@
   #:use-module (johnlepikhin packages apcalc)
   #:use-module (johnlepikhin packages dbeaver)
   #:use-module (johnlepikhin packages git-sync)
+  #:use-module (johnlepikhin packages golang)
   #:use-module (johnlepikhin packages oping)
   #:use-module (johnlepikhin packages puppet-lint)
   #:use-module (johnlepikhin packages rust-nightly)
@@ -249,7 +250,7 @@
 (define %golang-packages
   (list
    go-1.20
-   gopls))
+   gopls-go1.20))
 
 (define %devel-other-packages
   (list
