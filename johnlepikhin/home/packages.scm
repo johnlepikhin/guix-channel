@@ -202,7 +202,8 @@
     quaternion
     libfreeaptx
     autocutsel
-    flameshot)))
+    flameshot
+    smplayer)))
 
 (define %tools-packages
   (list
