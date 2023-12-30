@@ -1061,11 +1061,27 @@ safety and thread safety guarantees.")
                                      "gdb = \"" gdb "/bin/gdb\"\n"))))))
              (replace 'build
                ;; Phase overridden to also build rustfmt.
-               (lambda* (#:key parallel-build? outputs #:allow-other-keys)
+               (lambda* (#:key parallel-build? inputs outputs #:allow-other-keys)
                  (let ((job-spec (string-append
                                   "-j" (if parallel-build?
                                            (number->string (parallel-job-count))
                                            "1"))))
+                   ;; Enable wasm32 target
+                   ;; Based on patch https://issues.guix.gnu.org/46163
+                   (substitute* "config.toml"
+                     (("\\[build\\]" all)
+                      (string-append all "
+target = [\"" ,(nix-system->gnu-triplet-for-rust) "\", \"wasm32-unknown-unknown\"]
+"))
+                     (("\\[dist\\]" all)
+                      (string-append "
+[target.wasm32-unknown-unknown]
+llvm-config = \"" (assoc-ref inputs "llvm") "/bin/llvm-config\"
+cc = \"" (assoc-ref inputs "gcc") "/bin/gcc\"
+cxx = \"" (assoc-ref inputs "gcc") "/bin/g++\"
+ar = \"" (assoc-ref inputs "binutils") "/bin/ar\"
+"
+all)))
                    ;; Append the default output's lib folder to the RUSTFLAGS
                    ;; environment variable. This lets programs like rustfmt
                    ;; that depend on rustc's shared libraries like rustfmt work.
