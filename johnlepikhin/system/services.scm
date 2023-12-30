@@ -182,7 +182,8 @@ host    all all ::1/128     md5")))))))
    (service bluetooth-service-type
             (bluetooth-configuration
              (auto-enable? #t)
-             (experimental #t)))
+             (experimental #t)
+             (fast-connectable? #t)))
    (simple-service 'dbus-extras
                    dbus-root-service-type
                    (list blueman))
