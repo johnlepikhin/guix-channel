@@ -757,11 +757,128 @@ safety and thread safety guarantees.")
         (patch-flags '("-p1")))))))
 
 (define rust-1.71
+  (let ((base-rust
+          (rust-bootstrapped-package
+           rust-1.70 "1.71.1" "0bj79syjap1kgpg9pc0r4jxc0zkxwm6phjf3digsfafms580vabg")))
+    (package
+      (inherit base-rust)
+      (arguments
+       (substitute-keyword-arguments (package-arguments base-rust)
+         ((#:phases phases)
+          `(modify-phases ,phases
+             (replace 'patch-cargo-checksums
+               (lambda _
+                 (substitute* (cons* "Cargo.lock"
+                                     "src/bootstrap/Cargo.lock"
+                                     (find-files "src/tools" "Cargo.lock"))
+                   (("(checksum = )\".*\"" all name)
+                    (string-append name "\"" ,%cargo-reference-hash "\"")))
+                 (generate-all-checksums "vendor"))))))))))
+
+(define rust-1.72
+  (let ((base-rust
+          (rust-bootstrapped-package
+           rust-1.71 "1.72.1" "15gqd1jzhnc16a7gjmav4x1v83jjbzyjh1gvcdfvpkajd9gq8j3z")))
+    (package
+      (inherit base-rust)
+      (source
+        (origin
+          (inherit (package-source base-rust))
+          (snippet
+           '(begin
+              (for-each delete-file-recursively
+                        '("src/llvm-project"
+                          "vendor/tikv-jemalloc-sys/jemalloc"))
+              ;; Remove vendored dynamically linked libraries.
+              ;; find . -not -type d -executable -exec file {} \+ | grep ELF
+              ;; Also remove the bundled (mostly Windows) libraries.
+              (for-each delete-file
+                        (find-files "vendor" "\\.(a|dll|exe|lib)$"))
+              ;; Adjust rustc_driver to explicitly use rustix with libc backend.
+              (substitute* "compiler/rustc_driver/Cargo.toml"
+                (("rustix = \"=0.37.11\"")
+                 (string-append "rustix = { version = \"=0.37.11\","
+                                " features = [\"use-libc\"] }"))))))))))
+
+(define rust-1.73
+  (let ((base-rust
+          (rust-bootstrapped-package
+           rust-1.72 "1.73.0" "0fmvn7vg3qg9xprgfwv10g3ygy8i4j4bkcxcr1xdy89d3xnjxmln")))
+    (package
+      (inherit base-rust)
+      (source
+       (origin
+         (inherit (package-source base-rust))
+         (snippet
+          '(begin
+             (for-each delete-file-recursively
+                       '("src/llvm-project"
+                         "vendor/tikv-jemalloc-sys/jemalloc"))
+             ;; Remove vendored dynamically linked libraries.
+             ;; find . -not -type d -executable -exec file {} \+ | grep ELF
+             ;; Also remove the bundled (mostly Windows) libraries.
+             (for-each delete-file
+                       (find-files "vendor" "\\.(a|dll|exe|lib)$"))
+             ;; Adjust vendored dependency to explicitly use rustix with libc backend.
+             (substitute* "vendor/tempfile-3.6.0/Cargo.toml"
+               (("features = \\[\"fs\"" all)
+                (string-append all ", \"use-libc\""))))))))))
+
+(define rust-1.74
+  (let ((base-rust
+          (rust-bootstrapped-package
+           rust-1.73 "1.74.0" "0j8hrwjjjjf7spy0hy7gami96swhfzr6kandfzzdri91qd5mhaw8")))
+    (package
+      (inherit base-rust)
+      (source
+       (origin
+         (inherit (package-source base-rust))
+         (snippet
+          '(begin
+             (for-each delete-file-recursively
+                       '("src/llvm-project"
+                         "vendor/tikv-jemalloc-sys/jemalloc"))
+             ;; Remove vendored dynamically linked libraries.
+             ;; find . -not -type d -executable -exec file {} \+ | grep ELF
+             ;; Also remove the bundled (mostly Windows) libraries.
+             (for-each delete-file
+                       (find-files "vendor" "\\.(a|dll|exe|lib)$")))))))))
+
+(define rust-1.75
  (let ((base-rust
          (rust-bootstrapped-package
-          rust-1.70 "1.71.0" "15jc0d13cmrh2xvpkyyvsbwgn3w4klqiwf2wlgzfp22mvjmy8rx6")))
+          rust-1.74 "1.75.0" "1260mf3066ki6y55pvr35lnf54am6z96a3ap3hniwd4xpi2rywsv")))
    (package
      (inherit base-rust)
+     (source
+      (origin
+        (inherit (package-source base-rust))
+         (snippet
+          '(begin
+             (for-each delete-file-recursively
+                       '("src/llvm-project"
+                         "vendor/tikv-jemalloc-sys/jemalloc"))
+             ;; Remove vendored dynamically linked libraries.
+             ;; find . -not -type d -executable -exec file {} \+ | grep ELF
+             ;; Also remove the bundled (mostly Windows) libraries.
+             (for-each delete-file
+                       (find-files "vendor" "\\.(a|dll|exe|lib)$"))
+             ;; Adjust vendored dependency to explicitly use rustix with libc backend.
+             (substitute* "vendor/tempfile-3.8.0/Cargo.toml"
+               (("features = \\[\"fs\"" all)
+                (string-append all ", \"use-libc\"")))))
+        ;; Rust 1.70 adds the rustix library which depends on the vendored fd-lock
+        ;; crate. The fd-lock crate uses Outline assembly which expects a precompiled
+        ;; static library. Enabling the "cc" feature tells the build.rs script to
+        ;; compile the assembly files instead of searching for a precompiled library.
+        (patches
+         (parameterize
+             ((%patch-path
+               (map (lambda (directory)
+                      (string-append directory "/johnlepikhin/packages/patches"))
+                    %load-path)))
+           (search-patches "rust-1.75-fix-rustix-build.patch")))
+        (patch-flags '("-p1"))))
      (arguments
        (substitute-keyword-arguments (package-arguments base-rust)
         ((#:phases phases)
@@ -786,7 +903,7 @@ safety and thread safety guarantees.")
 ;;; Here we take the latest included Rust, make it public, and re-enable tests
 ;;; and extra components such as rustfm.
 (define-public rust-next
-  (let ((base-rust rust-1.71))
+  (let ((base-rust rust-1.75))
     (package
       (inherit base-rust)
       (name "rust-next")
@@ -844,20 +961,20 @@ safety and thread safety guarantees.")
                     ,@(make-ignore-test-list '("fn gitoxide_cargo_compile_offline_with_cached_git_dep_shallow_dep")))
                   (substitute* "src/tools/cargo/tests/testsuite/patch.rs"
                     ,@(make-ignore-test-list '("fn gitoxide_clones_shallow_old_git_patch")))))
-             (add-after 'unpack 'disable-tests-requiring-mercurial
-               (lambda _
-                 (substitute*
-                  "src/tools/cargo/tests/testsuite/init/simple_hg_ignore_exists/mod.rs"
-                  ,@(make-ignore-test-list '("fn case")))
-                 (substitute*
-                   "src/tools/cargo/tests/testsuite/init/mercurial_autodetect/mod.rs"
-                   ,@(make-ignore-test-list '("fn case")))
-                 (substitute*
-                  "src/tools/cargo/tests/testsuite/init/simple_hg/mod.rs"
-                  ,@(make-ignore-test-list '("fn case")))
-                 (substitute*
-                  "src/tools/cargo/tests/testsuite/new.rs"
-                  ,@(make-ignore-test-list '("fn simple_hg")))))
+             ;; (add-after 'unpack 'disable-tests-requiring-mercurial
+             ;;   (lambda _
+             ;;     (substitute*
+             ;;      "src/tools/cargo/tests/testsuite/init/simple_hg_ignore_exists/mod.rs"
+             ;;      ,@(make-ignore-test-list '("fn case")))
+             ;;     (substitute*
+             ;;       "src/tools/cargo/tests/testsuite/init/mercurial_autodetect/mod.rs"
+             ;;       ,@(make-ignore-test-list '("fn case")))
+             ;;     (substitute*
+             ;;      "src/tools/cargo/tests/testsuite/init/simple_hg/mod.rs"
+             ;;      ,@(make-ignore-test-list '("fn case")))
+             ;;     (substitute*
+             ;;      "src/tools/cargo/tests/testsuite/new.rs"
+             ;;      ,@(make-ignore-test-list '("fn simple_hg")))))
              (add-after 'unpack 'disable-tests-broken-on-aarch64
                (lambda _
                  (with-directory-excursion "src/tools/cargo/tests/testsuite/"
@@ -924,17 +1041,17 @@ safety and thread safety guarantees.")
                                 ((file) file))
                    (("fn ctrl_c_kills_everyone")
                     "#[ignore]\nfn ctrl_c_kills_everyone"))))
-             (add-after 'unpack 'adjust-rpath-values
-               ;; This adds %output:out to rpath, allowing us to install utilities in
-               ;; different outputs while reusing the shared libraries.
-               (lambda* (#:key outputs #:allow-other-keys)
-                 (let ((out (assoc-ref outputs "out")))
-                   (substitute* "src/bootstrap/builder.rs"
-                      ((" = rpath.*" all)
-                       (string-append all
-                                      "                "
-                                      "rustflags.arg(\"-Clink-args=-Wl,-rpath="
-                                      out "/lib\");\n"))))))
+             ;; (add-after 'unpack 'adjust-rpath-values
+             ;;   ;; This adds %output:out to rpath, allowing us to install utilities in
+             ;;   ;; different outputs while reusing the shared libraries.
+             ;;   (lambda* (#:key outputs #:allow-other-keys)
+             ;;     (let ((out (assoc-ref outputs "out")))
+             ;;       (substitute* "src/bootstrap/builder.rs"
+             ;;          ((" = rpath.*" all)
+             ;;           (string-append all
+             ;;                          "                "
+             ;;                          "rustflags.arg(\"-Clink-args=-Wl,-rpath="
+             ;;                          out "/lib\");\n"))))))
              (add-after 'configure 'add-gdb-to-config
                (lambda* (#:key inputs #:allow-other-keys)
                  (let ((gdb (assoc-ref inputs "gdb")))
