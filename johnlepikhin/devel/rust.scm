@@ -42,6 +42,7 @@
     (list
      clang
      openssl-1.1
+     rust-cargo
      rust-package)))
      ;; (list rust-package "rustfmt")
      ;; (list rust-package "rust-analyzer")
