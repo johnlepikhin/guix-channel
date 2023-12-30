@@ -21,11 +21,12 @@
   #:use-module (gnu packages crates-io)
   #:use-module (gnu packages llvm)
   #:use-module (gnu packages tls)
+  #:use-module (gnu packages rust)
   #:use-module (gnu services configuration)
   #:use-module (gnu services)
   #:use-module (guix gexp)
   #:use-module (guix records)
-  #:use-module (johnlepikhin packages rust)
+  ;; #:use-module (johnlepikhin packages rust)
   #:use-module (srfi srfi-1)
   #:export (home-devel-rust-configuration
             home-devel-rust-service-type))
@@ -33,7 +34,7 @@
 (define-record-type* <home-devel-rust-configuration>
   home-devel-rust-configuration make-home-devel-rust-configuration
   home-devel-rust-configuration?
-  (package home-devel-rust-configuration-package (default rust-next))
+  (package home-devel-rust-configuration-package (default rust))
   (edition home-devel-rust-configuration-edition (default "2021")))
 
 (define (add-devel-rust-packages config)
