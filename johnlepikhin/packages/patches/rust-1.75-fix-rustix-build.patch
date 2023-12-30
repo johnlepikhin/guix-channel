@@ -1,0 +1,11 @@
+--- a/vendor/fd-lock/Cargo.toml	2023-05-31 14:44:48.000000000 -0700
++++ b/vendor/fd-lock/Cargo.toml	2023-07-14 21:19:34.637702319 -0700
+@@ -42,7 +42,7 @@
+ 
+ [target."cfg(unix)".dependencies.rustix]
+ version = "0.38.0"
+-features = ["fs"]
++features = ["fs", "cc"]
+ 
+ [target."cfg(windows)".dependencies.windows-sys]
+ version = "0.48.0"
