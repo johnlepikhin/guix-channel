@@ -47,6 +47,7 @@
   #:use-module (gnu packages jemalloc)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages llvm)
+  #:use-module (gnu packages ninja)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
   #:use-module (gnu packages ssh)
@@ -856,8 +857,7 @@ safety and thread safety guarantees.")
          (snippet
           '(begin
              (for-each delete-file-recursively
-                       '("src/llvm-project"
-                         "vendor/tikv-jemalloc-sys/jemalloc"))
+                       '("vendor/tikv-jemalloc-sys/jemalloc"))
              ;; Remove vendored dynamically linked libraries.
              ;; find . -not -type d -executable -exec file {} \+ | grep ELF
              ;; Also remove the bundled (mostly Windows) libraries.
@@ -912,6 +912,9 @@ safety and thread safety guarantees.")
        (substitute-keyword-arguments (package-arguments base-rust)
          ((#:tests? _ #f)
           (not (%current-target-system)))
+         ;; Fails in lib/rustlib/wasm32-unknown-unknown
+         ((#:validate-runpath? _ #f)
+          #f)
          ((#:phases phases)
           `(modify-phases ,phases
              (add-after 'unpack 'relax-gdb-auto-load-safe-path
@@ -1069,6 +1072,11 @@ safety and thread safety guarantees.")
                    ;; Enable wasm32 target
                    ;; Based on patch https://issues.guix.gnu.org/46163
                    (substitute* "config.toml"
+                     ;; rust-lld will be compiled
+                     (("\\[rust\\]" all)
+                      (string-append all "
+lld = true
+"))
                      (("\\[build\\]" all)
                       (string-append all "
 target = [\"" ,(nix-system->gnu-triplet-for-rust) "\", \"wasm32-unknown-unknown\"]
@@ -1100,6 +1108,9 @@ all)))
              (replace 'install
                ;; Phase overridden to also install rustfmt.
                (lambda* (#:key outputs #:allow-other-keys)
+                 (for-each delete-file-recursively
+                           '("src/llvm-project"))     ; Do not install llvm-project sources
+
                  ;; Copy source code required by rust-analyzer
                  (let* ((out (assoc-ref outputs "out"))
                         (src (string-append out "/lib/rustlib/src/rust")))
@@ -1128,25 +1139,14 @@ all)))
                    (("prefix = \"[^\"]*\"")
                     (format #f "prefix = ~s" (assoc-ref outputs "rustfmt"))))
                  (invoke "./x.py" "install" "rustfmt")))))))
+      (inputs
+       `(("jemalloc" ,jemalloc)
+         ("llvm" ,llvm-17)
+         ("openssl" ,openssl)
+         ("libssh2" ,libssh2)             ; For "cargo"
+         ("libcurl" ,curl)                ; For "cargo"
+         ("ninja" ,ninja)))               ; For rust-lld
       ;; Add test inputs.
       (native-inputs (cons* `("gdb" ,gdb/pinned)
                             `("procps" ,procps)
                             (package-native-inputs base-rust))))))
-
-(define-public rust-src-1.64
-  (hidden-package
-   (package
-     (inherit rust-1.64)
-     (name "rust-src")
-     (build-system copy-build-system)
-     (native-inputs '())
-     (inputs '())
-     (native-search-paths '())
-     (outputs '("out"))
-     (arguments
-      `(#:install-plan
-        '(("library" "lib/rustlib/src/rust/library")
-          ("src" "lib/rustlib/src/rust/src"))))
-     (synopsis "Source code for the Rust standard library")
-     (description "This package provide source code for the Rust standard
-library, only use by rust-analyzer, make rust-analyzer out of the box."))))
