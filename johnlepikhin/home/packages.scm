@@ -149,7 +149,8 @@
    liboping
    alsa-lib
    libxcomposite
-   nss-certs))
+   nss-certs
+   libsoup))
 
 (define %xmonad-packages
   (list ghc ghc-hostname ghc-xmonad-contrib xmonad xmessage))
