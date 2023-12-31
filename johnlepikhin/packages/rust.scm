@@ -1087,7 +1087,7 @@ target = [\"" ,(nix-system->gnu-triplet-for-rust) "\", \"wasm32-unknown-unknown\
 llvm-config = \"" (assoc-ref inputs "llvm") "/bin/llvm-config\"
 cc = \"" (assoc-ref inputs "gcc") "/bin/gcc\"
 cxx = \"" (assoc-ref inputs "gcc") "/bin/g++\"
-ar = \"" (assoc-ref inputs "binutils") "/bin/ar\"
+ar = \"" (assoc-ref inputs "llvm") "/bin/llvm-ar\"
 "
 all)))
                    ;; Append the default output's lib folder to the RUSTFLAGS
