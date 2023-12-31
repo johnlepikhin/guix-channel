@@ -1087,7 +1087,7 @@ target = [\"" ,(nix-system->gnu-triplet-for-rust) "\", \"wasm32-unknown-unknown\
 llvm-config = \"" (assoc-ref inputs "llvm") "/bin/llvm-config\"
 cc = \"" (assoc-ref inputs "gcc") "/bin/gcc\"
 cxx = \"" (assoc-ref inputs "gcc") "/bin/g++\"
-ar = \"" (assoc-ref inputs "llvm") "/bin/llvm-ar\"
+ar = \"" (assoc-ref inputs "gcc") "/bin/ar\"
 "
 all)))
                    ;; Append the default output's lib folder to the RUSTFLAGS
@@ -1105,6 +1105,8 @@ all)))
              (replace 'check
                ;; Phase overridden to also test rustfmt.
                (lambda* (#:key tests? parallel-build? #:allow-other-keys) #t))
+             ;; stripping *.rlib files breaks wasm
+             (delete 'strip)
              (replace 'install
                ;; Phase overridden to also install rustfmt.
                (lambda* (#:key outputs #:allow-other-keys)
