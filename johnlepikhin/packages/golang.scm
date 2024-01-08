@@ -8,6 +8,7 @@
   #:use-module (guix build-system go)
   #:use-module (guix packages)
   #:use-module (gnu packages golang)
+  #:use-module (gnu packages golang-web)
   #:use-module (gnu packages golang-check))
 
 (define-public go-golang-org-x-telemetry
