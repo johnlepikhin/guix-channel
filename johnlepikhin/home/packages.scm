@@ -136,6 +136,7 @@
    socat
    nmap
    tesseract-ocr
+   tesseract-ocr-tessdata-fast
    leptonica
    coq
    ansible
