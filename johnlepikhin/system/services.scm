@@ -77,10 +77,10 @@
                            "
 local   all all         trust
 host    all all 127.0.0.1/32    md5
-host    all all ::1/128     md5")
-               (extra-config
-                '(("work_mem" "500 MB")
-                  ("max_parallel_workers_per_gather" "6")))))))))
+host    all all ::1/128     md5"))
+              (extra-config
+               '(("work_mem" "500 MB")
+                 ("max_parallel_workers_per_gather" 6))))))))
 
 (define-public tuned-desktop-services
   (cons*
