@@ -90,7 +90,6 @@
                              go-github-com-jba-printsrc
                              go-github-com-jba-templatecheck
                              go-github-com-sergi-go-diff
-                             go-golang-org-x-mod
                              go-golang-org-x-sync
                              go-golang-org-x-sys
                              go-golang-org-x-telemetry
