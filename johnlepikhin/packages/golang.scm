@@ -87,18 +87,11 @@
                     (lambda _
                       (delete-file-recursively "src/golang.org/x/tools"))))))
     (propagated-inputs (list go-github-com-google-go-cmp-cmp
-                             go-github-com-jba-printsrc
-                             go-github-com-jba-templatecheck
                              go-github-com-sergi-go-diff
-                             go-golang-org-x-sync
                              go-golang-org-x-sys
                              go-golang-org-x-telemetry
                              go-golang-org-x-text
-                             go-gopkg-in-yaml-v3
                              go-honnef-co-go-tools
-                             go-github-com-burntsushi-toml
-                             go-github-com-google-safehtml
-                             go-golang-org-x-exp
                              go-mvdan-cc-gofumpt
                              go-golang-org-x-vuln-1
                              go-mvdan-cc-xurls))
