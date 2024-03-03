@@ -1,0 +1,12 @@
+diff --git a/base/qt/qt_compare.h b/base/qt/qt_compare.h
+index ca03fa2..948e5e9 100644
+--- a/base/qt/qt_compare.h
++++ b/base/qt/qt_compare.h
+@@ -8,6 +8,7 @@
+ 
+ #include <compare>
+ #include <gsl/pointers>
++#include <variant>
+ 
+ #include <QString>
+

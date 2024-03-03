@@ -81,7 +81,6 @@
   #:use-module (gnu packages rdesktop)
   #:use-module (gnu packages rsync)
   #:use-module (gnu packages rust-apps)
-  #:use-module (gnu packages telegram)
   #:use-module (gnu packages texlive)
   #:use-module (gnu packages tls)
   #:use-module (gnu packages unicode)
@@ -104,6 +103,7 @@
   #:use-module (johnlepikhin packages puppet-lint)
   #:use-module (johnlepikhin packages rust-nightly)
   #:use-module (johnlepikhin packages shadowplay)
+  #:use-module (johnlepikhin packages telegram)
   #:use-module (nongnu packages messaging)
   #:export (%devel-common-tools-packages
             %devel-common-libs-packages
@@ -165,7 +165,7 @@
     network-manager-applet
     xhost
     feh
-    telegram-desktop
+    telegram-desktop-next
     ungoogled-chromium
     pasystray
     mplayer
