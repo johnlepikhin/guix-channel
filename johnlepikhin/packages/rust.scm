@@ -478,7 +478,8 @@ all)))
          ("openssl" ,openssl)
          ("libssh2" ,libssh2)             ; For "cargo"
          ("libcurl" ,curl)                ; For "cargo"
-         ("ninja" ,ninja)))               ; For rust-lld
+         ("ninja" ,ninja)                 ; For rust-lld
+         cmake))
       ;; Add test inputs.
       (native-inputs (cons* `("gdb" ,gdb/pinned)
                             `("procps" ,procps)
