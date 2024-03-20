@@ -59,6 +59,7 @@
   #:use-module (gnu packages image-viewers)
   #:use-module (gnu packages inkscape)
   #:use-module (gnu packages java)
+  #:use-module (gnu packages kde)
   #:use-module (gnu packages libreoffice)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages llvm)
@@ -160,51 +161,52 @@
   (append
    %xmonad-packages
    (list
-    xmobar
-    xrdb
+    autocutsel
+    brightnessctl
     copyq
-    network-manager-applet
-    xhost
+    dunst
+    evince
     feh
+    flatpak
+    font-google-noto
+    gimp
+    google-chrome-beta
+    inkscape
+    kdenlive
+    libfreeaptx
+    libreoffice
+    mesa-utils
+    mplayer
+    network-manager-applet
+    pasystray
+    pavucontrol
+    qbittorrent
+    qogir-icon-theme
+    quaternion
+    recordmydesktop
     telegram-desktop-next
     ungoogled-chromium
-    google-chrome-beta
-    pasystray
-    mplayer
-    xset
-    xprop
-    xdotool
-    xwininfo
-    xautolock
-    mesa-utils
-    dunst
-    xsetroot
-    xev
-    xclip
-    pavucontrol
-    xrandr
-    brightnessctl
-    libreoffice
-    xdg-utils
-    xdg-desktop-portal-gtk
-    xdg-desktop-portal
-    gimp
-    evince
-    recordmydesktop
-    vlc
-    xmodmap
-    virt-manager
-    inkscape
-    xf86-input-synaptics
-    qogir-icon-theme
-    qbittorrent
     unicode-emoji
-    font-google-noto
-    flatpak
+    virt-manager
+    vlc
+    xautolock
+    xclip
+    xdg-desktop-portal
+    xdg-desktop-portal-gtk
+    xdg-utils
+    xdotool
+    xev
+    xf86-input-synaptics
+    xhost
+    xmobar
+    xmodmap
+    xprop
+    xrandr
+    xrdb
+    xset
+    xsetroot
+    xwininfo
     zoom
-    quaternion
-    libfreeaptx
-    autocutsel
     flameshot
     smplayer)))
 
