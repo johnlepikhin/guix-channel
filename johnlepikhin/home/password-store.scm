@@ -29,11 +29,8 @@
    password-store
    browserpass-native))
 
-(define (add-files config)
-  `((".config/chromium/NativeMessagingHosts/com.github.browserpass.native.json"
-     ,(mixed-text-file
-       "com.github.browserpass.native.json"
-       #~(string-append
+(define generate-native.json
+  #~(string-append
           "\
 {
     \"name\": \"com.github.browserpass.native\",
@@ -45,7 +42,17 @@
         \"chrome-extension://pjmbgaakjkbhpopmakjoedenlfdmcdgm/\",
         \"chrome-extension://klfoddkbhleoaabpmiigbmpbjfljimgb/\"
     ]
-}")))))
+}"))
+
+(define (add-files config)
+  `((".config/chromium/NativeMessagingHosts/com.github.browserpass.native.json"
+     ,(mixed-text-file
+       "com.github.browserpass.native.json"
+       generate-native.json))
+    (".config/google-chrome-beta/NativeMessagingHosts/com.github.browserpass.native.json"
+     ,(mixed-text-file
+       "com.github.browserpass.native.json"
+       generate-native.json))))
 
 (define home-password-store-service-type
   (service-type

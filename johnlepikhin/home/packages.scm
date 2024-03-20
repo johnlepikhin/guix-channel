@@ -105,6 +105,7 @@
   #:use-module (johnlepikhin packages shadowplay)
   #:use-module (johnlepikhin packages telegram)
   #:use-module (nongnu packages messaging)
+  #:use-module (nongnu packages chrome)
   #:export (%devel-common-tools-packages
             %devel-common-libs-packages
             %xmonad-packages
@@ -167,6 +168,7 @@
     feh
     telegram-desktop-next
     ungoogled-chromium
+    google-chrome-beta
     pasystray
     mplayer
     xset
