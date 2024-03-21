@@ -177,6 +177,7 @@
     kdenlive
     libfreeaptx
     libreoffice
+    mediainfo ;; required by kdenlive
     mesa-utils
     mplayer
     network-manager-applet
