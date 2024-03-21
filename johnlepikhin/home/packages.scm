@@ -167,8 +167,10 @@
     dunst
     evince
     feh
+    flameshot
     flatpak
     font-google-noto
+    geeqie
     gimp
     google-chrome-beta
     inkscape
@@ -184,6 +186,8 @@
     qogir-icon-theme
     quaternion
     recordmydesktop
+    simplescreenrecorder
+    smplayer
     telegram-desktop-next
     ungoogled-chromium
     unicode-emoji
@@ -207,51 +211,52 @@
     xsetroot
     xwininfo
     zoom
-    flameshot
-    smplayer)))
+    )))
 
 (define %tools-packages
   (list
-   which
-   rsync
-   rpm
-   sshfs
-   curl
-   cpio
-   pwgen
-   xz
-   netcat
-   blueman
+   (list isc-bind "utils")
+   (make-git-sync "2020-11-09" "aa420e3f9681ce54cb3e2de10bd118f2664621ea" "0wrwmh852a2xjpzsd45fmpg9v1k20fwy5dl7cs5lc5c6k4mhigbi")
+   apcalc
    aspell
    aspell-dict-en
    aspell-dict-ru
-   texlive
-   ripgrep
-   pigz
-   pv
-   whois
-   (list isc-bind "utils")
+   blueman
+   cpio
+   curl
+   diffoscope
+   ffmpeg
    file
-   unzip
-   graphviz
    gnuplot
-   tgcli
-   apcalc
-   playerctl
+   graphviz
+   grep
    jmtpfs
    macchanger
+   netcat
+   pigz
+   playerctl
+   powertop
+   procps
+   psmisc
+   pv
+   pwgen
+   ripgrep
+   rpm
+   rsync
+   sed
+   sshfs
+   texlive
+   tgcli
+   tlp
+   unzip
+   which
+   whois
    wireshark
+   xz
+   yt-dlp
    zip
    zstd
-   grep
-   sed
-   psmisc
-   procps
-   powertop
-   yt-dlp
-   (make-git-sync "2020-11-09" "aa420e3f9681ce54cb3e2de10bd118f2664621ea" "0wrwmh852a2xjpzsd45fmpg9v1k20fwy5dl7cs5lc5c6k4mhigbi")
-   tlp
-   diffoscope))
+   ))
 
 (define %golang-packages
   (list
