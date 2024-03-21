@@ -1131,6 +1131,3 @@ formerly a part of telegram-cli, but now being maintained separately.")
     (synopsis "Telegram Terminal Application")
     (description "TgCli is a telegram client to automate repetitive tasks.")
     (license license:asl2.0)))
-
-telegram-desktop-next
-
