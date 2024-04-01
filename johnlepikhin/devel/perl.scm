@@ -41,6 +41,8 @@
                            perl-uri-escape
                            perl-yaml-tiny
                            perltidy
+                           perl-lwp-protocol-https
+                           perl-libwww
                            perl-io-socket-ssl))))
 
 (define (add-devel-perl-packages config)
