@@ -49,19 +49,20 @@
   #:export (make-system-services
             postgresql-dev-service))
 
-(define nonguix-signing-key
-  "(public-key
+(define-public nonguix-signing-key
+  (plain-file "non-guix.pub"
+              "(public-key
      (ecc
        (curve Ed25519)
        (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)
-     ))")
+     ))"))
 
-(define bordeaux-signing-key
-  "(public-key
+(define-public bordeaux-signing-key
+  (plain-file "bordeaux.guix.gnu.org.pub" "(public-key
      (ecc
        (curve Ed25519)
        (q #7D602902D3A2DBB83F8A0FB98602A754C5493B0B778C8D1DD4E0F41DE14DE34F#)
-     ))")
+     ))"))
 
 (define-public postgresql-dev-service
   (service postgresql-service-type
@@ -175,9 +176,7 @@ host    all all ::1/128     md5"))
           #:key
           (zram-size "2G")
           #:key
-          (authorized-keys (list
-                            (plain-file "non-guix.pub" nonguix-signing-key)
-                            (plain-file "bordeaux.guix.gnu.org.pub" bordeaux-signing-key)))
+          (authorized-keys (list nonguix-signing-key bordeaux-signing-key))
           #:key
           (substitute-urls (list
                             "https://substitutes.nonguix.org"
