@@ -82,7 +82,9 @@ host    all all ::1/128     md5"))
                '(("work_mem" "500 MB")
                  ("max_parallel_workers_per_gather" 6))))))))
 
-(define-public tuned-desktop-services
+(define-public (tuned-desktop-services
+                #:key (authorized-keys '())
+                #:key (substitute-urls '()))
   (cons*
    (modify-services
     %desktop-services
@@ -106,9 +108,7 @@ host    all all ::1/128     md5"))
       (discover? #t)
       (authorized-keys
        (append
-        (list
-         (plain-file "non-guix.pub" nonguix-signing-key)
-         (plain-file "bordeaux.guix.gnu.org.pub" bordeaux-signing-key))
+        authorized-keys
         %default-authorized-guix-keys))))
 
     (upower-service-type
@@ -173,7 +173,16 @@ host    all all ::1/128     md5"))
 
 (define* (make-system-services
           #:key
-          (zram-size "2G"))
+          (zram-size "2G")
+          #:key
+          (authorized-keys (list
+                            (plain-file "non-guix.pub" nonguix-signing-key)
+                            (plain-file "bordeaux.guix.gnu.org.pub" bordeaux-signing-key)))
+          #:key
+          (substitute-urls (list
+                            "https://substitutes.nonguix.org"
+                            "https://ci.guix.gnu.org"
+                            "https://bordeaux.guix.gnu.org/")))
   (cons*
 
    (set-xorg-configuration
@@ -258,4 +267,6 @@ host    all all ::1/128     md5"))
 
    ;; (service fprintd-service-type)
 
-   tuned-desktop-services))
+   (tuned-desktop-services
+    #:authorized-keys authorized-keys
+    #:substitute-urls substitute-urls)))
