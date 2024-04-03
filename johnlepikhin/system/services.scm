@@ -84,8 +84,9 @@ host    all all ::1/128     md5"))
                  ("max_parallel_workers_per_gather" 6))))))))
 
 (define* (tuned-desktop-services
-          #:key (authorized-keys '())
-          #:key (substitute-urls '()))
+          #:key
+          (authorized-keys '())
+          (substitute-urls '()))
   (cons*
    (modify-services
     %desktop-services
@@ -175,9 +176,7 @@ host    all all ::1/128     md5"))
 (define* (make-system-services
           #:key
           (zram-size "2G")
-          #:key
           (authorized-keys (list nonguix-signing-key bordeaux-signing-key))
-          #:key
           (substitute-urls (list
                             "https://substitutes.nonguix.org"
                             "https://ci.guix.gnu.org"
