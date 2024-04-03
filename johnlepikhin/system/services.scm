@@ -169,7 +169,7 @@ host    all all ::1/128     md5"))
 
 ;; trim free blocks on SSD
 (define fstrim-job
-  #~(job "40 10   * * *" "fstrim -v /"))
+  #~(job "40 */2   * * *" "fstrim -v /"))
 
 (define* (make-system-services
           #:key
