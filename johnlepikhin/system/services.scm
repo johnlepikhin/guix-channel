@@ -83,9 +83,9 @@ host    all all ::1/128     md5"))
                '(("work_mem" "500 MB")
                  ("max_parallel_workers_per_gather" 6))))))))
 
-(define*-public (tuned-desktop-services
-                 #:key (authorized-keys '())
-                 #:key (substitute-urls '()))
+(define* (tuned-desktop-services
+          #:key (authorized-keys '())
+          #:key (substitute-urls '()))
   (cons*
    (modify-services
     %desktop-services
