@@ -91,7 +91,11 @@ host    all all ::1/128     md5"))
    (modify-services
     %desktop-services
 
-    ;; (delete gdm-service-type)
+    (gdm-service-type
+     config =>
+     (gdm-configuration
+      (inherit config)
+      (wayland? #f)))
 
     (pulseaudio-service-type
      config =>
