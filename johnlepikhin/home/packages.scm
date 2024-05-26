@@ -205,6 +205,7 @@
     xhost
     xmobar
     xmodmap
+    xorg-server ;; provides Xephyr
     xprop
     xrandr
     xrdb
