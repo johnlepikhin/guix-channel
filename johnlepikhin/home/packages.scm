@@ -66,6 +66,7 @@
   #:use-module (gnu packages lsof)
   #:use-module (gnu packages m4)
   #:use-module (gnu packages mail)
+  #:use-module (gnu packages markup)
   #:use-module (gnu packages maths)
   #:use-module (gnu packages messaging)
   #:use-module (gnu packages music)
@@ -177,6 +178,7 @@
     kdenlive
     libfreeaptx
     libreoffice
+    markdown ;; required by Emacs Obsidian mode
     mediainfo ;; required by kdenlive
     mesa-utils
     mplayer
