@@ -2,6 +2,7 @@
 (define-module (johnlepikhin devel ansible)
   #:use-module (gnu home services)
   #:use-module (gnu services configuration)
+  #:use-module (gnu services)
   #:use-module (johnlepikhin packages ansible-lint)
   #:use-module (gnu packages admin)
   #:use-module (srfi srfi-1)
