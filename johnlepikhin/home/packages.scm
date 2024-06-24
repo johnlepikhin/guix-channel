@@ -142,7 +142,6 @@
    tesseract-ocr-tessdata-fast
    leptonica
    coq
-   ansible
    adb
    python-yamllint
    docker-compose))
