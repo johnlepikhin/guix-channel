@@ -2,5 +2,9 @@
   (version 0)
   (dependencies
    (channel
+    (name guix)
+    (commit "433b666ecff939240ec05a89d85b1c20e7cb5a0a")
+    (url "https://git.savannah.gnu.org/git/guix.git"))
+   (channel
     (name nonguix)
     (url "https://gitlab.com/nonguix/nonguix"))))

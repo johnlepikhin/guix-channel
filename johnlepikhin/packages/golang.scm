@@ -88,7 +88,7 @@
                   (add-before 'unpack 'override-tools
                     (lambda _
                       (delete-file-recursively "src/golang.org/x/tools"))))))
-    (propagated-inputs (list go-github-com-google-go-cmp-cmp
+    (propagated-inputs (list go-github-com-google-go-cmp
                              go-github-com-sergi-go-diff
                              go-golang-org-x-sys
                              go-golang-org-x-telemetry
