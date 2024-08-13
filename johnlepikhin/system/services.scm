@@ -265,6 +265,7 @@ host    all all ::1/128     md5"))
              (prefer-regexp "(cc1(plus)?|.rustc-real|ghc|Web Content|rust-analyzer)")
              (avoid-regexp "xmonad")))
 
+   (service containerd-service-type)
    (service docker-service-type)
 
    ;; (service fprintd-service-type)
