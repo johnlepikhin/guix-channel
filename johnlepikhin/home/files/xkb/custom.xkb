@@ -1,7 +1,16 @@
 xkb_keymap {
-  xkb_keycodes  { include "evdev+aliases(qwerty)" };
-  xkb_compat    { include "complete" };
-  xkb_geometry  { include "pc(pc104)" };
+  xkb_keycodes  {
+    include "evdev+aliases(qwerty)"
+    indicator 3 = "LED3";
+  };
+  xkb_compatibility {
+    include "complete"
+    interpret Mae_Koho {
+      action=LockGroup(group=3);
+    };
+    indicator "LED2" { groups = 0xff; };
+  };
+  xkb_geometry  { include "pc(pc105)" };
 
   xkb_types    {
     include "complete"
@@ -13,6 +22,7 @@ xkb_keymap {
       level_name[Level1] = "Base";
       level_name[Level2] = "Ctrl";
       level_name[Level3] = "Shift";
+      level_name[Level4] = "Ctrl Shift";
     };
   };
 
@@ -29,7 +39,12 @@ xkb_keymap {
 
     replace key <CAPS> {
       type = "THREE_GROUPS",
-      actions[Group1]=[LockGroup(group=1), LockGroup(group=2), LockGroup(group=3), LockMods(modifiers=Lock)]
+      [
+        ISO_First_Group,
+        ISO_Last_Group,
+        Mae_Koho,
+        Caps_Lock
+      ]
     };
 
     key.type = "ONE_LEVEL";

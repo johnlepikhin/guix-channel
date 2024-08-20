@@ -1,0 +1,24 @@
+xkb_keymap {
+  xkb_keycodes  {
+    include "evdev+aliases(qwerty)"
+  };
+  xkb_types     {
+     include "complete"
+     type "THREE_GROUPS" {
+        modifiers = Shift+Control+Alt;
+        map[None] = Level1;
+        level_name[Level1] = "Base";
+     };
+  };
+  xkb_compat {
+    include "complete"
+  };
+  xkb_symbols   {
+    include "pc+us+inet(evdev)"
+
+    replace key <CAPS> { [] };
+  };
+  xkb_geometry  {
+    include "pc(pc105)"
+  };
+};

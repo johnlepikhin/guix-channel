@@ -27,23 +27,26 @@
   #:use-module (guix gexp)
   #:export (home-xkb-configuration
             home-xkb-service-type
-            xkb-symbols-path
+            xkb-custom-symbols-path
             home-xkb-load-keymap-command
             home-xkb-reset-keymap-command))
 
-(define xkb-symbols-path ".config/xkb/custom.xkb")
-(define default-symbols-file (local-file "files/xkb/custom.xkb"))
+(define xkb-custom-symbols-path ".config/xkb/custom.xkb")
+(define custom-symbols-file (local-file "files/xkb/custom.xkb"))
+(define xkb-default-symbols-path ".config/xkb/default.xkb")
+(define default-symbols-file (local-file "files/xkb/default.xkb"))
 
 (define home-xkb-load-keymap-command "xkbcomp $HOME/.config/xkb/custom.xkb $DISPLAY 2>/dev/null")
-(define home-xkb-reset-keymap-command "setxkbmap us 2>/dev/null")
+(define home-xkb-reset-keymap-command "xkbcomp $HOME/.config/xkb/default.xkb $DISPLAY 2>/dev/null")
 
 (define-record-type* <home-xkb-configuration>
   home-xkb-configuration make-home-xkb-configuration
   home-xkb-configuration?
-  (symbols home-xkb-symbols (default default-symbols-file)))
+  (symbols home-xkb-symbols (default custom-symbols-file)))
 
 (define (add-xkb-files config)
-  `((,xkb-symbols-path ,(home-xkb-symbols config))))
+  `((,xkb-custom-symbols-path ,(home-xkb-symbols config))
+    (,xkb-default-symbols-path ,default-symbols-file)))
 
 (define (add-xkb-package config)
   (list xkbcomp setxkbmap))
@@ -55,7 +58,9 @@
   (activation-command #t))
 
 (define (home-xkb-activation config)
-  `((,(string-append "files/" xkb-symbols-path) ,#~(system #$(activation-command #t)))))
+  `((,(string-append "files/" xkb-custom-symbols-path)
+     ,(string-append "files/" xkb-default-symbols-path)
+     ,#~(system #$(activation-command #t)))))
 
 (define home-xkb-service-type
   (service-type
