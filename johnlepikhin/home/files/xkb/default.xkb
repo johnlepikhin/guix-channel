@@ -16,6 +16,8 @@ xkb_keymap {
   xkb_symbols   {
     include "pc+us+inet(evdev)"
 
+    name[group1]="EN";
+
     replace key <CAPS> { [] };
   };
   xkb_geometry  {

@@ -36,8 +36,10 @@
 (define xkb-default-symbols-path ".config/xkb/default.xkb")
 (define default-symbols-file (local-file "files/xkb/default.xkb"))
 
-(define home-xkb-load-keymap-command "xkbcomp $HOME/.config/xkb/custom.xkb $DISPLAY 2>/dev/null")
-(define home-xkb-reset-keymap-command "xkbcomp $HOME/.config/xkb/default.xkb $DISPLAY 2>/dev/null")
+(define home-xkb-load-keymap-command
+  (string-append "xkbcomp $HOME/" xkb-custom-symbols-path " $DISPLAY 2>/dev/null"))
+(define home-xkb-reset-keymap-command
+  (string-append "xkbcomp $HOME/" xkb-default-symbols-path " $DISPLAY 2>/dev/null"))
 
 (define-record-type* <home-xkb-configuration>
   home-xkb-configuration make-home-xkb-configuration

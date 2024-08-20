@@ -1,7 +1,7 @@
 xkb_keymap {
   xkb_keycodes  {
     include "evdev+aliases(qwerty)"
-    indicator 3 = "LED3";
+    indicator 2 = "LED2";
   };
   xkb_compatibility {
     include "complete"
