@@ -155,8 +155,6 @@ host    all all ::1/128     md5"))
                 (vpn-plugins
                  (list network-manager-openvpn))))
 
-    polkit-network-manager-service
-
     (avahi-service-type
      config =>
      (avahi-configuration
@@ -287,6 +285,8 @@ host    all all ::1/128     md5"))
    (service docker-service-type)
 
    ;; (service fprintd-service-type)
+
+   polkit-network-manager-service
 
    (tuned-desktop-services
     #:authorized-keys authorized-keys
