@@ -83,6 +83,22 @@ host    all all ::1/128     md5"))
                '(("work_mem" "500 MB")
                  ("max_parallel_workers_per_gather" 6))))))))
 
+(define polkit-network-manager
+  (file-union
+   "polkit-wheel"
+   `(("share/polkit-1/rules.d/org.freedesktop.NetworkManager.rules"
+      ,(plain-file
+        "org.freedesktop.NetworkManager.rules"
+        "polkit.addRule(function(action, subject) {
+  if (action.id == \"org.freedesktop.NetworkManager.settings.modify.system\" &&
+	subject.local && subject.active && subject.isInGroup (\"netdev\")) {
+    return polkit.Result.YES;
+  }
+});")))))
+
+(define polkit-network-manager-service
+  (simple-service 'polkit-network-manager polkit-service-type (list polkit-network-manager)))
+
 (define* (tuned-desktop-services
           #:key
           (authorized-keys '())
@@ -138,6 +154,8 @@ host    all all ::1/128     md5"))
                 (dns "dnsmasq")
                 (vpn-plugins
                  (list network-manager-openvpn))))
+
+    polkit-network-manager-service
 
     (avahi-service-type
      config =>
