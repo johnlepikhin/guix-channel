@@ -134,7 +134,6 @@
    global
    dbeaver
    puppet-lint
-   lxc
    tcpdump
    socat
    nmap
