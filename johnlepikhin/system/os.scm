@@ -21,7 +21,6 @@
   #:use-module (nongnu system linux-initrd)
   #:use-module (gnu)
   #:use-module (gnu system)
-  #:use-module (gnu system locale)
   #:use-module (gnu system keyboard)
   #:use-module (gnu system locale)
   #:use-module (gnu system pam)
