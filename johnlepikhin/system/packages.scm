@@ -31,6 +31,7 @@
   #:use-module (gnu packages rust-apps)
   #:use-module (gnu packages tls)
   #:use-module (gnu packages vim)
+  #:use-module (gnu packages virtualization)
   #:export (system-packages))
 
 (define system-packages
@@ -57,4 +58,6 @@
    parted
    smartmontools
    nvme-cli
+   iftop
+   qemu-minimal
    %base-packages))
