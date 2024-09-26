@@ -105,8 +105,8 @@
   #:use-module (johnlepikhin packages puppet-lint)
   #:use-module (johnlepikhin packages rust-nightly)
   #:use-module (johnlepikhin packages shadowplay)
-  ;; #:use-module (johnlepikhin packages telegram)
-  #:use-module (gnu packages telegram)
+  #:use-module (johnlepikhin packages telegram)
+  ;; #:use-module (gnu packages telegram)
   #:use-module (nongnu packages messaging)
   #:use-module (nongnu packages chrome)
   #:export (%devel-common-tools-packages
@@ -190,7 +190,7 @@
     recordmydesktop
     simplescreenrecorder
     smplayer
-    telegram-desktop
+    telegram-desktop-next
     ungoogled-chromium
     unicode-emoji
     virt-manager
