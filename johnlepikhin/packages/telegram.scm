@@ -454,7 +454,7 @@
      (base32
       "0iij79fqkv6bqmpqryrdlfqdvf8jqrwyff3476a55flw7dclnxnf"))))
 
-(define-public webrtc-for-telegram-desktop
+(define webrtc-for-telegram-desktop
   (let ((commit "dcb5069ff76bd293e86928804208737e6cee2ccc")
         (revision "327"))
     (hidden-package
@@ -522,7 +522,7 @@
         (list abseil-cpp-cxxstd17
               crc32c
               ffmpeg
-              glib-2.78
+              glib-2.78-for-telegram-desktop
               libdrm
               libglvnd
               libjpeg-turbo
@@ -558,7 +558,7 @@ Telegram project, for its use in telegram desktop client.")
          ;; LibSRTP, Crc32c and Others
          license:bsd-3))))))
 
-(define-public rlottie-for-telegram-desktop
+(define rlottie-for-telegram-desktop
   (let ((commit "8c69fc20cf2e150db304311f1233a4b55a8892d7")
         (revision "678"))
     (hidden-package
@@ -583,7 +583,7 @@ Telegram project, for its use in telegram desktop client.")
                (substitute* "meson.build"
                  (("werror=true") "werror=false"))))))))))
 
-(define-public glib-2.78
+(define glib-2.78-for-telegram-desktop
   (package
     (name "glib")
     (version "2.78.1")
@@ -631,7 +631,7 @@ functions for strings and common data structures.")
     (license license:lgpl2.1+)
     (properties '((hidden? . #t)))))
 
-(define glibmm-2.78
+(define glibmm-2.78-for-telegram-desktop
   (package
     (name "glibmm")
     (version "2.78.1")
@@ -668,7 +668,7 @@ functions for strings and common data structures.")
     (native-inputs
      (list graphviz
            doxygen
-           glib-2.78
+           glib-2.78-for-telegram-desktop
            m4
            mm-common
            perl
@@ -676,7 +676,7 @@ functions for strings and common data structures.")
            cmake
            libxslt))
     (propagated-inputs
-     (list libsigc++ glib-2.78))
+     (list libsigc++ glib-2.78-for-telegram-desktop))
     (home-page "https://gtkmm.org/")
     (synopsis "C++ interface to the GLib library")
     (description
@@ -684,7 +684,7 @@ functions for strings and common data structures.")
 useful for C++.")
     (license license:lgpl2.1+)))
 
-(define-public c++-gsl-4
+(define c++-gsl-4-for-telegram-desktop
   (package
     (name "c++-gsl")
     (version "4.0.0")
@@ -824,7 +824,7 @@ use by the C++ Core Guidelines maintained by the Standard C++ Foundation.")
                (add-after 'glib-or-gtk-compile-schemas 'glib-or-gtk-wrap
                  (assoc-ref glib-or-gtk:%standard-phases 'glib-or-gtk-wrap)))))
     (native-inputs
-     (list glib-2.78
+     (list glib-2.78-for-telegram-desktop
            `(,gtk+ "bin")
            pkg-config
            python-wrapper))
@@ -832,14 +832,14 @@ use by the C++ Core Guidelines maintained by the Standard C++ Foundation.")
      (list abseil-cpp-cxxstd17
            alsa-lib
            boost
-           c++-gsl-4
+           c++-gsl-4-for-telegram-desktop
            crc32c
            fcitx-qt5
            fcitx5-qt
            ffmpeg
            fmt
-           glib-2.78
-           glibmm-2.78
+           glib-2.78-for-telegram-desktop
+           glibmm-2.78-for-telegram-desktop
            gobject-introspection
            gtk+
            hime
@@ -952,7 +952,7 @@ formerly a part of telegram-cli, but now being maintained separately.")
        `(#:tests? #f                    ; No target
          #:imported-modules
          ((guix build copy-build-system)
-          ,@%gnu-build-system-modules)
+          ,@%default-gnu-imported-modules)
          #:modules
          (((guix build copy-build-system)
            #:prefix copy:)
@@ -1022,7 +1022,7 @@ formerly a part of telegram-cli, but now being maintained separately.")
        `(#:tests? #f                    ; No target
          #:imported-modules
          ((guix build copy-build-system)
-          ,@%gnu-build-system-modules)
+          ,@%default-gnu-imported-modules)
          #:modules
          (((guix build copy-build-system)
            #:prefix copy:)
