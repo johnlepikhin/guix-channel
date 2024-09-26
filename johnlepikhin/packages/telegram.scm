@@ -771,7 +771,11 @@ use by the C++ Core Guidelines maintained by the Standard C++ Foundation.")
               "-DDESKTOP_APP_DISABLE_CRASH_REPORTS=ON"
               "-DDESKTOP_APP_DISABLE_AUTOUPDATE=ON"
               "-DDESKTOP_APP_USE_PACKAGED_RLOTTIE=ON"
-              "-DDESKTOP_APP_DISABLE_SCUDO=ON")
+              "-DDESKTOP_APP_DISABLE_SCUDO=ON"
+              ;; Do not generate the debug symbols to reduce link time memory
+              ;; requirements from 25 GiB to 1.3 GiB.  This also nearly halves
+              ;; the build time.
+              "-DCMAKE_BUILD_TYPE=Release")
            #:phases
            #~(modify-phases %standard-phases
                (add-after 'unpack 'unpack-additional-sources
