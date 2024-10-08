@@ -90,7 +90,7 @@
   #:use-module (gnu packages video)
   #:use-module (gnu packages vim)
   #:use-module (gnu packages virtualization)
-  #:use-module (gnu packages virtualization)
+  #:use-module (gnu packages vnc)
   #:use-module (gnu packages web)
   #:use-module (gnu packages wm)
   #:use-module (gnu packages xdisorg)
@@ -188,6 +188,7 @@
     qogir-icon-theme
     quaternion
     recordmydesktop
+    remmina
     simplescreenrecorder
     smplayer
     telegram-desktop-next
