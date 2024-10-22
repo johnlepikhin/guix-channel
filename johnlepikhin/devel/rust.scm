@@ -25,7 +25,7 @@
   #:use-module (gnu services)
   #:use-module (guix gexp)
   #:use-module (guix records)
-  #:use-module (johnlepikhin packages rust)
+  #:use-module (gnu packages rust)
   #:use-module (srfi srfi-1)
   #:export (home-devel-rust-configuration
             home-devel-rust-service-type))
