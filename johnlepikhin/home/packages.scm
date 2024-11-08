@@ -35,7 +35,6 @@
   #:use-module (gnu packages cpio)
   #:use-module (gnu packages curl)
   #:use-module (gnu packages databases)
-  #:use-module (gnu packages diffoscope)
   #:use-module (gnu packages dns)
   #:use-module (gnu packages docker)
   #:use-module (gnu packages elf)
@@ -228,7 +227,6 @@
    blueman
    cpio
    curl
-   diffoscope
    ffmpeg
    file
    gnuplot
