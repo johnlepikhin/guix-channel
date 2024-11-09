@@ -204,6 +204,7 @@
   (let ((base-rust rust-1.80))
     (package
       (inherit base-rust)
+      (name "rust-next")
       (properties (append
                     (alist-delete 'hidden? (package-properties base-rust))
                     (clang-compiler-cpu-architectures "17")))
