@@ -43,6 +43,7 @@
      openssl-1.1
      rust-package
      (list rust-package "tools")
+     (list rust-package "rust-src")
      (list rust-package "cargo"))))
 
 (define (add-env-variables config)
