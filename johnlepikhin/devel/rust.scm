@@ -42,7 +42,8 @@
      clang
      openssl-1.1
      rust-package
-     (list rust-package "tools"))))
+     (list rust-package "tools")
+     (list rust-package "cargo"))))
 
 (define (add-env-variables config)
   `(("RUST_SRC_PATH" . ,(string-append (getenv "HOME") "/.guix-home/profile/lib/rustlib/src/rust/library"))
