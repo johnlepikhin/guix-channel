@@ -18,6 +18,7 @@
 
 (define-module (johnlepikhin system os)
   #:use-module (nongnu packages linux)
+  #:use-module (nongnu packages video)
   #:use-module (nongnu system linux-initrd)
   #:use-module (gnu)
   #:use-module (gnu system)
@@ -50,7 +51,8 @@
             ibt-hw-firmware
             i915-firmware
             intel-microcode
-            amd-microcode))
+            amd-microcode
+            intel-media-driver/nonfree))
           (timezone "Europe/Moscow")
           (kernel-arguments default-kernel-arguments)
           (mapped-devices '()))
@@ -77,6 +79,9 @@
     (bootloader-configuration
      (bootloader grub-efi-bootloader)
      (targets (list "/boot/efi"))
-     (keyboard-layout keyboard-layout)))
+     (keyboard-layout keyboard-layout)
+     (theme (grub-theme
+             (inherit grub-theme)
+             (gfxmode '("640x480x32" "auto"))))))
    (mapped-devices mapped-devices)
    (file-systems file-systems)))
