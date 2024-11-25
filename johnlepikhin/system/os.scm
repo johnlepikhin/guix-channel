@@ -40,7 +40,7 @@
           services
           packages
           file-systems
-          (linux-kernel linux-lts)
+          (linux-kernel linux-6.10)
           (firmware
            (list
             sof-firmware
