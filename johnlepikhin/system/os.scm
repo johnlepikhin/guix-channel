@@ -21,6 +21,7 @@
   #:use-module (nongnu packages video)
   #:use-module (nongnu system linux-initrd)
   #:use-module (gnu)
+  #:use-module (gnu bootloader grub)
   #:use-module (gnu system)
   #:use-module (gnu system keyboard)
   #:use-module (gnu system locale)
