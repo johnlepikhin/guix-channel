@@ -96,7 +96,7 @@
                              go-honnef-co-go-tools
                              go-mvdan-cc-gofumpt
                              go-golang-org-x-vuln-1
-                             go-mvdan-cc-xurls))
+                             go-mvdan-cc-xurls-v2))
     (home-page "https://golang.org/x/tools/gopls")
     (synopsis "Official language server for the Go language")
     (description
