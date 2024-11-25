@@ -82,6 +82,6 @@
      (targets (list "/boot/efi"))
      (keyboard-layout keyboard-layout)
      (theme (grub-theme
-             (gfxmode '("640x480x32" "auto"))))))
+             (gfxmode '("1440x900x32" "auto"))))))
    (mapped-devices mapped-devices)
    (file-systems file-systems)))
