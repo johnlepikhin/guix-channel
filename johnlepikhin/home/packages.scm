@@ -82,6 +82,7 @@
   #:use-module (gnu packages rdesktop)
   #:use-module (gnu packages rsync)
   #:use-module (gnu packages rust-apps)
+  #:use-module (gnu packages terminals)
   #:use-module (gnu packages texlive)
   #:use-module (gnu packages tls)
   #:use-module (gnu packages unicode)
@@ -160,6 +161,7 @@
   (append
    %xmonad-packages
    (list
+    alacritty
     autocutsel
     brightnessctl
     copyq
