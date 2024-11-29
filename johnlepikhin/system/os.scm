@@ -55,6 +55,7 @@
             amd-microcode
             intel-media-driver/nonfree))
           (timezone "Europe/Moscow")
+          (sudoers-file-extras "")
           (kernel-arguments default-kernel-arguments)
           (mapped-devices '()))
   (operating-system
@@ -76,6 +77,11 @@
    (services services)
    ;; resolve .local hostnames with mDNS
    (name-service-switch %mdns-host-lookup-nss)
+   (sudoers-file
+    (plain-file "etc-sudoers-config"
+                (string-append "root ALL=(ALL) ALL
+%wheel ALL=(ALL) ALL
+" sudoers-file-extras)))
    (bootloader
     (bootloader-configuration
      (bootloader grub-efi-bootloader)
