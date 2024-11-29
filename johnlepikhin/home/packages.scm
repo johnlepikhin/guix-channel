@@ -251,7 +251,6 @@
    sshfs
    texlive
    tgcli
-   tlp
    unzip
    which
    whois
