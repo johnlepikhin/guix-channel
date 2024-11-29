@@ -230,7 +230,7 @@ host    all all ::1/128     md5"))
             (tlp-configuration
              (cpu-scaling-governor-on-ac (list "performance"))
              (cpu-scaling-governor-on-bat (list "powersave"))
-             (sched-powersave-on-bat? #f)
+             (sched-powersave-on-bat? #t)
              (cpu-boost-on-ac? #t)
              (max-lost-work-secs-on-bat 180)
              (cpu-scaling-min-freq-on-bat (* 400 1000))
