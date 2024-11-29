@@ -279,7 +279,7 @@ host    all all ::1/128     md5"))
    (service containerd-service-type)
    (service docker-service-type)
 
-   (service fprintd-service-type)
+   ;; (service fprintd-service-type)
 
    polkit-network-manager-service
 
