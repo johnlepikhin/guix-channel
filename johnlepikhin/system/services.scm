@@ -163,6 +163,7 @@ host    all all ::1/128     md5"))
 (define-public (intel-cpu-throttle-fix-service _)
   (list (shepherd-service
          (provision '(intel-cpu-throttle-fix))
+         (requirement '(user-processes))
          (documentation "On some Intel CPUs, the CPU frequency may be throttled to 400 MHz
 after few seconds of high load. There many similar issues on the internet and
 this service fixes only one class of them, which is described here:
