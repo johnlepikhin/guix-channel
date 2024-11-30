@@ -173,7 +173,7 @@ Blacklisting it in modprobe is not enough.")
          (one-shot? #t)
          (start #~(lambda _ (system "/run/current-system/profile/bin/rmmod processor_thermal_device_pci"))))))
 
-(define intel-cpu-throttle-fix-service-type
+(define-public intel-cpu-throttle-fix-service-type
   (service-type
    (name 'intel-cpu-throttle-fix)
    (description "Fix Intel CPU throttling issue")
