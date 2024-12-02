@@ -259,7 +259,7 @@ Blacklisting it in modprobe is not enough.")
              (cpu-scaling-min-freq-on-bat (* 400 1000))
              (cpu-scaling-max-freq-on-bat (* 800 1000))
              (cpu-scaling-min-freq-on-ac (* 2300 1000))
-             (cpu-scaling-max-freq-on-ac (* 4500 1000))
+             (cpu-scaling-max-freq-on-ac (* 5000 1000))
              (wifi-pwr-on-bat? #f)))
    (service mcron-service-type
             (mcron-configuration
