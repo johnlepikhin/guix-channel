@@ -41,6 +41,7 @@
           packages
           file-systems
           (linux-kernel linux-6.10)
+          (kernel-loadable-modules (list v4l2loopback-linux-module))
           (firmware
            (list
             sof-firmware
@@ -60,6 +61,7 @@
           (mapped-devices '()))
   (operating-system
    (kernel linux-kernel)
+   (kernel-loadable-modules kernel-loadable-modules)
    (kernel-arguments kernel-arguments)
    (initrd microcode-initrd)
    (firmware firmware)
