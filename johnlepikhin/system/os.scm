@@ -22,6 +22,7 @@
   #:use-module (nongnu system linux-initrd)
   #:use-module (gnu)
   #:use-module (gnu bootloader grub)
+  #:use-module (gnu packages linux)
   #:use-module (gnu system)
   #:use-module (gnu system keyboard)
   #:use-module (gnu system locale)
