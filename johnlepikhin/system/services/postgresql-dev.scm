@@ -16,6 +16,11 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 (define-module (johnlepikhin system services postgresql-dev)
+  #:use-module (gnu services databases)
+  #:use-module (gnu services)
+  #:use-module (gnu packages databases)
+  #:use-module (gnu packages geo)
+  #:use-module (guix gexp)
   #:export (postgresql-dev-service))
 
 (define-public postgresql-dev-service
