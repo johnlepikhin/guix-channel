@@ -33,5 +33,5 @@
   }
 });")))))
 
-(define polkit-network-manager-service
+(define-public polkit-network-manager-service
   (simple-service 'polkit-network-manager polkit-service-type (list polkit-network-manager)))

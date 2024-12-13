@@ -19,7 +19,7 @@
   #:use-module (gnu services shepherd)
   #:use-module (gnu services))
 
-(define (public-backlight-brightness-service _)
+(define-public (public-backlight-brightness-service _)
   (list (shepherd-service
          (provision '(public-backlight-brightness))
          (documentation "Grant R/W to /sys/class/backlight/*/brightness for all users")
@@ -29,7 +29,7 @@
 (define (add-brightnessctl-package config)
   (list brightnessctl))
 
-(define public-backlight-brightness-service-type
+(define-public public-backlight-brightness-service-type
   (service-type
    (name 'public-backlight-brightness)
    (description "Grant R/W to /sys/class/backlight/*/brightness for all users")
