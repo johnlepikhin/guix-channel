@@ -23,7 +23,9 @@
   #:use-module (gnu services)
   #:use-module (gnu services shepherd)
   #:use-module (gnu services configuration)
-  #:use-module (johnlepikhin packages throttled))
+  #:use-module (johnlepikhin packages throttled)
+  #:export (throttled-service-type
+            throttled-configuration))
 
 (define-record-type* <throttled-configuration>
   throttled-configuration
