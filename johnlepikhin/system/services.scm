@@ -18,6 +18,7 @@
 
 (define-module (johnlepikhin system services)
   #:use-module (gnu packages cups)
+  #:use-module (gnu packages xorg)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages networking)
   #:use-module (gnu services admin)
