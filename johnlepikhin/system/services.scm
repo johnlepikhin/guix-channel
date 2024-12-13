@@ -22,6 +22,7 @@
   #:use-module (gnu packages networking)
   #:use-module (gnu services avahi)
   #:use-module (gnu services cups)
+  #:use-module (gnu services admin)
   #:use-module (gnu services dbus)
   #:use-module (gnu services desktop)
   #:use-module (gnu services dns)
