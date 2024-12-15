@@ -36,6 +36,7 @@
                           (bash (assoc-ref %build-inputs "bash"))
                           (coreutils (assoc-ref %build-inputs "coreutils"))
                           (dbus (assoc-ref %build-inputs "dbus"))
+                          (pciutils (assoc-ref %build-inputs "pciutils"))
                           (gzip (assoc-ref %build-inputs "gzip"))
                           (python (assoc-ref %build-inputs "python"))
                           (python-dbus (assoc-ref %build-inputs "python-dbus"))
@@ -79,6 +80,9 @@
                         (string-append python-dir "/throttled.py" " $@")))
                      (invoke "mv" bin-script
                              (string-append bin-dir "/throttled"))
+                     (wrap-program (string-append bin-dir "/throttled")
+                       `("PATH" ":" prefix
+                         (,(string-append pciutils "/sbin"))))
                      (wrap-program (string-append bin-dir "/throttled")
                        `("PYTHONPATH" ":" prefix
                          (,(string-append python-dbus pythonpath))))
