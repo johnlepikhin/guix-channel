@@ -111,7 +111,7 @@
   #:use-module (nongnu packages chrome)
   #:export (%devel-common-tools-packages
             %devel-common-libs-packages
-            %xmonad-packages
+            %i3wm-packages
             %xdesktop-packages
             %tools-packages
             %devel-other-packages
@@ -154,12 +154,12 @@
    libxcomposite
    nss-certs))
 
-(define %xmonad-packages
-  (list ghc ghc-hostname ghc-xmonad-contrib xmonad xmessage))
+(define %i3wm-packages
+  (list i3-wm i3status))
 
 (define %xdesktop-packages
   (append
-   %xmonad-packages
+   %i3wm-packages
    (list
     alacritty
     autocutsel
@@ -206,7 +206,6 @@
     xev
     xf86-input-synaptics
     xhost
-    xmobar
     xmodmap
     xorg-server ;; provides Xephyr
     xprop
