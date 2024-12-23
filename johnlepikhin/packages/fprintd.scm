@@ -119,9 +119,8 @@ software.")
                (add-before 'configure 'ignore-test-dependencies
                  (lambda _
                    (substitute* "meson.build"
-                     ((".*gi\\.repository\\.FPrint.*") "")
-                     ;; (("pam_wrapper_dep .*") ""))))
-           #:tests? #f))                    ; XXX depend on unpackaged packages
+                     ((".*gi\\.repository\\.FPrint.*") "")))))
+           #:tests? #f))
     (native-inputs
      (list gettext-minimal
            `(,glib "bin")               ; for glib-genmarshal
@@ -150,3 +149,5 @@ library to access fingerprint readers, over the D-Bus interprocess
 communication bus.  This daemon layer above libfprint solves problems related
 to applications simultaneously competing for fingerprint readers.")
     (license license:gpl2+)))
+
+fprintd
