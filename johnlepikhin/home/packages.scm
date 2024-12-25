@@ -107,6 +107,7 @@
   #:use-module (johnlepikhin packages shadowplay)
   #:use-module (johnlepikhin packages telegram)
   #:use-module (johnlepikhin packages xidlehook)
+  #:use-module (johnlepikhin packages i3im)
   ;; #:use-module (gnu packages telegram)
   #:use-module (nongnu packages messaging)
   #:use-module (nongnu packages chrome)
@@ -156,7 +157,9 @@
    nss-certs))
 
 (define %i3wm-packages
-  (list i3-wm i3status))
+  (list i3-wm
+        i3status
+        i3im))
 
 (define %xdesktop-packages
   (append
