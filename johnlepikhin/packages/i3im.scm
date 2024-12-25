@@ -49,8 +49,10 @@
                        ("rust-serde-json" ,rust-serde-json-1))))
     (native-inputs (list pkg-config))
     (home-page "https://github.com/johnlepikhin/i3ipc-jl")
-    (synopsis "A Rust library for controlling i3-wm through its IPC interface.")
-    (description "A Rust library for controlling i3-wm through its IPC interface.")
+    (synopsis
+     "A Rust library for controlling i3-wm through its IPC interface.")
+    (description
+     "A Rust library for controlling i3-wm through its IPC interface.")
     (license license:expat)))
 
 (define-public rust-syslog-5
@@ -116,7 +118,8 @@
     (native-inputs (list pkg-config))
     (home-page "https://github.com/slog-rs/slog")
     (synopsis "Port of env_logger as a slog-rs drain")
-    (description "env_logger is a de facto standard Rust logger implementation, which allows controlling logging to stderr via the
+    (description
+     "env_logger is a de facto standard Rust logger implementation, which allows controlling logging to stderr via the
 RUST_LOG environment variable.")
     (license license:expat)))
 
@@ -143,7 +146,8 @@ RUST_LOG environment variable.")
     (native-inputs (list pkg-config))
     (home-page "https://github.com/vorner/structdoc")
     (synopsis "A procedural macro to generate documentation for structs")
-    (description "A trait and procedural derive for extracting structure and documentation out of doc comments so they can be used at
+    (description
+     "A trait and procedural derive for extracting structure and documentation out of doc comments so they can be used at
 runtime.")
     (license license:expat)))
 
@@ -166,7 +170,8 @@ runtime.")
     (native-inputs (list pkg-config))
     (home-page "https://github.com/vorner/structdoc")
     (synopsis "A procedural macro to generate documentation for structs")
-    (description "A trait and procedural derive for extracting structure and documentation out of doc comments so they can be used at
+    (description
+     "A trait and procedural derive for extracting structure and documentation out of doc comments so they can be used at
 runtime.")
     (license license:expat)))
 
@@ -203,8 +208,7 @@ runtime.")
                        ("rust-serde-json" ,rust-serde-json-1))))
     (native-inputs (list pkg-config))
     (home-page "https://github.com/johnlepikhin/i3im")
-    (synopsis
-     "@command{i3im} i3 IMproved")
+    (synopsis "@command{i3im} i3 IMproved")
     (description
      "The utility extends the standard functionality of the i3 and Sway window managers.")
     (license (list license:expat))))
