@@ -106,6 +106,7 @@
   #:use-module (johnlepikhin packages rust-nightly)
   #:use-module (johnlepikhin packages shadowplay)
   #:use-module (johnlepikhin packages telegram)
+  #:use-module (johnlepikhin packages xidlehook)
   ;; #:use-module (gnu packages telegram)
   #:use-module (nongnu packages messaging)
   #:use-module (nongnu packages chrome)
@@ -197,7 +198,7 @@
     unicode-emoji
     virt-manager
     vlc
-    xautolock
+    xidlehook
     xclip
     xdg-desktop-portal
     xdg-desktop-portal-gtk
