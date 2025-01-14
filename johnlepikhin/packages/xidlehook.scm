@@ -20,6 +20,7 @@
   #:use-module ((guix licenses)
                 #:prefix license:)
   #:use-module (gnu packages crates-graphics)
+  #:use-module (gnu packages crates-audio)
   #:use-module (gnu packages crates-io)
   #:use-module (gnu packages gl)
   #:use-module (gnu packages pkg-config)
