@@ -213,5 +213,3 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
                 "1ibmgkrh1g479j6ngh41ycsx5gk1a3vvb66rqngaipakq0x0pw5z"))
 
 (define-public vkteams vkteams-24.3)
-
-vkteams
