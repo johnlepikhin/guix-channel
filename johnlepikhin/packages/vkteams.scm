@@ -30,6 +30,7 @@
   #:use-module (gnu packages ncurses)
   #:use-module (gnu packages nss)
   #:use-module (gnu packages pulseaudio)
+  #:use-module (gnu packages pciutils)
   #:use-module (gnu packages xorg)
   #:use-module (guix build-system copy)
   #:use-module (guix download)
@@ -186,7 +187,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("libxcomposite" ,libxcomposite)
               ("libxcursor" ,libxcursor)
               ("libxdamage" ,libxdamage)
-              ("gcc:lib" ,gcc-5 "lib")
+              ("gcc:lib" ,gcc-14 "lib")
               ("gcc" ,gcc)
               ("libgpg-error" ,libgpg-error)
               ("glibc" ,glibc)
@@ -202,10 +203,15 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("libxtst" ,libxtst)
               ("alsa-lib" ,alsa-lib)
                ("nss" ,nss)
+               ("pciutils" ,pciutils) ;; libpci
                ("libxinerama" ,libxinerama)))
     (license gpl3+)))
 
-(define-public vkteams-23.02
-  (make-vkteams "23.02.2" "https://t.bk.ru/lQ8MG7Buvx1ugDI/vkteams.tar.xz" "0kjng9rm89b8iz574p6ykvjvdhs8w5dn85da66mdsxkp9gkcka0x"))
+(define-public vkteams-24.3
+  (make-vkteams "24.3.6"
+                "https://dl.vkt.postgrespro.ru/downloads/linux/x64/latest/vkteams.tar.xz"
+                "1ibmgkrh1g479j6ngh41ycsx5gk1a3vvb66rqngaipakq0x0pw5z"))
 
-(define-public vkteams vkteams-23.02)
+(define-public vkteams vkteams-24.3)
+
+vkteams
