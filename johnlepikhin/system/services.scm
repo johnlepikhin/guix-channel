@@ -137,7 +137,7 @@
          (simple-service 'dbus-extras dbus-root-service-type
                          (list blueman))
          (service unattended-upgrade-service-type
-                  (unattended-upgrade-configuration (schedule "30 02 * * */3")))
+                  (unattended-upgrade-configuration (schedule "30 02  */3 * *")))
          (service public-backlight-brightness-service-type
                   '())
          (service hostapd-service-type
