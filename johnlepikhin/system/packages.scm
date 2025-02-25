@@ -60,4 +60,5 @@
    nvme-cli
    iftop
    qemu-minimal
+   runc
    %base-packages))
