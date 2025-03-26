@@ -195,6 +195,7 @@
     quaternion
     recordmydesktop
     remmina
+    rofi
     simplescreenrecorder
     smplayer
     telegram-desktop
