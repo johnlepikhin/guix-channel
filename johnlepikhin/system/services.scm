@@ -102,8 +102,7 @@
               (list
                network-manager-openvpn))
              (extra-configuration-files
-              (list
-               ("default-wifi-powersave-on.conf" ,(plain-file "default-wifi-powersave-on.conf"
+              `(("default-wifi-powersave-on.conf" ,(plain-file "default-wifi-powersave-on.conf"
                            "[connection]
 wifi.powersave = 2"))))))
 
