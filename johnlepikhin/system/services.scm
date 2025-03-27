@@ -91,8 +91,7 @@
                                                         (handle-power-key 'suspend)
                                                         (handle-lid-switch-external-power 'suspend)
                                                         (handle-lid-switch 'suspend)
-                                                        (suspend-state '("mem"))
-                                                        (broadcast-suspend-interrupts? #f)))
+                                                        (suspend-state '("mem"))))
 
            (network-manager-service-type
             config =>
