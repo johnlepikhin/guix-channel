@@ -103,9 +103,9 @@
                network-manager-openvpn))
              (extra-configuration-files
               (list
-               (plain-file "default-wifi-powersave-on.conf"
+               ("default-wifi-powersave-on.conf" ,(plain-file "default-wifi-powersave-on.conf"
                            "[connection]
-wifi.powersave = 2")))))
+wifi.powersave = 2"))))))
 
            (avahi-service-type config =>
                                (avahi-configuration (ipv6? #f))))))
