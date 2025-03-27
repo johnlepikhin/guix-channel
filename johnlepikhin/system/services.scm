@@ -93,14 +93,19 @@
                                                         (handle-lid-switch-external-power 'suspend)
                                                         (handle-lid-switch 'suspend)))
 
-           (network-manager-service-type config =>
-                                         (network-manager-configuration (inherit
-                                                                         config)
-                                                                        (dns
-                                                                         "dnsmasq")
-                                                                        (vpn-plugins
-                                                                         (list
-                                                                          network-manager-openvpn))))
+           (network-manager-service-type
+            config =>
+            (network-manager-configuration
+             (inherit config)
+             (dns "dnsmasq")
+             (vpn-plugins
+              (list
+               network-manager-openvpn))
+             (extra-configuration-files
+              (list
+               (plain-file "default-wifi-powersave-on.conf"
+                           "[connection]
+wifi.powersave = 2")))))
 
            (avahi-service-type config =>
                                (avahi-configuration (ipv6? #f))))))
@@ -136,8 +141,8 @@
                                            (fast-connectable? #t)))
          (simple-service 'dbus-extras dbus-root-service-type
                          (list blueman))
-         (service unattended-upgrade-service-type
-                  (unattended-upgrade-configuration (schedule "30 02  */3 * *")))
+         (service unattended-upgrade-service-type (unattended-upgrade-configuration
+                   (schedule "30 02  */3 * *")))
          (service public-backlight-brightness-service-type
                   '())
          (service hostapd-service-type
