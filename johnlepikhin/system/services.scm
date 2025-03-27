@@ -91,7 +91,8 @@
                                  (elogind-configuration (inherit config)
                                                         (handle-power-key 'suspend)
                                                         (handle-lid-switch-external-power 'suspend)
-                                                        (handle-lid-switch 'suspend)))
+                                                        (handle-lid-switch 'suspend)
+                                                        (suspend-state '("mem"))))
 
            (network-manager-service-type
             config =>
