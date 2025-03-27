@@ -78,7 +78,6 @@ esac
 (define* (tuned-desktop-services #:key (authorized-keys '())
                                  (substitute-urls '()))
   (cons* (modify-services %desktop-services
-           
            (gdm-service-type config =>
                              (gdm-configuration (inherit config)
                                                 (wayland? #f)))
@@ -121,9 +120,6 @@ esac
               `(("default-wifi-powersave-on.conf" ,(plain-file "default-wifi-powersave-on.conf"
                            "[connection]
 wifi.powersave = 2"))))))
-
-           (simple-service 'network-manager-disable-suspend-interfaces etc-service-type
-                           `(("NetworkManager/dispatcher.d/01-disable-suspend-interfaces" ,network-manager-disable-suspend-interfaces)))
 
            (avahi-service-type config =>
                                (avahi-configuration (ipv6? #f))))))
@@ -216,8 +212,12 @@ wifi.powersave = 2"))))))
          (service docker-service-type)
 
          ;; (service fprintd-service-type)
-         
+
          polkit-network-manager-service
+
+         (simple-service 'network-manager-disable-suspend-interfaces etc-service-type
+                         `(("NetworkManager/dispatcher.d/01-disable-suspend-interfaces" ,network-manager-disable-suspend-interfaces)))
+
 
          (tuned-desktop-services #:authorized-keys authorized-keys
                                  #:substitute-urls substitute-urls)))
