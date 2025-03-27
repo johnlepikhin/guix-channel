@@ -60,6 +60,21 @@
        (q #7D602902D3A2DBB83F8A0FB98602A754C5493B0B778C8D1DD4E0F41DE14DE34F#)
      ))"))
 
+
+(define network-manager-disable-suspend-interfaces
+  (plain-file "disable-suspend-interfaces"
+              "#!/bin/sh
+
+case \"$2\" in
+    pre-sleep)
+        exit 0
+        ;;
+    post-sleep)
+        exit 0
+        ;;
+esac
+"))
+
 (define* (tuned-desktop-services #:key (authorized-keys '())
                                  (substitute-urls '()))
   (cons* (modify-services %desktop-services
@@ -106,6 +121,9 @@
               `(("default-wifi-powersave-on.conf" ,(plain-file "default-wifi-powersave-on.conf"
                            "[connection]
 wifi.powersave = 2"))))))
+
+           (simple-service 'network-manager-disable-suspend-interfaces etc-service-type
+                           `(("NetworkManager/dispatcher.d/01-disable-suspend-interfaces" ,network-manager-disable-suspend-interfaces)))
 
            (avahi-service-type config =>
                                (avahi-configuration (ipv6? #f))))))
