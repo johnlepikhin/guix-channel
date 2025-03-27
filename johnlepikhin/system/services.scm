@@ -60,21 +60,6 @@
        (q #7D602902D3A2DBB83F8A0FB98602A754C5493B0B778C8D1DD4E0F41DE14DE34F#)
      ))"))
 
-
-(define network-manager-disable-suspend-interfaces
-  (plain-file "disable-suspend-interfaces"
-              "#!/bin/sh
-
-case \"$2\" in
-    pre-sleep)
-        exit 0
-        ;;
-    post-sleep)
-        exit 0
-        ;;
-esac
-"))
-
 (define* (tuned-desktop-services #:key (authorized-keys '())
                                  (substitute-urls '()))
   (cons* (modify-services %desktop-services
@@ -106,7 +91,8 @@ esac
                                                         (handle-power-key 'suspend)
                                                         (handle-lid-switch-external-power 'suspend)
                                                         (handle-lid-switch 'suspend)
-                                                        (suspend-state '("mem"))))
+                                                        (suspend-state '("mem"))
+                                                        (broadcast-suspend-interrupts #f)))
 
            (network-manager-service-type
             config =>
@@ -214,10 +200,6 @@ wifi.powersave = 2"))))))
          ;; (service fprintd-service-type)
 
          polkit-network-manager-service
-
-         (simple-service 'network-manager-disable-suspend-interfaces etc-service-type
-                         `(("NetworkManager/dispatcher.d/01-disable-suspend-interfaces" ,network-manager-disable-suspend-interfaces)))
-
 
          (tuned-desktop-services #:authorized-keys authorized-keys
                                  #:substitute-urls substitute-urls)))
