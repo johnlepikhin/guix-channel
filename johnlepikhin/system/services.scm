@@ -74,6 +74,7 @@
                               (guix-configuration (inherit config)
                                                   (substitute-urls (list
                                                                     "https://substitutes.nonguix.org"
+                                                                    "https://bordeaux-singapore-mirror.cbaines.net"
                                                                     "https://ci.guix.gnu.org"
                                                                     "https://bordeaux.guix.gnu.org/"))
                                                   (discover? #t)
