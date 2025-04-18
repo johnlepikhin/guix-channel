@@ -20,6 +20,7 @@
   #:use-module (gnu home services)
   #:use-module (gnu packages crates-io)
   #:use-module (gnu packages llvm)
+  #:use-module (gnu packages rust)
   #:use-module (gnu packages tls)
   #:use-module (gnu services configuration)
   #:use-module (gnu services)
