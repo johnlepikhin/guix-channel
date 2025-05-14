@@ -23,11 +23,9 @@
   #:use-module (nongnu packages chrome))
 
 (define-public google-chrome-beta-system-egl
-  (let* ((base google-chrome-beta)
-         (args (package-arguments base)))
-    (package
-      (inherit base)
-      (name "google-chrome-beta-system-egl")
-      (inputs
-       (modify-inputs (package-inputs google-chrome-beta)
-                      (prepend mesa))))))
+  (package
+    (inherit google-chrome-beta)
+    (name "google-chrome-beta-system-egl")
+    (inputs
+     (modify-inputs (package-inputs google-chrome-beta)
+                    (prepend mesa)))))
