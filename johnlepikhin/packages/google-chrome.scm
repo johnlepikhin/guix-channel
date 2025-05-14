@@ -15,11 +15,12 @@
 ;;;
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
-(use-modules (guix packages)
-             (guix gexp)
-             (guix utils)
-             (gnu packages gl)
-             (nongnu packages chrome))
+(define-module (johnlepikhin packages google-chrome)
+  #:use-module (guix packages)
+  #:use-module (guix gexp)
+  #:use-module (guix utils)
+  #:use-module (gnu packages gl)
+  #:use-module (nongnu packages chrome))
 
 (define-public google-chrome-beta-system-egl
   (let* ((base google-chrome-beta)
