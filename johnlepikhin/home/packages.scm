@@ -111,7 +111,7 @@
   #:use-module (johnlepikhin packages i3im)
   #:use-module (gnu packages telegram)
   #:use-module (nongnu packages messaging)
-  #:use-module (nongnu packages chrome)
+  #:use-module (johnlepikhin packages google-chrome)
   #:export (%devel-common-tools-packages
             %devel-common-libs-packages
             %i3wm-packages
@@ -178,7 +178,7 @@
     font-google-noto
     geeqie
     gimp
-    google-chrome-beta
+    google-chrome-beta-system-egl
     inkscape
     kdenlive
     libfreeaptx
