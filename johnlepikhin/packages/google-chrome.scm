@@ -15,6 +15,25 @@
 ;;;
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
+;;;
+
+;; Chrome is dynamically linked against libGLX and libEGL from the libglvnd library.
+;; Libglvnd acts as a proxy/dispatcher that routes OpenGL API calls to the appropriate
+;; backend provider (such as Mesa or proprietary drivers). It selects which implementation
+;; to use at runtime based on available drivers.
+
+;; However, in Guix, the version of libglvnd (or its integration with the rest of the stack)
+;; may be outdated or incompatible, resulting in Chrome encountering `undefined symbol` errors
+;; during library loading.
+
+;; To work around this issue, I created a custom package that adds `mesa` to the runtime
+;; dependencies. Crucially, `mesa` is prepended to the `inputs` list, so it appears first
+;; in the generated LD_LIBRARY_PATH.
+
+;; As a result, nonguix's build system (via the chromium-binary-build-system) generates a
+;; wrapper script that sets LD_LIBRARY_PATH in the correct order. This ensures that Chrome
+;; attempts to load libGLX and libEGL directly from Mesa first, avoiding conflicts or missing
+;; symbols caused by relying solely on libglvnd.
 (define-module (johnlepikhin packages google-chrome)
   #:use-module (guix packages)
   #:use-module (guix gexp)
