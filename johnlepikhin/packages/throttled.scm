@@ -97,7 +97,8 @@
     (inputs `(("bash" ,bash)
               ("python-dbus" ,python-dbus)
               ("pciutils" ,pciutils)
-              ("python-pygobject" ,python-pygobject)))
+              ("python-pygobject" ,python-pygobject)
+              ("gobject-introspection" ,gobject-introspection)))
     (home-page "https://github.com/erpalma/throttled")
     (synopsis "Workaround for Intel throttling issues in Linux.")
     (description
