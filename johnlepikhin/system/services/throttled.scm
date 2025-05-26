@@ -55,7 +55,8 @@
            (documentation "Throttled service")
            (start #~(make-forkexec-constructor
                      (list #$(file-append package "/bin/throttled")
-                           "--config" #$config-file)))
+                           "--config" #$config-file
+                           "--monitor" "10")))
            (stop #~(make-kill-destructor))))))
 
 (define-public throttled-service-type
