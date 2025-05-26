@@ -53,7 +53,7 @@
         (config-file (throttled-configuration-config-file config)))
     (list (shepherd-service
            (provision '(throttled))
-           (requirement '(user-processes dbus-system udev))
+           (requirement '(dbus-system udev))
            (documentation "Throttled service")
            (start #~(make-forkexec-constructor
                      (list #$(file-append package "/bin/throttled")
