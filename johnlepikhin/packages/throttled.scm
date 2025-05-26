@@ -42,6 +42,9 @@
                           (python-dbus (assoc-ref %build-inputs "python-dbus"))
                           (python-pygo (assoc-ref %build-inputs
                                                   "python-pygobject"))
+                          (gobject-introspection-path (assoc-ref %build-inputs
+                                                                 "gobject-introspection"))
+                          (glib-path (assoc-ref %build-inputs "glib"))
                           (pythonpath (string-append "/lib/python"
                                                      ,(version-major+minor (package-version
                                                                             python))
@@ -84,21 +87,31 @@
                        `("PATH" ":" prefix
                          (,(string-append pciutils "/sbin"))))
                      (wrap-program (string-append bin-dir "/throttled")
+                       `("GI_TYPELIB_PATH" ":" prefix
+                         (,(string-append glib-path "/lib/girepository-1.0"))))
+                     (wrap-program (string-append bin-dir "/throttled")
                        `("PYTHONPATH" ":" prefix
                          (,(string-append python-dbus pythonpath))))
                      (wrap-program (string-append bin-dir "/throttled")
                        `("PYTHONPATH" ":" prefix
                          (,(string-append python-pygo pythonpath))))
+                     (wrap-program (string-append bin-dir "/throttled")
+                       `("PYTHONPATH" ":" prefix
+                         (,(string-append python-pygo pythonpath))))
+
                      #t))))
+
     (native-inputs `(("coreutils" ,coreutils)
                      ("gzip" ,gzip)
                      ("python" ,python)
                      ("tar" ,tar)))
-    (inputs `(("bash" ,bash)
-              ("python-dbus" ,python-dbus)
-              ("pciutils" ,pciutils)
-              ("python-pygobject" ,python-pygobject)
-              ("gobject-introspection" ,gobject-introspection)))
+    (inputs
+     `(("bash" ,bash)
+       ("python-dbus" ,python-dbus)
+       ("pciutils" ,pciutils)
+       ("glib" ,glib)
+       ("python-pygobject" ,python-pygobject)
+       ("gobject-introspection" ,gobject-introspection)))
     (home-page "https://github.com/erpalma/throttled")
     (synopsis "Workaround for Intel throttling issues in Linux.")
     (description
