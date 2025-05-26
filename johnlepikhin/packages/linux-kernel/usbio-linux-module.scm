@@ -1,4 +1,4 @@
-(define-module (gnu packages usbio-linux-module)
+(define-module (gnu packages linux-kernel usbio-linux-module)
   #:use-module (guix git-download)
   #:use-module (guix build-system linux-module)
   #:use-module (guix packages)
