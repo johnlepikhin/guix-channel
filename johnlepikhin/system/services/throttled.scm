@@ -23,6 +23,7 @@
   #:use-module (gnu services)
   #:use-module (gnu services shepherd)
   #:use-module (gnu services configuration)
+  #:use-module (gnu services dbus)
   #:use-module (johnlepikhin packages throttled)
   #:export (throttled-service-type
             throttled-configuration))
@@ -52,6 +53,7 @@
         (config-file (throttled-configuration-config-file config)))
     (list (shepherd-service
            (provision '(throttled))
+           (requirement '(user-processes dbus-system udev))
            (documentation "Throttled service")
            (start #~(make-forkexec-constructor
                      (list #$(file-append package "/bin/throttled")
