@@ -73,7 +73,8 @@
            (guix-service-type config =>
                               (guix-configuration (inherit config)
                                                   (substitute-urls (list
-                                                                    "https://substitutes.nonguix.org"
+                                                                    ;; https://substitutes.nonguix.org is not available via IPv6 only
+                                                                    "https://nonguix-proxy.ditigal.xyz"
                                                                     "https://bordeaux-singapore-mirror.cbaines.net"
                                                                     "https://ci.guix.gnu.org"
                                                                     "https://bordeaux.guix.gnu.org/"))
