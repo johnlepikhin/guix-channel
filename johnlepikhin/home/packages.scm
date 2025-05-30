@@ -106,6 +106,7 @@
   #:use-module (johnlepikhin packages puppet-lint)
   #:use-module (johnlepikhin packages rust-nightly)
   #:use-module (johnlepikhin packages shadowplay)
+  #:use-module (johnlepikhin packages mikrotik-winbox)
   ;; #:use-module (johnlepikhin packages telegram)
   #:use-module (johnlepikhin packages xidlehook)
   #:use-module (johnlepikhin packages i3im)
@@ -264,6 +265,7 @@
    yt-dlp
    zip
    zstd
+   mikrotik-winbox
    ))
 
 (define %golang-packages
