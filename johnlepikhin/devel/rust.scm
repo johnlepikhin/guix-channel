@@ -33,7 +33,7 @@
 (define-record-type* <home-devel-rust-configuration>
   home-devel-rust-configuration make-home-devel-rust-configuration
   home-devel-rust-configuration?
-  (package home-devel-rust-configuration-package (default rust-binary-complete))
+  (package home-devel-rust-configuration-package (default rust-binary-complete-1.88))
   (edition home-devel-rust-configuration-edition (default "2021")))
 
 (define (add-devel-rust-packages config)
@@ -41,10 +41,10 @@
     (list
      clang
      openssl-1.1
-     rust-package
-     (list rust-package "tools")
-     (list rust-package "rust-src")
-     (list rust-package "cargo"))))
+     rust-package)))
+     ;; (list rust-package "tools")
+     ;; (list rust-package "rust-src")
+     ;; (list rust-package "cargo"))))
 
 (define (add-env-variables config)
   `(("RUST_SRC_PATH" . ,(string-append (getenv "HOME") "/.guix-home/profile/lib/rustlib/src/rust/library"))
