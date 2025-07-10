@@ -266,7 +266,7 @@ high performance and accuracy.")
            python-overrides
            python-dotenv
            python-flask
-           python-pydantic
+           python-pydantic-2
            python-pyyaml
            python-ruamel.yaml
            python-jinja2
