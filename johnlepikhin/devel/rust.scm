@@ -20,7 +20,7 @@
   #:use-module (gnu home services)
   #:use-module (gnu packages crates-io)
   #:use-module (gnu packages llvm)
-  #:use-module (gnu packages rust)
+  #:use-module (johnlepikhin packages rust)
   #:use-module (gnu packages tls)
   #:use-module (gnu services configuration)
   #:use-module (gnu services)
@@ -33,7 +33,7 @@
 (define-record-type* <home-devel-rust-configuration>
   home-devel-rust-configuration make-home-devel-rust-configuration
   home-devel-rust-configuration?
-  (package home-devel-rust-configuration-package (default rust))
+  (package home-devel-rust-configuration-package (default rust-binary))
   (edition home-devel-rust-configuration-edition (default "2021")))
 
 (define (add-devel-rust-packages config)
