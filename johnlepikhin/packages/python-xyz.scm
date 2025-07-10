@@ -84,7 +84,7 @@ in a structured format.")
 (define-public python-anyio-4.9
   (package
     (inherit python-anyio)
-    (name "python-anyio")
+    (name "python-anyio-4.9")
     (version "4.9.0")
     (source
      (origin
