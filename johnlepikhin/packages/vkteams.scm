@@ -210,6 +210,6 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
 (define-public vkteams-24.3
   (make-vkteams "24.3.6"
                 "https://dl.vkt.postgrespro.ru/downloads/linux/x64/latest/vkteams.tar.xz"
-                "1ibmgkrh1g479j6ngh41ycsx5gk1a3vvb66rqngaipakq0x0pw5z"))
+                "08jbi23184lgscw7x2n52fxll7365fj1m5zzmwgzxi3ljsb1fnb9"))
 
 (define-public vkteams vkteams-24.3)
