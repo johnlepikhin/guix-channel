@@ -220,7 +220,6 @@
     xset
     xsetroot
     xwininfo
-    zoom
     )))
 
 (define %tools-packages
