@@ -157,7 +157,7 @@ applications, enabling real-time server-to-client communication.")
     (native-inputs
      (list python-hatchling))
     (propagated-inputs
-     (list python-pydantic
+     (list python-pydantic-2
            python-pydantic-settings
            python-httpx
            python-sse-starlette
