@@ -198,6 +198,3 @@ and various developer tools like rustfmt, clippy, and rust-analyzer.")
     (description "This meta-package provides a complete Rust development
 environment including the compiler, Cargo, development tools (rustfmt, clippy,
 rust-analyzer), and the Rust source code for IDE integration.")))
-
-;; Export all packages
-(list rust-src-1.88 rust-binary-1.88 rust-binary-complete-1.88)

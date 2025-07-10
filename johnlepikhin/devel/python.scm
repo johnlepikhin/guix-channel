@@ -24,6 +24,7 @@
   #:use-module (gnu packages check)
   #:use-module (gnu packages python-check)
   #:use-module (gnu packages python-xyz)
+  #:use-module (johnlepikhin packages crates-io)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (guix gexp)
@@ -47,7 +48,9 @@
    python-pep8-naming
    python-pylint
    python-pytest-flake8
-   python-virtualenv))
+   python-virtualenv
+   uv-bin
+   ruff-bin))
 
 (define home-devel-python-service-type
   (service-type
