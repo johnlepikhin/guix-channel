@@ -270,7 +270,44 @@ high performance and accuracy.")
                ;; Also fix project file resolution to use ~/.config/serena
                (("project_config_path = Path\\(serena_root_path\\(\\)\\) / project_config_path")
                 "project_config_path = Path(os.path.expanduser(\"~/.config/serena\")) / project_config_path if not project_config_path.is_absolute() else project_config_path"))
-             #t)))))
+             #t))
+         (add-after 'patch-config-location 'patch-prompts-location
+           (lambda* (#:key outputs #:allow-other-keys)
+             ;; Fix prompts directory location
+             (substitute* "src/serena/llm/multilang_prompt.py"
+               (("def _prompt_template_folder\\(cls\\) -> str:")
+                "def _prompt_template_folder(cls) -> str:
+        # Patched by Guix to find prompts in the package installation
+        import importlib.resources
+        import tempfile
+        import shutil
+        
+        # Try to use importlib.resources first
+        try:
+            if hasattr(importlib.resources, 'files'):
+                # Python 3.9+
+                prompts_dir = str(importlib.resources.files('serena') / 'prompts')
+                if os.path.isdir(prompts_dir):
+                    return prompts_dir
+        except:
+            pass
+            
+        # Fallback to package directory
+        import serena
+        serena_dir = os.path.dirname(serena.__file__)
+        prompts_dir = os.path.join(serena_dir, 'prompts')
+        if os.path.isdir(prompts_dir):
+            return prompts_dir
+            
+        # Original implementation as last resort:"))
+             #t))
+         (add-after 'install 'install-prompts
+           (lambda* (#:key outputs #:allow-other-keys)
+             ;; Copy prompts directory to the package
+             (let* ((out (assoc-ref outputs "out"))
+                    (lib (string-append out "/lib/python3.11/site-packages/serena")))
+               (copy-recursively "prompts" (string-append lib "/prompts"))
+               #t))))))
     (propagated-inputs
      (list python-requests
            python-overrides
