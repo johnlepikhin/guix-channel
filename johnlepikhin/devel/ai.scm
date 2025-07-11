@@ -37,7 +37,7 @@
 (define-record-type* <home-devel-ai-configuration>
   home-devel-ai-configuration make-home-devel-ai-configuration
   home-devel-ai-configuration?
-  ;; Enable MCP integration between claude-code and serena
+  ;; Enable MCP integration for claude-code
   (enable-mcp-integration? home-devel-ai-configuration-enable-mcp-integration?
                            (default #t))
   ;; Additional packages to include
@@ -49,7 +49,6 @@
    (list
     ;; Core AI development tools
     claude-code
-    python-serena
     ;; Python development tools that work well with AI
     uv-bin
     ruff-bin
@@ -61,24 +60,13 @@
    (home-devel-ai-configuration-extra-packages config)))
 
 (define (add-mcp-configuration config)
-  "Generate MCP configuration file for claude-code to connect to serena."
+  "Generate MCP configuration file for claude-code."
   (if (home-devel-ai-configuration-enable-mcp-integration? config)
       `((".mcp.json"
          ,(plain-file "mcp.json"
                       (string-append
                        "{\n"
                        "  \"mcpServers\": {\n"
-                       "    \"serena\": {\n"
-                       "      \"command\": \"serena-mcp-server\",\n"
-                       "      \"type\": \"stdio\",\n"
-                       "      \"scope\": \"user\",\n"
-                       "      \"description\": \"Serena code analysis and editing MCP server\",\n"
-                       "      \"capabilities\": {\n"
-                       "        \"resources\": true,\n"
-                       "        \"tools\": true,\n"
-                       "        \"prompts\": true\n"
-                       "      }\n"
-                       "    }\n"
                        "  }\n"
                        "}\n"))))
       '()))
@@ -86,8 +74,8 @@
 (define (add-environment-variables config)
   "Add environment variables for AI development tools."
   `(("CLAUDE_MCP_ENABLED" . "1")
-    ;; Optional: Set default project directory for serena
-    ;; ("SERENA_PROJECT_DIR" . "$HOME/projects")
+    ;; Optional: Add additional environment variables
+    ;; ("CLAUDE_PROJECT_DIR" . "$HOME/projects")
     ))
 
 (define (add-activation-script config)
@@ -97,7 +85,7 @@
         (use-modules (guix build utils))
         ;; Ensure MCP directory exists
         (mkdir-p (string-append (getenv "HOME") "/.config/claude-code"))
-        ;; Create a helper script to start serena with a project
+        ;; Create a helper script to start claude-code
         (let ((script-path (string-append (getenv "HOME") "/.local/bin/ai-dev")))
           (mkdir-p (dirname script-path))
           (call-with-output-file script-path
@@ -107,11 +95,8 @@
               (format port "# Usage: ai-dev [project-directory]\n\n")
               (format port "PROJECT_DIR=\"${1:-.}\"\n")
               (format port "cd \"$PROJECT_DIR\"\n\n")
-              (format port "# Index the project with serena\n")
-              (format port "echo \"Indexing project with Serena...\"\n")
-              (format port "index-project \"$PROJECT_DIR\" || echo \"Warning: Failed to index project\"\n\n")
-              (format port "# Start claude with MCP\n")
-              (format port "echo \"Starting Claude Code with Serena integration...\"\n")
+              (format port "# Start claude-code\n")
+              (format port "echo \"Starting Claude Code...\"\n")
               (format port "claude\n")))
           (chmod script-path #o755)))))
 
@@ -134,4 +119,4 @@
                         add-activation-script)))
    (default-value (home-devel-ai-configuration))
    (description "Install and configure AI development tools including
-claude-code and serena with automatic MCP integration.")))
+claude-code with MCP integration support.")))
