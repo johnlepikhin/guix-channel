@@ -26,7 +26,6 @@
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages node)
   #:use-module (johnlepikhin packages ai)
-  #:use-module (johnlepikhin packages python-xyz)
   #:use-module (johnlepikhin packages crates-io)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
@@ -49,14 +48,7 @@
    (list
     ;; Core AI development tools
     claude-code
-    ;; Python development tools that work well with AI
-    uv-bin
-    ruff-bin
-    ;; Python runtime and tools
-    python
-    python-wrapper
-    ;; Node.js for claude-code
-    node-lts)
+    rust-docs-mcp-server)
    (home-devel-ai-configuration-extra-packages config)))
 
 (define (add-mcp-configuration config)

@@ -24,7 +24,7 @@
   #:use-module (gnu packages check)
   #:use-module (gnu packages python-check)
   #:use-module (gnu packages python-xyz)
-  #:use-module (johnlepikhin packages crates-io)
+  #:use-module (johnlepikhin packages python-xyz)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (guix gexp)

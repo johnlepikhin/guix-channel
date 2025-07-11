@@ -32,101 +32,58 @@
   #:use-module (gnu packages base)
   #:use-module (gnu packages elf)
   #:use-module (gnu packages version-control)
-  #:use-module (johnlepikhin packages rust-binary))
+  #:use-module (johnlepikhin packages rust-binary)
+  #:use-module (gnu packages crates-io)
+  #:use-module (gnu packages crates-web)
+  #:use-module (gnu packages crates-crypto)
+  #:use-module (gnu packages crates-apple)
+  #:use-module (gnu packages crates-windows))
 
-(define-public uv-bin
+
+(define-public rust-docs-mcp-server
   (package
-    (name "uv-bin")
-    (version "0.7.20")
+    (name "rust-docs-mcp-server")
+    (version "1.3.1")
     (source
      (origin
-       (method url-fetch)
-       (uri (string-append "https://github.com/astral-sh/uv/releases/download/"
-                          version "/uv-x86_64-unknown-linux-gnu.tar.gz"))
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/Govcraft/rust-docs-mcp-server")
+             (commit (string-append "v" version))))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "0rh67y3sjb4f3cp724s5sbaai46i201isg5549fr527idx109whh"))))
-    (build-system copy-build-system)
+        (base32 "1af1wz4rkqwdkbib1zs7skgz988fhghla4gsc5prdda4lslbh9ld"))))
+    (build-system cargo-build-system)
     (arguments
-     `(#:install-plan
-       '(("uv" "bin/")
-         ("uvx" "bin/"))
-       #:validate-runpath? #f
-       #:phases
-       (modify-phases %standard-phases
-         (add-after 'install 'patch-elf
-           (lambda* (#:key inputs outputs #:allow-other-keys)
-             (let* ((out (assoc-ref outputs "out"))
-                    (patchelf (string-append
-                               (assoc-ref inputs "patchelf") "/bin/patchelf"))
-                    (ld-so (string-append
-                            (assoc-ref inputs "glibc") "/lib/ld-linux-x86-64.so.2"))
-                    (gcc-lib (string-append
-                              (assoc-ref inputs "gcc:lib") "/lib")))
-               (invoke patchelf "--set-interpreter" ld-so
-                       (string-append out "/bin/uv"))
-               (invoke patchelf "--set-interpreter" ld-so
-                       (string-append out "/bin/uvx"))
-               (invoke patchelf "--set-rpath" gcc-lib
-                       (string-append out "/bin/uv"))
-               (invoke patchelf "--set-rpath" gcc-lib
-                       (string-append out "/bin/uvx"))
-               #t))))))
-    (inputs
-     `(("gcc:lib" ,gcc "lib")
-       ("glibc" ,glibc)))
+     `(#:cargo-inputs
+       (("rust-rmcp" ,rust-rmcp-0.1)
+        ("rust-tokio" ,rust-tokio-1)
+        ("rust-dotenvy" ,rust-dotenvy-0.15)
+        ("rust-serde" ,rust-serde-1)
+        ("rust-serde-json" ,rust-serde-json-1)
+        ("rust-thiserror" ,rust-thiserror-2)
+        ("rust-walkdir" ,rust-walkdir-2)
+        ("rust-scraper" ,rust-scraper-0.23)
+        ("rust-ndarray" ,rust-ndarray-0.16)
+        ("rust-async-openai" ,rust-async-openai-0.28)
+        ("rust-futures" ,rust-futures-0.3)
+        ("rust-bincode" ,rust-bincode-2)
+        ("rust-tiktoken-rs" ,rust-tiktoken-rs-0.6)
+        ("rust-cargo" ,rust-cargo-0.87)
+        ("rust-tempfile" ,rust-tempfile-3)
+        ("rust-anyhow" ,rust-anyhow-1)
+        ("rust-schemars" ,rust-schemars-0.8)
+        ("rust-clap" ,rust-clap-4)
+        ("rust-xdg" ,rust-xdg-2)
+        ("rust-dirs" ,rust-dirs-6))))
     (native-inputs
-     `(("patchelf" ,patchelf)))
-    (home-page "https://github.com/astral-sh/uv")
-    (synopsis "Extremely fast Python package and project manager (binary release)")
-    (description
-     "uv is an extremely fast Python package and project manager, written in
-Rust.  It is designed to be a drop-in replacement for pip and pip-tools
-workflows.  This is the pre-built binary release.")
-    (supported-systems '("x86_64-linux"))
-    (license (list license:expat license:asl2.0))))
-
-(define-public ruff-bin
-  (package
-    (name "ruff-bin")
-    (version "0.12.2")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (string-append "https://github.com/astral-sh/ruff/releases/download/"
-                          version "/ruff-x86_64-unknown-linux-gnu.tar.gz"))
-       (sha256
-        (base32 "0xyr769bipa4m500qylq87k0fp3chh8kmazdlv9v0hj7gzmv0dzb"))))
-    (build-system copy-build-system)
-    (arguments
-     `(#:install-plan
-       '(("ruff" "bin/"))
-       #:validate-runpath? #f
-       #:phases
-       (modify-phases %standard-phases
-         (add-after 'install 'patch-elf
-           (lambda* (#:key inputs outputs #:allow-other-keys)
-             (let* ((out (assoc-ref outputs "out"))
-                    (patchelf (string-append
-                               (assoc-ref inputs "patchelf") "/bin/patchelf"))
-                    (ld-so (string-append
-                            (assoc-ref inputs "glibc") "/lib/ld-linux-x86-64.so.2"))
-                    (gcc-lib (string-append
-                              (assoc-ref inputs "gcc:lib") "/lib")))
-               (invoke patchelf "--set-interpreter" ld-so
-                       (string-append out "/bin/ruff"))
-               (invoke patchelf "--set-rpath" gcc-lib
-                       (string-append out "/bin/ruff"))
-               #t))))))
+     `(("pkg-config" ,pkg-config)))
     (inputs
-     `(("gcc:lib" ,gcc "lib")
-       ("glibc" ,glibc)))
-    (native-inputs
-     `(("patchelf" ,patchelf)))
-    (home-page "https://github.com/astral-sh/ruff")
-    (synopsis "Extremely fast Python linter and formatter (binary release)")
-    (description
-     "Ruff is an extremely fast Python linter and code formatter, written in
-Rust.  It can be used to replace Black, isort, Flake8, PyLint, pyupgrade,
-autoflake, and more.  This is the pre-built binary release.")
-    (supported-systems '("x86_64-linux"))
+     `(("openssl" ,openssl)))
+    (home-page "https://github.com/Govcraft/rust-docs-mcp-server")
+    (synopsis "MCP server for accurate Rust documentation context")
+    (description "This MCP (Model Context Protocol) server prevents outdated Rust code
+suggestions from AI assistants by fetching current crate documentation.  It uses
+embeddings and LLMs to provide accurate context via tool calls.  The server requires
+an OpenAI API key for embeddings and summarization.")
     (license license:expat)))
