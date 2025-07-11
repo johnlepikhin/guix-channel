@@ -266,7 +266,10 @@ high performance and accuracy.")
              ;; Make serena look for config in user's home directory
              (substitute* "src/serena/agent.py"
                (("config_file = os.path.join\\(serena_root_path\\(\\), cls.CONFIG_FILE\\)")
-                "config_file = os.path.join(os.path.expanduser(\"~/.config/serena\"), cls.CONFIG_FILE)"))
+                "config_file = os.path.join(os.path.expanduser(\"~/.config/serena\"), cls.CONFIG_FILE)")
+               ;; Also fix project file resolution to use ~/.config/serena
+               (("project_config_path = Path\\(serena_root_path\\(\\)\\) / project_config_path")
+                "project_config_path = Path(os.path.expanduser(\"~/.config/serena\")) / project_config_path if not project_config_path.is_absolute() else project_config_path"))
              #t)))))
     (propagated-inputs
      (list python-requests
