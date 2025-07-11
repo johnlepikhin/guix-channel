@@ -260,6 +260,13 @@ high performance and accuracy.")
              ;; Allow Python 3.10+ instead of strict 3.11
              (substitute* "pyproject.toml"
                ((">=3.11, <3.12") ">=3.10"))
+             #t))
+         (add-after 'unpack 'patch-config-location
+           (lambda _
+             ;; Make serena look for config in user's home directory
+             (substitute* "src/serena/agent.py"
+               (("config_file = os.path.join\\(serena_root_path\\(\\), cls.CONFIG_FILE\\)")
+                "config_file = os.path.join(os.path.expanduser(\"~/.config/serena\"), cls.CONFIG_FILE)"))
              #t)))))
     (propagated-inputs
      (list python-requests
@@ -286,5 +293,10 @@ high performance and accuracy.")
      "Serena is an open-source coding agent toolkit that provides semantic code
 retrieval and editing capabilities.  It turns Large Language Models into coding
 agents that can work directly on codebases, supporting multiple programming
-languages through language servers.")
+languages through language servers.
+
+Note: Before using serena-mcp-server, you must create a configuration file:
+1. Create directory: mkdir -p ~/.config/serena
+2. Copy template from the source: cp $(guix build --source python-serena)/serena_config.template.yml ~/.config/serena/serena_config.yml
+3. Edit the configuration file as needed")
     (license license:expat)))
