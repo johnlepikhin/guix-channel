@@ -50,6 +50,7 @@
   #:use-module (gnu packages gnome-xyz)
   #:use-module (gnu packages golang)
   #:use-module (gnu packages golang-xyz)
+  #:use-module (gnu packages golang-apps)
   #:use-module (gnu packages graphviz)
   #:use-module (gnu packages guile)
   #:use-module (gnu packages haskell)
