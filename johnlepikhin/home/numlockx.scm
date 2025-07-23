@@ -42,6 +42,11 @@
    "numlockx "
    (home-numlockx-configuration-status config)))
 
+(define (xsession-component config)
+  (xsession-component
+   (command (activation-command config))
+   (priority 30)))
+
 (define (home-numlockx-activation config)
   ;; TODO monitor dedicated file
   `(("files/.xsession" ,#~(system #$(activation-command config)))))
@@ -54,7 +59,7 @@
      (service-extension
       home-profile-service-type add-numlockx-package)
      (service-extension
-      home-xsession-service-type activation-command)
+      home-xsession-service-type xsession-component)
      (service-extension
       home-run-on-unlock-service-type activation-command)
      (service-extension

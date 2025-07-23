@@ -70,7 +70,9 @@
   `(("files/.config/xresources" ,#~(system #$(merge-command #t)))))
 
 (define (add-xsession-component config)
-  (merge-command #t))
+  (xsession-component
+   (command (merge-command #t))
+   (priority 10)))
 
 (define home-xresources-service-type
   (service-type

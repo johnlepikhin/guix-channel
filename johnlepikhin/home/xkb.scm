@@ -57,7 +57,9 @@
   home-xkb-load-keymap-command)
 
 (define (add-xsession-component config)
-  (activation-command #t))
+  (xsession-component
+   (command (activation-command #t))
+   (priority 20)))
 
 (define (home-xkb-activation config)
   `((,(string-append "files/" xkb-custom-symbols-path)

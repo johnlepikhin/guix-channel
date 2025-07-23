@@ -57,9 +57,11 @@
    (home-synaptics-record-value record)))
 
 (define (add-xsession-synclient config)
-  (string-append
-   "synclient"
-   (apply string-append (map serialize-record (home-synaptics-configuration-records config)))))
+  (xsession-component
+   (command (string-append
+             "synclient"
+             (apply string-append (map serialize-record (home-synaptics-configuration-records config)))))
+   (priority 30)))
 
 (define (add-synaptics-package config)
   (list (home-synaptics-configuration-package config)))

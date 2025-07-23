@@ -24,13 +24,35 @@
   #:use-module (guix records)
   #:use-module (guix gexp)
   #:export (home-xsession-configuration
-            home-xsession-service-type))
+            home-xsession-service-type
+            xsession-component
+            xsession-component?))
+
+(define-record-type* <xsession-component>
+  xsession-component make-xsession-component
+  xsession-component?
+  (command xsession-component-command)
+  (priority xsession-component-priority (default 50)))
 
 (define-record-type* <home-xsession-configuration>
   home-xsession-configuration make-xsession-configuration
   home-xsession-configuration?
   (root-process home-xsession-root-process (default "xmonad >$XDG_STATE_HOME/log/xmonad.log 2>&1"))
   (components home-xsession-components (default '())))
+
+(define (normalize-component component)
+  (cond
+   ((xsession-component? component) component)
+   ((string? component) (xsession-component
+                         (command component)
+                         (priority 50)))
+   (else (error "Invalid xsession component" component))))
+
+(define (sort-components components)
+  (sort (map normalize-component components)
+        (lambda (a b)
+          (< (xsession-component-priority a)
+             (xsession-component-priority b)))))
 
 (define (add-xsession-file config)
   `((".xsession"
@@ -44,8 +66,9 @@
                        (string-append
                         "#! /bin/sh\n\n"
                         ". ~/.profile\n"
-                        #$@(map (lambda (component) (string-append component "\n"))
-                                (home-xsession-components config))
+                        #$@(map (lambda (component) 
+                                  (string-append (xsession-component-command component) "\n"))
+                                (sort-components (home-xsession-components config)))
                         "\n"
                         (ungexp (home-xsession-root-process config))
                         "\n"))))

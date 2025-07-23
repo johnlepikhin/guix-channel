@@ -56,7 +56,9 @@
    (components (append (home-run-on-unlock-components config) extensions))))
 
 (define (add-xsession-component config)
-  home-run-on-unlock-script-path)
+  (xsession-component
+   (command home-run-on-unlock-script-path)
+   (priority 90)))
 
 (define home-run-on-unlock-service-type
   (service-type
