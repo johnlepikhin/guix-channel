@@ -147,8 +147,8 @@
    leptonica
    coq
    adb
-   python-yamllint
-   docker-compose))
+   ;; docker-compose
+   python-yamllint))
 
 (define %devel-common-libs-packages
   (list
