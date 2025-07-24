@@ -200,7 +200,6 @@
     simplescreenrecorder
     smplayer
     telegram-desktop
-    ungoogled-chromium
     unicode-emoji
     virt-manager
     vlc
