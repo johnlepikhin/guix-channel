@@ -28,7 +28,7 @@
            (postgresql-configuration
             ;; PostGIS compiled for PostgreSQL 14
             (postgresql postgresql-14)
-            (extension-packages (list postgis))
+            ;; (extension-packages (list postgis))
             (config-file (postgresql-config-file (log-destination "stderr")
                                                  (hba-file (plain-file
                                                             "pg_hba.conf"
