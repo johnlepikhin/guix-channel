@@ -130,7 +130,8 @@
                      (format #t "    --ignore-gpu-blocklist \\~%")
                      ;; SSD optimization
                      (format #t "    --disk-cache-size=104857600 \\~%")
+                     ;; Disable update notifications (Chrome cannot self-update in Guix)
+                     (format #t "    --simulate-outdated-no-au=\"Tue, 31 Dec 2099 23:59:59 GMT\" \\~%")
                      (format #t "    \"$@\"~%")))
                  (chmod wrapper #o755)
                  #t)))))))))
-
