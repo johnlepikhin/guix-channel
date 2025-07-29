@@ -37,6 +37,7 @@
   #:use-module (guix search-paths)
   #:use-module (gnu packages gl)
   #:use-module (gnu packages video)
+  #:use-module (gnu packages pciutils)
   #:use-module (nongnu packages chrome))
 
 (define-public google-chrome-beta-system-egl
@@ -45,7 +46,18 @@
     (name "google-chrome-beta-system-egl")
     (inputs
      (modify-inputs (package-inputs google-chrome-beta)
-                    (prepend mesa libva)))
+                    (prepend mesa libva pciutils)))
+    (native-search-paths
+     (append (package-native-search-paths google-chrome-beta)
+             (list (search-path-specification
+                    (variable "LIBGL_DRIVERS_PATH")
+                    (files '("lib/dri")))
+                   (search-path-specification
+                    (variable "LIBVA_DRIVERS_PATH")
+                    (files '("lib/dri")))
+                   (search-path-specification
+                    (variable "SSL_CERT_DIR")
+                    (files '("etc/ssl/certs"))))))
     (arguments
      (substitute-keyword-arguments (package-arguments google-chrome-beta)
        ((#:phases phases)
@@ -64,25 +76,61 @@
                  (with-output-to-file wrapper
                    (lambda ()
                      (format #t "#!/bin/sh~%")
+                     (format #t "~%")
+                     ;; Auto-detect GPU driver
+                     (format #t "# Auto-detect GPU driver~%")
+                     (format #t "if command -v lspci >/dev/null 2>&1; then~%")
+                     (format #t "    if lspci | grep -qi nvidia; then~%")
+                     (format #t "        export MESA_LOADER_DRIVER_OVERRIDE=nouveau~%")
+                     (format #t "    elif lspci | grep -qi 'vga.*amd\\|vga.*advanced micro\\|vga.*radeon'; then~%")
+                     (format #t "        export MESA_LOADER_DRIVER_OVERRIDE=radeonsi~%")
+                     (format #t "    elif lspci | grep -qi 'vga.*intel'; then~%")
+                     (format #t "        export MESA_LOADER_DRIVER_OVERRIDE=iris~%")
+                     (format #t "    fi~%")
+                     (format #t "else~%")
+                     (format #t "    # Default to Intel if lspci is not available~%")
+                     (format #t "    export MESA_LOADER_DRIVER_OVERRIDE=iris~%")
+                     (format #t "fi~%")
+                     (format #t "~%")
                      ;; Set GPU environment variables
+                     (format #t "# GPU environment variables~%")
                      (format #t "export LIBGL_DRIVERS_PATH=\"~a:${LIBGL_DRIVERS_PATH}\"~%"
                              (string-append mesa "/lib/dri"))
-                     (format #t "export MESA_LOADER_DRIVER_OVERRIDE=iris~%")
                      (format #t "export LIBVA_DRIVERS_PATH=\"~a:${LIBVA_DRIVERS_PATH}\"~%"
                              (string-append libva "/lib/dri"))
                      (format #t "export LIBVA_DRIVER_NAME=iHD~%")
                      (format #t "~%")
-                     ;; Execute the original wrapper with GPU flags
+                     ;; Debug mode support
+                     (format #t "# Debug mode support~%")
+                     (format #t "CHROME_FLAGS=\"\"~%")
+                     (format #t "if [ -n \"$CHROME_DEBUG\" ]; then~%")
+                     (format #t "    CHROME_FLAGS=\"$CHROME_FLAGS --enable-logging=stderr --v=1\"~%")
+                     (format #t "fi~%")
+                     (format #t "~%")
+                     ;; Execute the original wrapper with all flags
+                     (format #t "# Execute Chrome with enhanced GPU and performance flags~%")
                      (format #t "exec \"~a\" \\~%" (string-append wrapper "-original"))
+                     (format #t "    $CHROME_FLAGS \\~%")
+                     ;; GPU flags
                      (format #t "    --use-gl=angle \\~%")
                      (format #t "    --use-angle=gl \\~%")
                      (format #t "    --enable-features=VaapiVideoDecoder,VaapiVideoEncoder,CanvasOopRasterization,Vulkan \\~%")
+                     ;; Extended hardware decoding
+                     (format #t "    --enable-features=VaapiVideoDecodeLinuxGL,VaapiAV1Decoder \\~%")
+                     (format #t "    --enable-accelerated-video-decode \\~%")
+                     ;; Performance optimization
+                     (format #t "    --enable-features=ParallelDownloading,LazyFrameLoading,LazyImageLoading \\~%")
+                     (format #t "    --max-active-webgl-contexts=16 \\~%")
+                     (format #t "    --enable-quic \\~%")
+                     (format #t "    --enable-tcp-fast-open \\~%")
+                     ;; General GPU flags
                      (format #t "    --enable-gpu-rasterization \\~%")
                      (format #t "    --enable-zero-copy \\~%")
                      (format #t "    --disable-gpu-driver-bug-workarounds \\~%")
                      (format #t "    --ignore-gpu-blocklist \\~%")
+                     ;; SSD optimization
+                     (format #t "    --disk-cache-size=104857600 \\~%")
                      (format #t "    \"$@\"~%")))
                  (chmod wrapper #o755)
                  #t)))))))))
 
-google-chrome-beta-system-egl
