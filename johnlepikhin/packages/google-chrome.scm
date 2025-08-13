@@ -46,7 +46,7 @@
     (name "google-chrome-beta-system-egl")
     (inputs
      (modify-inputs (package-inputs google-chrome-beta)
-                    (prepend mesa libva pciutils)))
+                    (prepend mesa mesa-utils libva pciutils)))
     (native-search-paths
      (append (package-native-search-paths google-chrome-beta)
              (list (search-path-specification
@@ -69,6 +69,7 @@
                (let* ((out (assoc-ref outputs "out"))
                       (wrapper (string-append out "/bin/google-chrome-beta"))
                       (mesa (assoc-ref inputs "mesa"))
+                      (mesa-utils (assoc-ref inputs "mesa-utils"))
                       (libva (assoc-ref inputs "libva")))
                  ;; Move the original wrapper
                  (rename-file wrapper (string-append wrapper "-original"))
@@ -100,6 +101,26 @@
                              (string-append libva "/lib/dri"))
                      (format #t "export LIBVA_DRIVER_NAME=iHD~%")
                      (format #t "~%")
+                     ;; Auto-detect OpenGL and GLSL versions for Mesa workaround
+                     (format #t "# Auto-detect OpenGL and GLSL versions for Mesa workaround~%")
+                     (format #t "# Using glxinfo from mesa-utils package~%")
+                     (format #t "GLXINFO=\"~a/bin/glxinfo\"~%" mesa-utils)
+                     (format #t "if [ -x \"$GLXINFO\" ]; then~%")
+                     (format #t "    # Extract OpenGL version (e.g., \"4.6\" from \"4.6 (Compatibility Profile) Mesa 25.1.3\")~%")
+                     (format #t "    GL_VERSION=$(\"$GLXINFO\" 2>/dev/null | grep \"OpenGL version string:\" | sed -E 's/OpenGL version string: ([0-9]+\\.[0-9]+).*/\\1/')~%")
+                     (format #t "    # Extract GLSL version (e.g., \"460\" from \"4.60\")~%")
+                     (format #t "    GLSL_VERSION=$(\"$GLXINFO\" 2>/dev/null | grep \"OpenGL shading language version string:\" | sed -E 's/OpenGL shading language version string: ([0-9]+)\\.([0-9]+).*/\\1\\2/')~%")
+                     (format #t "    ~%")
+                     (format #t "    if [ -n \"$GL_VERSION\" ] && [ -n \"$GLSL_VERSION\" ]; then~%")
+                     (format #t "        export MESA_GL_VERSION_OVERRIDE=\"$GL_VERSION\"~%")
+                     (format #t "        export MESA_GLSL_VERSION_OVERRIDE=\"$GLSL_VERSION\"~%")
+                     (format #t "        if [ -n \"$CHROME_DEBUG\" ]; then~%")
+                     (format #t "            echo \"Mesa GL version override: $GL_VERSION\" >&2~%")
+                     (format #t "            echo \"Mesa GLSL version override: $GLSL_VERSION\" >&2~%")
+                     (format #t "        fi~%")
+                     (format #t "    fi~%")
+                     (format #t "fi~%")
+                     (format #t "~%")
                      ;; Debug mode support
                      (format #t "# Debug mode support~%")
                      (format #t "CHROME_FLAGS=\"\"~%")
@@ -114,12 +135,9 @@
                      ;; GPU flags
                      (format #t "    --use-gl=angle \\~%")
                      (format #t "    --use-angle=gl \\~%")
-                     (format #t "    --enable-features=VaapiVideoDecoder,VaapiVideoEncoder,CanvasOopRasterization,Vulkan \\~%")
-                     ;; Extended hardware decoding
-                     (format #t "    --enable-features=VaapiVideoDecodeLinuxGL,VaapiAV1Decoder \\~%")
+                     ;; Combine all features in one flag to avoid conflicts
+                     (format #t "    --enable-features=VaapiVideoDecoder,VaapiVideoEncoder,VaapiVideoDecodeLinuxGL,VaapiAV1Decoder,CanvasOopRasterization,Vulkan,ParallelDownloading,LazyFrameLoading,LazyImageLoading \\~%")
                      (format #t "    --enable-accelerated-video-decode \\~%")
-                     ;; Performance optimization
-                     (format #t "    --enable-features=ParallelDownloading,LazyFrameLoading,LazyImageLoading \\~%")
                      (format #t "    --max-active-webgl-contexts=16 \\~%")
                      (format #t "    --enable-quic \\~%")
                      (format #t "    --enable-tcp-fast-open \\~%")
