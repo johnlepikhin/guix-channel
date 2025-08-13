@@ -38,6 +38,7 @@
   #:use-module (gnu packages gl)
   #:use-module (gnu packages video)
   #:use-module (gnu packages pciutils)
+  #:use-module (gnu packages commencement)
   #:use-module (nongnu packages chrome))
 
 (define-public google-chrome-beta-system-egl
@@ -46,7 +47,7 @@
     (name "google-chrome-beta-system-egl")
     (inputs
      (modify-inputs (package-inputs google-chrome-beta)
-                    (prepend mesa mesa-utils libva pciutils)))
+                    (prepend mesa mesa-utils libva pciutils gcc-toolchain)))
     (native-search-paths
      (append (package-native-search-paths google-chrome-beta)
              (list (search-path-specification
@@ -70,7 +71,8 @@
                       (wrapper (string-append out "/bin/google-chrome-beta"))
                       (mesa (assoc-ref inputs "mesa"))
                       (mesa-utils (assoc-ref inputs "mesa-utils"))
-                      (libva (assoc-ref inputs "libva")))
+                      (libva (assoc-ref inputs "libva"))
+                      (gcc-toolchain (assoc-ref inputs "gcc-toolchain")))
                  ;; Move the original wrapper
                  (rename-file wrapper (string-append wrapper "-original"))
                  ;; Create new wrapper with GPU support
@@ -97,8 +99,14 @@
                      (format #t "# GPU environment variables~%")
                      (format #t "export LIBGL_DRIVERS_PATH=\"~a:${LIBGL_DRIVERS_PATH}\"~%"
                              (string-append mesa "/lib/dri"))
-                     (format #t "export LIBVA_DRIVERS_PATH=\"~a:${LIBVA_DRIVERS_PATH}\"~%"
+                     ;; Use VA-API drivers from user's guix-home profile for version compatibility
+                     (format #t "# VA-API will use drivers from user's guix-home profile~%")
+                     (format #t "if [ -d \"$HOME/.guix-home/profile/lib/dri\" ]; then~%")
+                     (format #t "    export LIBVA_DRIVERS_PATH=\"$HOME/.guix-home/profile/lib/dri:${LIBVA_DRIVERS_PATH}\"~%")
+                     (format #t "else~%")
+                     (format #t "    export LIBVA_DRIVERS_PATH=\"~a:${LIBVA_DRIVERS_PATH}\"~%"
                              (string-append libva "/lib/dri"))
+                     (format #t "fi~%")
                      (format #t "export LIBVA_DRIVER_NAME=iHD~%")
                      (format #t "~%")
                      ;; Auto-detect OpenGL and GLSL versions for Mesa workaround
@@ -128,6 +136,11 @@
                      (format #t "    CHROME_FLAGS=\"$CHROME_FLAGS --enable-logging=stderr --v=1\"~%")
                      (format #t "fi~%")
                      (format #t "~%")
+                     ;; Set LD_PRELOAD for libstdc++ compatibility
+                     (format #t "# Preload newer libstdc++ for VA-API drivers~%")
+                     (format #t "export LD_PRELOAD=\"~a/lib/libstdc++.so.6:${LD_PRELOAD}\"~%"
+                             gcc-toolchain)
+                     (format #t "~%")
                      ;; Execute the original wrapper with all flags
                      (format #t "# Execute Chrome with enhanced GPU and performance flags~%")
                      (format #t "exec \"~a\" \\~%" (string-append wrapper "-original"))
@@ -136,8 +149,9 @@
                      (format #t "    --use-gl=angle \\~%")
                      (format #t "    --use-angle=gl \\~%")
                      ;; Combine all features in one flag to avoid conflicts
-                     (format #t "    --enable-features=VaapiVideoDecoder,VaapiVideoEncoder,VaapiVideoDecodeLinuxGL,VaapiAV1Decoder,CanvasOopRasterization,Vulkan,ParallelDownloading,LazyFrameLoading,LazyImageLoading \\~%")
+                     (format #t "    --enable-features=VaapiVideoDecoder,VaapiVideoEncoder,VaapiVideoDecodeLinuxGL,VaapiAV1Decoder,VaapiIgnoreDriverChecks,CanvasOopRasterization,Vulkan,ParallelDownloading,LazyFrameLoading,LazyImageLoading \\~%")
                      (format #t "    --enable-accelerated-video-decode \\~%")
+                     (format #t "    --enable-accelerated-video-encode \\~%")
                      (format #t "    --max-active-webgl-contexts=16 \\~%")
                      (format #t "    --enable-quic \\~%")
                      (format #t "    --enable-tcp-fast-open \\~%")
@@ -146,6 +160,7 @@
                      (format #t "    --enable-zero-copy \\~%")
                      (format #t "    --disable-gpu-driver-bug-workarounds \\~%")
                      (format #t "    --ignore-gpu-blocklist \\~%")
+                     (format #t "    --disable-features=UseChromeOSDirectVideoDecoder \\~%")
                      ;; SSD optimization
                      (format #t "    --disk-cache-size=104857600 \\~%")
                      ;; Disable update notifications (Chrome cannot self-update in Guix)
