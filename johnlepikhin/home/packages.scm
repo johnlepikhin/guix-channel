@@ -101,6 +101,7 @@
   #:use-module (johnlepikhin home ssh)
   #:use-module (johnlepikhin packages apcalc)
   #:use-module (johnlepikhin packages dbeaver)
+  #:use-module (johnlepikhin packages convco)
   #:use-module (johnlepikhin packages git-sync)
   #:use-module (johnlepikhin packages oping)
   #:use-module (johnlepikhin packages puppet-lint)
@@ -148,7 +149,8 @@
    coq
    adb
    ;; docker-compose
-   python-yamllint))
+   python-yamllint
+   convco))
 
 (define %devel-common-libs-packages
   (list
