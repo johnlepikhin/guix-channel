@@ -25,7 +25,7 @@
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages base)
   #:use-module (gnu packages bittorrent)
-  #:use-module (gnu packages certs)
+  #:use-module ((gnu packages certs) #:select (nss-certs))
   #:use-module (gnu packages check)
   #:use-module (gnu packages chromium)
   #:use-module (gnu packages code)
@@ -104,6 +104,7 @@
   #:use-module (johnlepikhin packages convco)
   #:use-module (johnlepikhin packages git-sync)
   #:use-module (johnlepikhin packages oping)
+  #:use-module (johnlepikhin packages prettier)
   #:use-module (johnlepikhin packages puppet-lint)
   #:use-module (johnlepikhin packages rust-nightly)
   #:use-module (johnlepikhin packages shadowplay)
@@ -150,7 +151,8 @@
    adb
    ;; docker-compose
    python-yamllint
-   convco))
+   convco
+   prettier))
 
 (define %devel-common-libs-packages
   (list
