@@ -17,6 +17,7 @@
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (johnlepikhin home packages)
+  #:use-module (gnu packages)
   #:use-module (gnu packages admin)
   #:use-module (gnu packages android)
   #:use-module (gnu packages aspell)
@@ -25,7 +26,7 @@
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages base)
   #:use-module (gnu packages bittorrent)
-  #:use-module ((gnu packages certs) #:select (nss-certs))
+  #:use-module (gnu packages nss)
   #:use-module (gnu packages check)
   #:use-module (gnu packages chromium)
   #:use-module (gnu packages code)
