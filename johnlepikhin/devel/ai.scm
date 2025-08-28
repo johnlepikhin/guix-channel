@@ -26,6 +26,7 @@
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages node)
   #:use-module (johnlepikhin packages ai)
+  #:use-module (johnlepikhin packages opencode-ai)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (guix gexp)
@@ -46,7 +47,8 @@
   (append
    (list
     ;; Core AI development tools
-    claude-code)
+    claude-code
+    opencode)
    (home-devel-ai-configuration-extra-packages config)))
 
 (define (add-mcp-configuration config)
