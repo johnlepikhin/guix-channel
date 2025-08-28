@@ -19,16 +19,57 @@
 (define-module (johnlepikhin packages i3im)
   #:use-module ((guix licenses)
                 #:prefix license:)
-  #:use-module (gnu packages crates-graphics)
-  #:use-module (gnu packages crates-io)
   #:use-module (gnu packages gl)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages pulseaudio)
   #:use-module (gnu packages python)
+  #:use-module (gnu packages rust-crates)
   #:use-module (guix build-system cargo)
   #:use-module (guix download)
   #:use-module (guix git)
-  #:use-module (guix packages))
+  #:use-module (guix packages)
+  #:use-module (guix utils))
+
+;; Local definitions to avoid dependency on crates-io modules
+(define rust-env-logger-0.9
+  (package
+    (name "rust-env-logger")
+    (version "0.9.3")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (crate-uri "env_logger" version))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32 "1rq0kqpa8my6i1qcyhfqrn1g9xr5fbkwwbd42nqvlzn9qibncbm1"))))
+    (build-system cargo-build-system)
+    (arguments
+     `(#:cargo-inputs (("rust-log" ,rust-log-0.4)
+                       ("rust-regex" ,rust-regex-1.11.1)
+                       ("rust-atty" ,rust-atty-0.2)
+                       ("rust-humantime" ,rust-humantime-2)
+                       ("rust-termcolor" ,rust-termcolor-1))))
+    (home-page "https://github.com/rust-cli/env_logger")
+    (synopsis "Logging implementation for log")
+    (description "This package provides a logging implementation for @code{log} which is configured via an environment variable.")
+    (license (list license:expat license:asl2.0))))
+
+(define rust-syslog
+  (package
+    (name "rust-syslog")
+    (version "6.1.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (crate-uri "syslog" version))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32 "0j295nplm4f6f7k3zcmbapwh61hi8x44ycwq5f3gyng0sywqjp7p"))))
+    (build-system cargo-build-system)
+    (home-page "https://github.com/Geal/rust-syslog")
+    (synopsis "Syslog message formatter and writer")
+    (description "This package provides Syslog message formatter and writer, supporting UNIX sockets, UDP and TCP exporters.")
+    (license license:expat)))
 
 (define-public rust-i3ipc-jl-0
   (package
@@ -57,7 +98,7 @@
 
 (define-public rust-syslog-5
   (package
-    (inherit rust-syslog-6)
+    (inherit rust-syslog)
     (name "rust-syslog")
     (version "5.0.0")
     (source
@@ -114,7 +155,7 @@
                        ("rust-slog-scope" ,rust-slog-scope-4)
                        ("rust-slog-stdlog" ,rust-slog-stdlog-4)
                        ("rust-slog-term" ,rust-slog-term-2)
-                       ("rust-regex" ,rust-regex-1))))
+                       ("rust-regex" ,rust-regex-1.11.1))))
     (native-inputs (list pkg-config))
     (home-page "https://github.com/slog-rs/slog")
     (synopsis "Port of env_logger as a slog-rs drain")
@@ -191,7 +232,7 @@ runtime.")
     (arguments
      `(#:cargo-inputs (("rust-env-logger" ,rust-env-logger-0.9)
                        ("rust-structdoc" ,rust-structdoc-0)
-                       ("rust-regex" ,rust-regex-1)
+                       ("rust-regex" ,rust-regex-1.11.1)
                        ("rust-anyhow" ,rust-anyhow-1)
                        ("rust-clap" ,rust-clap-4)
                        ("rust-i3ipc-jl" ,rust-i3ipc-jl-0)

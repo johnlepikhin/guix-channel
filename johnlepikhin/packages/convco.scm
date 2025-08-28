@@ -18,12 +18,6 @@
 
 (define-module (johnlepikhin packages convco)
   #:use-module ((guix licenses) #:prefix license:)
-  #:use-module (gnu packages crates-io)
-  #:use-module (gnu packages crates-vcs)
-  #:use-module (gnu packages crates-check)
-  #:use-module (gnu packages crates-compression)
-  #:use-module (gnu packages crates-web)
-  #:use-module (gnu packages crates-windows)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages ssh)
@@ -471,6 +465,7 @@ Semantic Versioning.")
     (description "This package provides implementation detail of the
 @code{thiserror} crate.")
     (license (list license:expat license:asl2.0))))
+
 
 (define-public rust-thiserror-2.0.11
   (package
