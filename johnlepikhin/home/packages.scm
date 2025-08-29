@@ -259,7 +259,7 @@
    sed
    sshfs
    texlive
-   tgcli
+   ;; tgcli ;; Temporarily disabled due to python-mkdocs-material build failure
    unzip
    which
    whois
