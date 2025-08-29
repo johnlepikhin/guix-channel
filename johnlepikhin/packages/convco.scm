@@ -18,15 +18,21 @@
 
 (define-module (johnlepikhin packages convco)
   #:use-module ((guix licenses) #:prefix license:)
+  #:use-module (gnu packages)
+  #:use-module (gnu packages cmake)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages pkg-config)
+  #:use-module (gnu packages rust)
+  #:use-module (gnu packages rust-crates)
   #:use-module (gnu packages ssh)
   #:use-module (gnu packages tls)
   #:use-module (gnu packages version-control)
   #:use-module (guix build-system cargo)
   #:use-module (guix download)
+  #:use-module (guix gexp)
   #:use-module (guix packages)
-  #:use-module (guix utils))
+  #:use-module (guix utils)
+  #:use-module (johnlepikhin packages rust-crates))
 
 (define-public convco
   (package
@@ -34,45 +40,51 @@
     (version "0.6.2")
     (source
      (origin
-       (method url-fetch)
+	   (method url-fetch)
        (uri (crate-uri name version))
        (file-name (string-append name "-" version ".tar.gz"))
        (sha256
         (base32 "1m8si96p1m60wg93syf3f77ksn0mg5cbd19n4n8hxn3n2ix9clhr"))))
     (build-system cargo-build-system)
     (arguments
-     `(#:install-source? #f
-       ;; Disable default features which include zlib-ng
-       #:cargo-build-flags '("--release" "--no-default-features")
-       ;; Tests require zlib-ng, disable them
-       #:tests? #f
-       #:phases
-       (modify-phases %standard-phases
-         (add-before 'configure 'set-env-vars
-           (lambda* (#:key inputs #:allow-other-keys)
-             ;; Ensure sys crates use system libraries
-             (setenv "LIBZ_SYS_STATIC" "0")
-             (setenv "LIBGIT2_NO_VENDOR" "1")
-             (setenv "LIBSSH2_SYS_USE_PKG_CONFIG" "1")
-             (setenv "LIBGIT2_SYS_USE_PKG_CONFIG" "1")
-             (setenv "OPENSSL_NO_VENDOR" "1")
-             #t))
-         (replace 'install
-           (lambda* (#:key outputs #:allow-other-keys)
-             (let ((out (assoc-ref outputs "out")))
-               (invoke "cargo" "install" "--no-track"
-                       "--path" "." "--root" out
-                       "--no-default-features")))))))
-    (native-inputs (list pkg-config))
-    (inputs (list git-minimal
-                  zlib
-                  libgit2-1.9
-                  libssh2
-                  openssl))
+     (list
+      #:install-source? #f
+      ;; Disable default features which include zlib-ng
+      #:cargo-build-flags ''("--release" "--no-default-features")
+      ;; Tests require zlib-ng, disable them
+      #:tests? #f
+      #:phases
+      #~(modify-phases %standard-phases
+          (add-before 'configure 'set-env-vars
+		    (lambda* (#:key inputs #:allow-other-keys)
+			  ;; Ensure sys crates use system libraries
+			  (setenv "LIBZ_SYS_STATIC" "0")
+			  (setenv "LIBGIT2_NO_VENDOR" "1")
+			  (setenv "LIBSSH2_SYS_USE_PKG_CONFIG" "1")
+			  (setenv "LIBGIT2_SYS_USE_PKG_CONFIG" "1")
+			  (setenv "OPENSSL_NO_VENDOR" "1")))
+          (replace 'install
+		    (lambda* (#:key outputs #:allow-other-keys)
+		      ;; Install with --no-default-features flag
+		      (let ((out (assoc-ref outputs "out")))
+                (invoke "cargo"
+                        "install"
+                        "--offline"
+                        "--no-track"
+                        "--path"
+                        "."
+                        "--root"
+                        out
+                        "--no-default-features")))))))
+    (native-inputs (list cmake pkg-config))
+    (inputs (append (list git-minimal zlib libgit2-1.9 libssh2 openssl)
+                    ;; Use symbol instead of string
+                    (cargo-inputs 'convco
+                                  #:module '(johnlepikhin packages rust-crates))))
     (home-page "https://convco.github.io/")
     (synopsis "Conventional commit CLI tool")
     (description
      "Convco is a CLI tool that helps you to follow conventional commits.
 It provides helpful features like conventional commit templates, automatic
 changelog generation, and version number updates.")
-    (license (list license:expat))))
+    (license license:expat)))
