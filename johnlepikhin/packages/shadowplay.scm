@@ -22,7 +22,8 @@
   #:use-module (guix git-download)
   #:use-module (guix git)
   #:use-module (guix packages)
-  #:use-module (gnu packages pkg-config))
+  #:use-module (gnu packages pkg-config)
+  #:use-module ((johnlepikhin packages rust-crates) #:select (lookup-cargo-inputs)))
 
 (define (make-shadowplay version)
   (package
@@ -34,8 +35,7 @@
     (build-system cargo-build-system)
     (arguments
      `(#:tests? #f
-       ;; Cargo dependencies will be resolved automatically by cargo
-       #:install-source? #t
+       #:install-source? #f
        #:phases
        (modify-phases
            %standard-phases
@@ -43,8 +43,10 @@
            (lambda _
              (delete-file ".cargo/config.toml")
              #t)))))
+    (inputs
+     (lookup-cargo-inputs 'shadowplay))
     (native-inputs
-     `(("pkg-config" ,pkg-config)))
+     (list pkg-config))
     (home-page "https://gitlab.corp.mail.ru/MailBackendTest/devtools/shadowplay")
     (synopsis "@command{shadowplay} is Puppet linter, pretty printer and explorer")
     (description

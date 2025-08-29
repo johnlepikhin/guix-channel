@@ -25,7 +25,8 @@
   #:use-module (gnu packages python)
   #:use-module (guix build-system cargo)
   #:use-module (guix download)
-  #:use-module (guix packages))
+  #:use-module (guix packages)
+  #:use-module ((johnlepikhin packages rust-crates) #:select (lookup-cargo-inputs)))
 
 (define-public xidlehook
   (package
@@ -45,9 +46,10 @@
     (build-system cargo-build-system)
     (arguments
      `(#:tests? #f
-       ;; Cargo dependencies will be resolved automatically by cargo
-       #:install-source? #t))
-    (inputs (list mesa pulseaudio))
+       #:install-source? #f))
+    (inputs (cons* mesa 
+                   pulseaudio
+                   (lookup-cargo-inputs 'xidlehook)))
     (native-inputs (list pkg-config python))
     (home-page "https://github.com/jD91mZM2/xidlehook")
     (synopsis

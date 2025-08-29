@@ -55,15 +55,14 @@
              (setenv "LIBGIT2_NO_VENDOR" "1")
              (setenv "LIBSSH2_SYS_USE_PKG_CONFIG" "1")
              (setenv "LIBGIT2_SYS_USE_PKG_CONFIG" "1")
-             (setenv "OPENSSL_NO_VENDOR" "1")))
+             (setenv "OPENSSL_NO_VENDOR" "1")
+             #t))
          (replace 'install
            (lambda* (#:key outputs #:allow-other-keys)
              (let ((out (assoc-ref outputs "out")))
                (invoke "cargo" "install" "--no-track"
                        "--path" "." "--root" out
-                       "--no-default-features")))))
-       ;; Cargo dependencies will be resolved automatically by cargo
-       #:install-source? #t))
+                       "--no-default-features")))))))
     (native-inputs (list pkg-config))
     (inputs (list git-minimal
                   zlib

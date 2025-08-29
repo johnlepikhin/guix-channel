@@ -19,11 +19,12 @@
 (define-module (johnlepikhin packages i3im)
   #:use-module ((guix licenses)
                 #:prefix license:)
+  #:use-module (guix packages)
+  #:use-module (guix download)
+  #:use-module (gnu packages)
   #:use-module (gnu packages pkg-config)
   #:use-module (guix build-system cargo)
-  #:use-module (guix download)
-  #:use-module (guix packages)
-  #:use-module (guix utils))
+  #:use-module ((guix build-system cargo) #:select (cargo-inputs)))
 
 (define-public i3im
   (package
@@ -35,14 +36,13 @@
        (uri (crate-uri name version))
        (file-name (string-append name "-" version ".tar.gz"))
        (sha256
-        (base32 "1h7a0jcma3fjqi8f4l0crdl67yqaypd0b1d6f81c84gjzm4j3rp3"))
-       (modules '((guix build utils)))))
+        (base32 "1h7a0jcma3fjqi8f4l0crdl67yqaypd0b1d6f81c84gjzm4j3rp3"))))
     (build-system cargo-build-system)
     (arguments
-     `(#:tests? #f
-       ;; Cargo dependencies will be resolved automatically by cargo
-       #:install-source? #t))
+     `(#:install-source? #f))
     (native-inputs (list pkg-config))
+    (inputs
+     (cargo-inputs 'i3im #:module '(johnlepikhin packages rust-crates)))
     (home-page "https://github.com/johnlepikhin/i3im")
     (synopsis "@command{i3im} i3 IMproved")
     (description
