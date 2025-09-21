@@ -184,7 +184,7 @@
     font-google-noto
     geeqie
     gimp
-    google-chrome-beta-system-egl
+    google-chrome-beta
     inkscape
     kdenlive
     libfreeaptx
