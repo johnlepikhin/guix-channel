@@ -107,6 +107,7 @@
   #:use-module (johnlepikhin packages oping)
   #:use-module (johnlepikhin packages prettier)
   #:use-module (johnlepikhin packages puppet-lint)
+  #:use-module (johnlepikhin packages ripsecrets)
   #:use-module (johnlepikhin packages rust-nightly)
   #:use-module (johnlepikhin packages shadowplay)
   #:use-module (johnlepikhin packages mikrotik-winbox)
@@ -154,7 +155,8 @@
    ;; docker-compose
    python-yamllint
    convco
-   prettier))
+   prettier
+   ripsecrets))
 
 (define %devel-common-libs-packages
   (list
