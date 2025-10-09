@@ -8,6 +8,6 @@
     (name nonguix)
     (url "https://gitlab.com/nonguix/nonguix"))
    (channel
-    (name 'telegram-desktop)
+    (name telegram-desktop)
     (branch "main")
     (url "https://github.com/johnlepikhin/guix-telegram-desktop.git"))))
