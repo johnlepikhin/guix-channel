@@ -114,7 +114,7 @@
   ;; #:use-module (johnlepikhin packages telegram)
   #:use-module (johnlepikhin packages xidlehook)
   #:use-module (johnlepikhin packages i3im)
-  #:use-module (gnu packages telegram)
+  #:use-module (telegram-desktop packages telegram-desktop)
   #:use-module (nongnu packages messaging)
   #:use-module (nongnu packages chrome)
   #:use-module (johnlepikhin packages google-chrome)
