@@ -189,11 +189,9 @@
     gimp
     google-chrome-beta
     inkscape
-    kdenlive
     libfreeaptx
     libreoffice
     markdown ;; required by Emacs Obsidian mode
-    mediainfo ;; required by kdenlive
     mesa-utils
     mplayer
     network-manager-applet
