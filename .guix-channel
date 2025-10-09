@@ -6,4 +6,8 @@
     (url "https://git.savannah.gnu.org/git/guix.git"))
    (channel
     (name nonguix)
-    (url "https://gitlab.com/nonguix/nonguix"))))
+    (url "https://gitlab.com/nonguix/nonguix"))
+   (channel
+    (name 'telegram-desktop)
+    (branch "main")
+    (url "https://github.com/johnlepikhin/guix-telegram-desktop.git"))))
