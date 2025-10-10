@@ -59,7 +59,6 @@
            (start #~(make-forkexec-constructor
                      (list #$(file-append package "/sbin/thinkfan")
                            "-c" #$config-file
-                           "-n"
                            "-s" #$(number->string update-interval))))
            (stop #~(make-kill-destructor))))))
 
