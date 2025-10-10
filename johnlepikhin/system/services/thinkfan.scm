@@ -57,7 +57,7 @@
            (requirement '(udev))
            (documentation "Thinkfan service")
            (start #~(make-forkexec-constructor
-                     (list #$(file-append package "/bin/thinkfan")
+                     (list #$(file-append package "/sbin/thinkfan")
                            "-c" "/etc/thinkfan/thinkfan.yaml"
                            "-n"
                            "-s" #$(number->string update-interval))))
