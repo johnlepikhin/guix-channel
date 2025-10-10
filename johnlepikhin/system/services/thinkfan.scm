@@ -58,7 +58,7 @@
            (documentation "Thinkfan service")
            (start #~(make-forkexec-constructor
                      (list #$(file-append package "/sbin/thinkfan")
-                           "-c" "/etc/thinkfan/thinkfan.yaml"
+                           "-c" #$config-file
                            "-n"
                            "-s" #$(number->string update-interval))))
            (stop #~(make-kill-destructor))))))
