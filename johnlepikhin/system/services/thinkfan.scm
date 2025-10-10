@@ -47,15 +47,14 @@
             (copy-file #$config-file #$thinkfan.yaml))))))
 
 (define-public (thinkfan-shepherd-service config)
-  (let ((package "thinkfan")
-        (config-file (thinkfan-configuration-config-file config))
+  (let ((config-file (thinkfan-configuration-config-file config))
         (update-interval (thinkfan-configuration-update-interval config)))
     (list (shepherd-service
            (provision '(thinkfan))
            (requirement '(udev))
            (documentation "Thinkfan service")
            (start #~(make-forkexec-constructor
-                     (list #$(file-append package "/bin/thinkfan")
+                     (list #$(file-append thinkfan "/bin/thinkfan")
                            "-c" "/etc/thinkfan/thinkfan.yaml"
                            "-n"
                            "-s" #$(number->string update-interval))))
@@ -70,6 +69,6 @@
      (service-extension activation-service-type
                         thinkfan-activation)
      (service-extension profile-service-type
-                        (compose list thinkfan))
+                        (const (list thinkfan)))
      (service-extension shepherd-root-service-type
                         thinkfan-shepherd-service)))))
