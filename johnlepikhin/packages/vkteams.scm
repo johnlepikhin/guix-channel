@@ -135,7 +135,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
             (let ((wrapper (string-append out "/bin/vkteams")))
               (with-output-to-file wrapper
                 (lambda _
-                  (display (string-append "#! /bin/sh\n\nexport LD_LIBRARY_PATH=" nss ":$LD_LIBRARY_PATH\nSOFTWARE_RENDER=1 " out "/dist/.vkteams-real $*\n"))))
+                  (display (string-append "#! /bin/sh\n\nexport LD_LIBRARY_PATH=" nss ":$LD_LIBRARY_PATH\n" out "/dist/.vkteams-real $*\n"))))
               (chmod wrapper #o755))
 
             (let ((qt.conf (string-append
@@ -156,11 +156,6 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
                                            (string-length v))))
                                (version-major+minor (string-take v d))))
              (string-append out "/dist/lib/libtinfo.so.5"))
-
-            ;; Create symlink for libnssckbi.so from NSS package
-            (symlink
-             (string-append nss "/libnssckbi.so")
-             (string-append out "/dist/lib/libnssckbi.so"))
 
             #t)))
         (add-after
