@@ -31,16 +31,13 @@
   thinkfan-configuration
   make-thinkfan-configuration
   thinkfan-configuration?
-  (package              thinkfan-configuration-package
-                        (default thinkfan))
   (config-file          thinkfan-configuration-config-file
                         (default #f))
   (update-interval      thinkfan-configuration-update-interval
                         (default 1)))
 
 (define (thinkfan-activation config)
-  (let ((package (thinkfan-configuration-package config))
-        (config-file (thinkfan-configuration-config-file config)))
+  (let ((config-file (thinkfan-configuration-config-file config)))
     (with-imported-modules '((guix build utils))
       (let ((etc-dir "/etc/thinkfan")
             (thinkfan.yaml "/etc/thinkfan/thinkfan.yaml"))
@@ -50,7 +47,7 @@
             (copy-file #$config-file #$thinkfan.yaml))))))
 
 (define-public (thinkfan-shepherd-service config)
-  (let ((package (thinkfan-configuration-package config))
+  (let ((package "thinkfan")
         (config-file (thinkfan-configuration-config-file config))
         (update-interval (thinkfan-configuration-update-interval config)))
     (list (shepherd-service
@@ -73,6 +70,6 @@
      (service-extension activation-service-type
                         thinkfan-activation)
      (service-extension profile-service-type
-                        (compose list thinkfan-configuration-package))
+                        (compose list thinkfan))
      (service-extension shepherd-root-service-type
                         thinkfan-shepherd-service)))))
