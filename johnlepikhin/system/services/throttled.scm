@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2024 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2025 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -25,6 +25,7 @@
   #:use-module (gnu services configuration)
   #:use-module (gnu services dbus)
   #:use-module (johnlepikhin packages throttled)
+  #:use-module (johnlepikhin system services utils)
   #:export (throttled-service-type
             throttled-configuration))
 
@@ -38,23 +39,23 @@
                         (default #f)))
 
 (define (throttled-activation config)
-  (let ((package (throttled-configuration-package config))
-        (config-file (throttled-configuration-config-file config)))
-    (with-imported-modules '((guix build utils))
-      (let ((etc-dir "/etc/throttled")
-            (throttled.conf "/etc/throttled/throttled.conf"))
-        #~(begin
-            (use-modules (guix build utils))
-            (mkdir-p #$etc-dir)
-            (copy-file #$config-file #$throttled.conf))))))
+  "Generate activation script to install throttled configuration file.
+This ensures the configuration file is copied to /etc/throttled during system activation."
+  (make-config-file-activation
+   (throttled-configuration-config-file config)
+   "/etc/throttled"
+   "throttled.conf"))
 
 (define-public (throttled-shepherd-service config)
+  "Create shepherd service for throttled.
+Throttled is a workaround for Intel CPU throttling issues that overrides
+power limits and temperature trip points to prevent excessive throttling."
   (let ((package (throttled-configuration-package config))
         (config-file (throttled-configuration-config-file config)))
     (list (shepherd-service
            (provision '(throttled))
            (requirement '(dbus-system udev))
-           (documentation "Throttled service")
+           (documentation "Fix for Intel CPU throttling on Linux")
            (start #~(make-forkexec-constructor
                      (list #$(file-append package "/bin/throttled")
                            "--config" #$config-file)))

@@ -24,6 +24,7 @@
   #:use-module (gnu services shepherd)
   #:use-module (gnu services configuration)
   #:use-module (gnu packages linux)
+  #:use-module (johnlepikhin system services utils)
   #:export (thinkfan-service-type
             thinkfan-configuration))
 
@@ -39,23 +40,24 @@
                         (default 1)))
 
 (define (thinkfan-activation config)
-  (let ((config-file (thinkfan-configuration-config-file config)))
-    (with-imported-modules '((guix build utils))
-      (let ((etc-dir "/etc/thinkfan")
-            (thinkfan.yaml "/etc/thinkfan/thinkfan.yaml"))
-        #~(begin
-            (use-modules (guix build utils))
-            (mkdir-p #$etc-dir)
-            (copy-file #$config-file #$thinkfan.yaml))))))
+  "Generate activation script to install thinkfan configuration file.
+This ensures the configuration file is copied to /etc/thinkfan during system activation."
+  (make-config-file-activation
+   (thinkfan-configuration-config-file config)
+   "/etc/thinkfan"
+   "thinkfan.yaml"))
 
 (define-public (thinkfan-shepherd-service config)
+  "Create shepherd service for thinkfan.
+Thinkfan is a fan control daemon for ThinkPad laptops that adjusts
+fan speed based on temperature sensors."
   (let ((package (thinkfan-configuration-package config))
         (config-file (thinkfan-configuration-config-file config))
         (update-interval (thinkfan-configuration-update-interval config)))
     (list (shepherd-service
            (provision '(thinkfan))
            (requirement '(udev))
-           (documentation "Thinkfan service")
+           (documentation "Fan control daemon for ThinkPad laptops")
            (start #~(make-forkexec-constructor
                      (list #$(file-append package "/sbin/thinkfan")
                            "-c" #$config-file
