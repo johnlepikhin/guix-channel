@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2023 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2023-2025 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -20,7 +20,6 @@
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix build-system cargo)
   #:use-module (guix git-download)
-  #:use-module (guix git)
   #:use-module (guix packages)
   #:use-module (gnu packages pkg-config)
   #:use-module ((johnlepikhin packages rust-crates) #:select (lookup-cargo-inputs)))
@@ -29,9 +28,15 @@
   (package
     (name "shadowplay")
     (version version)
-    (source (git-checkout
-             (url "https://github.com/mailru/shadowplay")
-             (commit (string-append "v" version))))
+    (source (origin
+             (method git-fetch)
+             (uri (git-reference
+                   (url "https://github.com/mailru/shadowplay")
+                   (commit "91aa44b496793850dc107f93a299a5347c466043")))
+             (file-name (git-file-name name version))
+             (sha256
+              (base32
+               "12r4cmsk140y0z6znqi1afvxsv6j3kh3hxxwlamhilkrxb5hjn5n"))))
     (build-system cargo-build-system)
     (arguments
      `(#:tests? #f
@@ -47,7 +52,7 @@
      (lookup-cargo-inputs 'shadowplay))
     (native-inputs
      (list pkg-config))
-    (home-page "https://gitlab.corp.mail.ru/MailBackendTest/devtools/shadowplay")
+    (home-page "https://github.com/mailru/shadowplay")
     (synopsis "@command{shadowplay} is Puppet linter, pretty printer and explorer")
     (description
      "Shadowplay is a utility that has the functionality of checking puppet syntax, a puppet manifest linter, a pretty printer, and a
