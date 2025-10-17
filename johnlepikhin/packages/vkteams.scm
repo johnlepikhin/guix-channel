@@ -132,10 +132,15 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               patchelf " --set-rpath \"" out "/dist/lib:" nss ":$LIBRARY_PATH\" " libs " " plugins))
 
             (mkdir (string-append out "/bin"))
-            (let ((wrapper (string-append out "/bin/vkteams")))
+            (let ((wrapper (string-append out "/bin/vkteams"))
+                  (libx11-locale (string-append (assoc-ref inputs "libx11") "/share/X11/locale")))
               (with-output-to-file wrapper
                 (lambda _
-                  (display (string-append "#! /bin/sh\n\nexport LD_LIBRARY_PATH=" nss ":$LD_LIBRARY_PATH\n" out "/dist/.vkteams-real $*\n"))))
+                  (display (string-append "#! /bin/sh\n\n"
+                                          "export QT_IM_MODULE=compose\n"
+                                          "export XLOCALEDIR=" libx11-locale "\n"
+                                          "export LD_LIBRARY_PATH=" nss ":$LD_LIBRARY_PATH\n"
+                                          out "/dist/.vkteams-real $*\n"))))
               (chmod wrapper #o755))
 
             (let ((qt.conf (string-append
@@ -193,6 +198,7 @@ own.  This helper makes it easier to deal with \"tar bombs\"."
               ("glibc" ,glibc)
               ("libfontconfig" ,fontconfig)
               ("libxau" ,libxau)
+              ("libx11" ,libx11)
               ("pulseaudio" ,pulseaudio)
               ("dbus" ,dbus)
               ("mesa" ,mesa)
