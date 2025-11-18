@@ -1,0 +1,70 @@
+#!/bin/sh
+# Example xplugrc script for xplugd daemon
+# This script is called when hotplug events occur in X11
+#
+# Arguments:
+#   $1 (TYPE)   - Event type: display, keyboard, or pointer
+#   $2 (DEVICE) - Device identifier (e.g., HDMI3, LVDS1, xinput device number)
+#   $3 (STATUS) - Connection status: connected, disconnected, or unknown
+#   $4+ (DESC)  - Optional device description (for displays: model from EDID)
+
+TYPE=$1
+DEVICE=$2
+STATUS=$3
+shift 3
+DESC=$*
+
+# Log all events for debugging (comment out in production)
+# logger -t xplugd "Event: TYPE=$TYPE DEVICE=$DEVICE STATUS=$STATUS DESC=$DESC"
+
+case "$TYPE" in
+    display)
+        case "$STATUS" in
+            connected)
+                # Example: Auto-configure external monitor
+                # Uncomment and adjust according to your setup:
+                # if [ "$DEVICE" = "HDMI1" ]; then
+                #     xrandr --output HDMI1 --auto --left-of eDP1
+                # fi
+                logger -t xplugd "Display $DEVICE connected: $DESC"
+                ;;
+            disconnected)
+                # Example: Turn off disconnected display
+                # xrandr --output $DEVICE --off
+                logger -t xplugd "Display $DEVICE disconnected"
+                ;;
+        esac
+        ;;
+
+    keyboard)
+        case "$STATUS" in
+            connected)
+                # Example: Configure keyboard layout
+                # setxkbmap -layout us,ru -option grp:alt_shift_toggle
+                logger -t xplugd "Keyboard connected: $DESC"
+                ;;
+            disconnected)
+                logger -t xplugd "Keyboard disconnected: $DESC"
+                ;;
+        esac
+        ;;
+
+    pointer)
+        case "$STATUS" in
+            connected)
+                # Example: Disable touchpad when external mouse is connected
+                # case "$DESC" in
+                #     *TouchPad*)
+                #         xinput set-prop "$DEVICE" "Device Enabled" 0
+                #         ;;
+                # esac
+                logger -t xplugd "Pointer connected: $DESC"
+                ;;
+            disconnected)
+                logger -t xplugd "Pointer disconnected: $DESC"
+                ;;
+        esac
+        ;;
+esac
+
+exit 0
