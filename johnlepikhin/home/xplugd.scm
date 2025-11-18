@@ -60,6 +60,7 @@
       (stop #~(make-kill-destructor))
       (start #~(make-forkexec-constructor
                 (list #$(file-append xplugd-pkg "/bin/xplugd")
+                      "-n"
                       "-l" #$log-level)))
       (documentation "Monitor X11 hotplug events for displays and input devices")))))
 
