@@ -31,18 +31,22 @@
   home-xplugd-configuration make-home-xplugd-configuration
   home-xplugd-configuration?
   (package home-xplugd-configuration-package (default xplugd))
-  (log-level home-xplugd-configuration-log-level (default "notice")))
+  (log-level home-xplugd-configuration-log-level (default "notice"))
+  (xplugrc home-xplugd-configuration-xplugrc (default #f)))
 
 (define (add-xplugd-config-file config)
-  `(("xplugrc"
-     ,(computed-file
-       "xplugrc"
-       (with-imported-modules '((guix build utils))
-         #~(begin
-             (use-modules (guix build utils))
-             (copy-file #$(local-file "files/xplugrc")
-                        #$output)
-             (chmod #$output #o755)))))))
+  (let ((custom-xplugrc (home-xplugd-configuration-xplugrc config)))
+    `(("xplugrc"
+       ,(computed-file
+         "xplugrc"
+         (with-imported-modules '((guix build utils))
+           #~(begin
+               (use-modules (guix build utils))
+               (copy-file #$(if custom-xplugrc
+                                custom-xplugrc
+                                (local-file "files/xplugrc"))
+                          #$output)
+               (chmod #$output #o755))))))))
 
 (define (add-xplugd-package config)
   (list (home-xplugd-configuration-package config)))
