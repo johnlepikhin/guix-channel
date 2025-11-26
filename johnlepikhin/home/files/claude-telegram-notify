@@ -1,0 +1,41 @@
+#!/bin/bash
+# Claude Code Telegram notifications
+
+# Load tokens
+# shellcheck source=/dev/null
+[ -f ~/.config/telegram-claude.env ] && source ~/.config/telegram-claude.env
+
+TELEGRAM_API="https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}"
+
+send_message() {
+    local text="$1"
+    curl -s -X POST "${TELEGRAM_API}/sendMessage" \
+        -d "chat_id=${TELEGRAM_CHAT_ID}" \
+        -d "text=${text}" \
+        -d "parse_mode=HTML" > /dev/null
+}
+
+get_project_name() {
+    local cwd="$1"
+    echo "$cwd" | rev | cut -d'/' -f1-2 | rev
+}
+
+# Read JSON from stdin (from Claude Code hooks)
+input=$(cat)
+hook_event=$(echo "$input" | jq -r '.hook_event_name // empty')
+cwd=$(echo "$input" | jq -r '.cwd // empty')
+project=$(get_project_name "$cwd")
+
+case "$hook_event" in
+    Notification)
+        message=$(echo "$input" | jq -r '.message // empty')
+        send_message "🔔 <b>[${project}]</b>
+${message}"
+        ;;
+    Stop)
+        send_message "✅ <b>[${project}]</b> Claude Code завершил работу"
+        ;;
+    *)
+        send_message "📋 <b>[${project}]</b> Event: ${hook_event}"
+        ;;
+esac
