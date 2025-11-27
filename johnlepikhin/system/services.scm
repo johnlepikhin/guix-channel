@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2023 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2023-2025 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -81,6 +81,9 @@
                                                                     ;; "https://bordeaux.guix.gnu.org/"
                                                                     ))
                                                   (discover? #t)
+                                                  (extra-options
+                                                   (list "--gc-keep-derivations=yes"
+                                                         "--gc-keep-outputs=yes"))
                                                   (authorized-keys (append
                                                                     authorized-keys
                                                                     %default-authorized-guix-keys))))
