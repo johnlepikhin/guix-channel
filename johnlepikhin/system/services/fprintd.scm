@@ -52,17 +52,19 @@ rompts to be unlocked by fingerprint, you add @code{polkit-1} to this list.
 (This is enabled by default.)"))
 
 (define (fprintd-pam-other-services config fprintd-module)
-  (lambda (pam)
-    (if (member (pam-service-name pam)
-                (fprintd-configuration-unlock-other config))
-        (let ((sufficient
-               (pam-entry
-                (control "sufficient")
-                (module fprintd-module))))
-          (pam-service
-           (inherit pam)
-           (auth (cons sufficient (pam-service-auth pam)))))
-        pam)))
+  (pam-extension
+   (transformer
+    (lambda (pam)
+      (if (member (pam-service-name pam)
+                  (fprintd-configuration-unlock-other config))
+          (let ((sufficient
+                 (pam-entry
+                  (control "sufficient")
+                  (module fprintd-module))))
+            (pam-service
+             (inherit pam)
+             (auth (cons sufficient (pam-service-auth pam)))))
+          pam)))))
 
 (define (fprintd-pam-gdm-services fprintd-module)
   (list
@@ -79,7 +81,7 @@ rompts to be unlocked by fingerprint, you add @code{polkit-1} to this list.
          (file-append (fprintd-configuration-fprintd config) "/lib/security/pam_fprintd.so")))
     (cons
      (fprintd-pam-other-services config fprintd-module)
-     (if fprintd-configuration-unlock-gdm?
+     (if (fprintd-configuration-unlock-gdm? config)
          (fprintd-pam-gdm-services fprintd-module)
          '()))))
 
