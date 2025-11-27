@@ -28,9 +28,26 @@ project=$(get_project_name "$cwd")
 
 case "$hook_event" in
     Notification)
+        notification_type=$(echo "$input" | jq -r '.notification_type // empty')
         message=$(echo "$input" | jq -r '.message // empty')
-        send_message "🔔 <b>[${project}]</b>
+
+        case "$notification_type" in
+            idle_prompt)
+                send_message "⏳ <b>[${project}]</b> Claude ожидает вашего ввода"
+                ;;
+            elicitation_dialog)
+                send_message "❓ <b>[${project}]</b> Claude требуется ввод:
 ${message}"
+                ;;
+            *)
+                send_message "🔔 <b>[${project}]</b>
+${message}"
+                ;;
+        esac
+        ;;
+    PermissionRequest)
+        tool_name=$(echo "$input" | jq -r '.tool_name // empty')
+        send_message "🔐 <b>[${project}]</b> Claude запрашивает разрешение: ${tool_name}"
         ;;
     Stop)
         send_message "✅ <b>[${project}]</b> Claude Code завершил работу"
