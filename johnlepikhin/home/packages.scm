@@ -207,7 +207,6 @@
     telegram-desktop
     unicode-emoji
     virt-manager
-    vlc
     xidlehook
     xclip
     xdg-desktop-portal
