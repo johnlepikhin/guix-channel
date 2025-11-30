@@ -22,7 +22,7 @@
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages xorg)
   #:use-module (guix build-system gnu)
-  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix packages))
 
 (define-public xplugd
@@ -31,16 +31,17 @@
     (version "1.4")
     (source
      (origin
-       (method url-fetch)
-       (uri (string-append
-             "https://github.com/troglobit/xplugd/releases/download/v"
-             version "/xplugd-" version ".tar.xz"))
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/johnlepikhin/xplugd")
+             (commit "64450a31d48129c2352cec3069d26a54aff4dadb")))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "1x33wd72vxr2sijr0ib8sxjgnsp67mzl89zl7wnc7iaz0y9cynb0"))))
+        (base32 "0rimjxq3mfch2d4znsgp76b3y58naq6k7xinzk0r729ysjyzffl6"))))
     (build-system gnu-build-system)
     (native-inputs (list pkg-config))
     (inputs (list libx11 libxi libxrandr))
-    (home-page "https://github.com/troglobit/xplugd")
+    (home-page "https://github.com/johnlepikhin/xplugd")
     (synopsis "Monitor hotplug events for X11 displays and input devices")
     (description
      "xplugd is a daemon that monitors hotplug events in X11 for displays,
