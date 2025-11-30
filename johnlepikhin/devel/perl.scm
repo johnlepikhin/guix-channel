@@ -40,7 +40,7 @@
                            perl-perlcritic
                            perl-uri-escape
                            perl-yaml-tiny
-                           perltidy
+                           perl-tidy
                            perl-lwp-protocol-https
                            perl-libwww
                            perl-io-socket-ssl))))
