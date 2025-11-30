@@ -19,6 +19,7 @@
 (define-module (johnlepikhin packages xplugd)
   #:use-module ((guix licenses)
                 #:prefix license:)
+  #:use-module (gnu packages autotools)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages xorg)
   #:use-module (guix build-system gnu)
@@ -39,7 +40,7 @@
        (sha256
         (base32 "0rimjxq3mfch2d4znsgp76b3y58naq6k7xinzk0r729ysjyzffl6"))))
     (build-system gnu-build-system)
-    (native-inputs (list pkg-config))
+    (native-inputs (list autoconf automake pkg-config))
     (inputs (list libx11 libxi libxrandr))
     (home-page "https://github.com/johnlepikhin/xplugd")
     (synopsis "Monitor hotplug events for X11 displays and input devices")
