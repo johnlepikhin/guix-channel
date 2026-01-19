@@ -104,4 +104,8 @@ export EDITOR='emacsclient -c'
 
 # Useless in exotic WMs like XMonad
 export _JAVA_AWT_WM_NONREPARENTING=1
+
+# Normalize PKG_CONFIG_PATH to prevent cargo rebuilds due to duplicates
+# (Guix profile sourcing can add the same paths multiple times)
+export PKG_CONFIG_PATH=$(echo \"$PKG_CONFIG_PATH\" | tr ':' '\\n' | awk '!seen[\$0]++' | tr '\\n' ':' | sed 's/:$//')
 ")
