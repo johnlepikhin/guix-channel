@@ -42,7 +42,7 @@
    python-flake8
    python-flake8-bugbear
    python-isort
-   python-language-server
+   python-lsp-server
    python-mccabe
    python-mypy
    python-pep8-naming
