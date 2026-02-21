@@ -39,7 +39,7 @@
 (define-public voice-type
   (package
     (name "voice-type")
-    (version "0.1.1")
+    (version "0.2.0")
     (source (origin
              (method git-fetch)
              (uri (git-reference
@@ -48,7 +48,7 @@
              (file-name (git-file-name name version))
              (sha256
               (base32
-               "053ffk67pckrps34gm69jaa8612wqkdi4g516kkkfh8syya84svy"))))
+               "1cqymnmj87y46gfidk3z1asxj4mxnqp855hhmvl9sg09hmbpabfk"))))
     (build-system cargo-build-system)
     (arguments
      (list

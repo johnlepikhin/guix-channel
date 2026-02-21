@@ -19,7 +19,6 @@
 (define-module (johnlepikhin home voice-type)
   #:use-module (gnu services)
   #:use-module (gnu home services)
-  #:use-module (johnlepikhin home xsession)
   #:use-module (johnlepikhin packages voice-type)
   #:use-module (guix records)
   #:export (home-voice-type-configuration
@@ -33,15 +32,11 @@
 (define (add-voice-type-package config)
   (list (home-voice-type-configuration-package config)))
 
-(define (add-xsession-component config)
-  "voice-type daemon &")
-
 (define home-voice-type-service-type
   (service-type
    (name 'home-voice-type)
    (extensions
     (list
-     (service-extension home-profile-service-type add-voice-type-package)
-     (service-extension home-xsession-service-type add-xsession-component)))
+     (service-extension home-profile-service-type add-voice-type-package)))
    (default-value (home-voice-type-configuration))
-   (description "Install voice-type and start daemon in xsession")))
+   (description "Install voice-type")))

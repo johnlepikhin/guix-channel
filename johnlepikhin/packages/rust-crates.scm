@@ -3345,7 +3345,6 @@
                 rust-bit-vec-0.8.0
                 rust-bitflags-1.3.2
                 rust-bitflags-2.11.0
-                rust-bitvec-1.0.1
                 rust-block-0.1.6
                 rust-bumpalo-3.20.2
                 rust-bytes-1.11.1
@@ -3354,7 +3353,6 @@
                 rust-cc-1.2.56
                 rust-cesu8-1.1.0
                 rust-cexpr-0.6.0
-                rust-cfg-aliases-0.2.1
                 rust-cfg-expr-0.20.6
                 rust-cfg-if-1.0.4
                 rust-clang-sys-1.8.1
@@ -3384,7 +3382,6 @@
                 rust-either-1.15.0
                 rust-equivalent-1.0.2
                 rust-errno-0.3.14
-                rust-evdev-0.12.2
                 rust-fastrand-2.3.0
                 rust-field-offset-0.3.6
                 rust-find-msvc-tools-0.1.9
@@ -3394,7 +3391,6 @@
                 rust-foreign-types-0.3.2
                 rust-foreign-types-shared-0.1.1
                 rust-form-urlencoded-1.2.2
-                rust-funty-2.0.0
                 rust-futures-channel-0.3.32
                 rust-futures-core-0.3.32
                 rust-futures-executor-0.3.32
@@ -3469,15 +3465,12 @@
                 rust-malloc-buf-0.0.6
                 rust-matchers-0.2.0
                 rust-memchr-2.8.0
-                rust-memoffset-0.6.5
                 rust-memoffset-0.9.1
                 rust-minimal-lexical-0.2.1
                 rust-miniz-oxide-0.8.9
                 rust-ndk-0.8.0
                 rust-ndk-context-0.1.1
                 rust-ndk-sys-0.5.0+25.2.9519653
-                rust-nix-0.23.2
-                rust-nix-0.29.0
                 rust-nom-7.1.3
                 rust-nu-ansi-term-0.50.3
                 rust-num-conv-0.2.0
@@ -3505,7 +3498,6 @@
                 rust-quick-error-1.2.3
                 rust-quote-1.0.44
                 rust-r-efi-5.3.0
-                rust-radium-0.7.0
                 rust-rand-0.9.2
                 rust-rand-chacha-0.9.0
                 rust-rand-core-0.9.5
@@ -3547,7 +3539,6 @@
                 rust-syn-2.0.117
                 rust-synstructure-0.13.2
                 rust-system-deps-7.0.7
-                rust-tap-1.0.1
                 rust-target-lexicon-0.13.3
                 rust-tempfile-3.25.0
                 rust-thiserror-1.0.69
@@ -3637,7 +3628,6 @@
                 rust-wit-component-0.244.0
                 rust-wit-parser-0.244.0
                 rust-writeable-0.6.2
-                rust-wyz-0.5.1
                 rust-x11-2.21.0
                 rust-xml-rs-0.8.28
                 rust-yoke-0.8.1
