@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2023 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2023, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -29,6 +29,7 @@
   #:use-module (gnu system pam)
   #:use-module (gnu system nss)
   #:use-module (guix channels)
+  #:use-module (johnlepikhin system services swap-file)
   #:export (make-desktop-operating-system
             default-kernel-arguments))
 
@@ -59,7 +60,8 @@
           (timezone "Europe/Moscow")
           (sudoers-file-extras "")
           (kernel-arguments default-kernel-arguments)
-          (mapped-devices '()))
+          (mapped-devices '())
+          (swap-file #f))
   (operating-system
    (kernel linux-kernel)
    (kernel-loadable-modules kernel-loadable-modules)
@@ -77,7 +79,10 @@
    (host-name hostname)
    (users users)
    (packages packages)
-   (services services)
+   (services (if swap-file
+                 (cons (service swap-file-service-type swap-file)
+                       services)
+                 services))
    ;; resolve .local hostnames with mDNS
    (name-service-switch %mdns-host-lookup-nss)
    (sudoers-file
