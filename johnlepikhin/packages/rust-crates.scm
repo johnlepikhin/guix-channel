@@ -1978,14 +1978,6 @@
   (crate-source "gio-sys" "0.20.10"
                 "10vc6gqhz5crnrh040rv6r5nm09njky2r9d9ms29xj3gwnkr67jj"))
 
-(define rust-gl-0.14.0
-  (crate-source "gl" "0.14.0"
-                "015lgy3qpzdw7mnh59a4y4hdjq1fhv7nkqlmh1h6fzc212qxlkm9"))
-
-(define rust-gl-generator-0.14.0
-  (crate-source "gl_generator" "0.14.0"
-                "0k8j1hmfnff312gy7x1aqjzcm8zxid7ij7dlb8prljib7b1dz58s"))
-
 (define rust-glib-0.20.12
   (crate-source "glib" "0.20.12"
                 "10ynn8aiabbzrsgdswmqpr47sapfkbfn5rfxsy26swflabivdi7z"))
@@ -2025,14 +2017,6 @@
 (define rust-gtk4-0.9.7
   (crate-source "gtk4" "0.9.7"
                 "1mi6lcwm25jz7lznrb9glaabgyk40hnvkg4fzaxlf762080xsx7j"))
-
-(define rust-gtk4-layer-shell-0.4.0
-  (crate-source "gtk4-layer-shell" "0.4.0"
-                "1k6iisxb2ilczqjhq37mmrs8q9lfd0g6mylx135dgqvba6qy3qgk"))
-
-(define rust-gtk4-layer-shell-sys-0.3.0
-  (crate-source "gtk4-layer-shell-sys" "0.3.0"
-                "01c13i6aymd7y37ciwpr1kl186bhd1jrbwa5kd56cbfv2z0ps1g3"))
 
 (define rust-gtk4-macros-0.9.5
   (crate-source "gtk4-macros" "0.9.5"
@@ -2145,10 +2129,6 @@
 (define rust-js-sys-0.3.85
   (crate-source "js-sys" "0.3.85"
                 "1csmb42fxjmzjdgc790bgw77sf1cb9ydm5rdsnh5qj4miszjx54c"))
-
-(define rust-khronos-api-3.1.0
-  (crate-source "khronos_api" "3.1.0"
-                "1p0xj5mlbagqyvvnv8wmv3cr7l9y1m153888pxqwg3vk3mg5inz2"))
 
 (define rust-leb128fmt-0.1.0
   (crate-source "leb128fmt" "0.1.0"
@@ -2693,10 +2673,6 @@
 (define rust-x11-2.21.0
   (crate-source "x11" "2.21.0"
                 "0bnvl09d7044k067gqdx1ln2r0ljp5f4675icwb0216d9i3aabah"))
-
-(define rust-xml-rs-0.8.28
-  (crate-source "xml-rs" "0.8.28"
-                "0grdj7xwbki5zrkalrg8dljyf14y4yj3wrj34sbzqp06i9zk7s1s"))
 
 (define rust-yoke-0.8.1
   (crate-source "yoke" "0.8.1"
@@ -3407,8 +3383,6 @@
                 rust-getrandom-0.4.1
                 rust-gio-0.20.12
                 rust-gio-sys-0.20.10
-                rust-gl-0.14.0
-                rust-gl-generator-0.14.0
                 rust-glib-0.20.12
                 rust-glib-macros-0.20.12
                 rust-glib-sys-0.20.10
@@ -3419,8 +3393,6 @@
                 rust-gsk4-0.9.6
                 rust-gsk4-sys-0.9.6
                 rust-gtk4-0.9.7
-                rust-gtk4-layer-shell-0.4.0
-                rust-gtk4-layer-shell-sys-0.3.0
                 rust-gtk4-macros-0.9.5
                 rust-gtk4-sys-0.9.6
                 rust-hashbrown-0.15.5
@@ -3452,7 +3424,6 @@
                 rust-jni-sys-0.3.0
                 rust-jobserver-0.1.34
                 rust-js-sys-0.3.85
-                rust-khronos-api-3.1.0
                 rust-lazy-static-1.5.0
                 rust-leb128fmt-0.1.0
                 rust-libc-0.2.182
@@ -3629,7 +3600,6 @@
                 rust-wit-parser-0.244.0
                 rust-writeable-0.6.2
                 rust-x11-2.21.0
-                rust-xml-rs-0.8.28
                 rust-yoke-0.8.1
                 rust-yoke-derive-0.8.1
                 rust-zerocopy-0.8.39
