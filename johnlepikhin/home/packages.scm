@@ -257,7 +257,7 @@
    rsync
    sed
    sshfs
-   texlive
+   texlive-scheme-full
    ;; tgcli ;; Temporarily disabled due to python-mkdocs-material build failure
    unzip
    which
@@ -295,7 +295,7 @@
 
 (define %mail-packages
   (list
-   offlineimap))
+   offlineimap3))
 
 (define %astro-packages
   (list
