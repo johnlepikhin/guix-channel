@@ -4003,6 +4003,7 @@
                 rust-zmij-1.0.21))
   (clio => (list rust-adler2-2.0.1
                  rust-ahash-0.8.12
+                 rust-aho-corasick-1.1.4
                  rust-android-system-properties-0.1.5
                  rust-anstream-0.6.21
                  rust-anstyle-1.0.13
@@ -4150,7 +4151,9 @@
                  rust-r-efi-5.3.0
                  rust-redox-syscall-0.5.18
                  rust-redox-users-0.4.6
+                 rust-regex-1.12.3
                  rust-regex-automata-0.4.14
+                 rust-regex-syntax-0.8.9
                  rust-rusqlite-0.32.1
                  rust-rusqlite-migration-1.3.1
                  rust-rustc-version-0.4.1

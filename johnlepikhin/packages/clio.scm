@@ -36,7 +36,7 @@
 (define-public clio
   (package
     (name "clio")
-    (version "0.3.2")
+    (version "0.4.0")
     (source (origin
              (method git-fetch)
              (uri (git-reference
@@ -45,7 +45,7 @@
              (file-name (git-file-name name version))
              (sha256
               (base32
-               "1q0q1k6yr8nc9g7li9cx8izyfqm7cnbhh3mwm5jrln8sxwdsmha2"))))
+               "1hri3n6hsm3ff7m2vy1ycfmakp991yxs4drjb2pznypzfsj1gqcn"))))
     (build-system cargo-build-system)
     (arguments
      (list
