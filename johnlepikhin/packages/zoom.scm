@@ -193,7 +193,7 @@
    (native-inputs `(("patchelf" ,patchelf)))
    (inputs
     `(("alsa-lib" ,alsa-lib)
-      ("atk" ,atk)
+      ("at-spi2-core" ,at-spi2-core)
       ("cairo" ,cairo)
       ("dbus" ,dbus)
       ("fontconfig" ,fontconfig)
