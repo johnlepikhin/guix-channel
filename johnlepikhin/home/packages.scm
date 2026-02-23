@@ -85,6 +85,7 @@
   #:use-module (gnu packages rsync)
   #:use-module (gnu packages rust-apps)
   #:use-module (gnu packages terminals)
+  #:use-module (gnu packages tex)
   #:use-module (gnu packages texlive)
   #:use-module (gnu packages tls)
   #:use-module (gnu packages unicode)
