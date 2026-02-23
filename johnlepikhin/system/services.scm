@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2023-2025 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2023-2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -109,9 +109,12 @@
               (list
                network-manager-openvpn))
              (extra-configuration-files
-              `(("default-wifi-powersave-on.conf" ,(plain-file "default-wifi-powersave-on.conf"
-                           "[connection]
-wifi.powersave = 2"))))))
+              `(("default-wifi-powersave-on.conf"
+                 ,(plain-file "default-wifi-powersave-on.conf"
+                              "[connection]\nwifi.powersave = 2"))
+                ("99-unmanaged-veth.conf"
+                 ,(plain-file "99-unmanaged-veth.conf"
+                              "[keyfile]\nunmanaged-devices=interface-name:veth*\n"))))))
 
            (avahi-service-type config =>
                                (avahi-configuration (ipv6? #f))))))
