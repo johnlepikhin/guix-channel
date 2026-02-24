@@ -185,6 +185,8 @@
     flameshot
     flatpak
     font-google-noto
+    font-google-noto-emoji
+    font-google-noto-sans-cjk
     geeqie
     gimp
     google-chrome-beta-system-egl
