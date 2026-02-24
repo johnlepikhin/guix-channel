@@ -2844,6 +2844,14 @@
   (crate-source "error-code" "3.3.2"
                 "0nacxm9xr3s1rwd6fabk3qm89fyglahmbi4m512y0hr8ym6dz8ny"))
 
+(define rust-env-filter-1.0.0
+  (crate-source "env_filter" "1.0.0"
+                "13rhwy5arjn626a0z3hvvkpf9w9pnll14c35vscyqx3jwp43q73s"))
+
+(define rust-env-logger-0.11.9
+  (crate-source "env_logger" "0.11.9"
+                "13913sqpnhv741z5ixmcy5j3nnml53gmsllnhajjkx2ili7fxnmj"))
+
 (define rust-fallible-iterator-0.3.0
   (crate-source "fallible-iterator" "0.3.0"
                 "0ja6l56yka5vn4y4pk6hn88z0bpny7a8k1919aqjzp0j1yhy9k1a"))
@@ -4049,6 +4057,8 @@
                  rust-downcast-rs-1.2.1
                  rust-equivalent-1.0.2
                  rust-errno-0.3.14
+                 rust-env-filter-1.0.0
+                 rust-env-logger-0.11.9
                  rust-error-code-3.3.2
                  rust-fallible-iterator-0.3.0
                  rust-fallible-streaming-iterator-0.1.9
