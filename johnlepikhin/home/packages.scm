@@ -294,10 +294,12 @@
    vim
    emacs-geiser
    emacs-geiser-guile
-   emacs-ac-geiser))
+   emacs-ac-geiser
+   emacs-lsp-booster))
 
 (define %mail-packages
   (list
+   isync
    offlineimap3))
 
 (define %astro-packages
