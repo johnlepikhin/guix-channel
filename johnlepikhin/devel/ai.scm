@@ -26,6 +26,7 @@
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages node)
   #:use-module (johnlepikhin packages ai)
+  #:use-module (johnlepikhin packages ast-index)
   #:use-module (johnlepikhin packages opencode-ai)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
@@ -47,6 +48,7 @@
   (append
    (list
     ;; Core AI development tools
+    ast-index
     claude-code
     opencode)
    (home-devel-ai-configuration-extra-packages config)))
