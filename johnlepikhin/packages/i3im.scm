@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2024-2025 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2024-2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -29,14 +29,14 @@
 (define-public i3im
   (package
     (name "i3im")
-    (version "0.2.0")
+    (version "0.2.1")
     (source
      (origin
        (method url-fetch)
        (uri (crate-uri name version))
        (file-name (string-append name "-" version ".tar.gz"))
        (sha256
-        (base32 "0wrfjjgi6ripfyqj4d36iaygfq8dnzicfjnyy92jdlily7zr82b3"))))
+        (base32 "02sfir2p7nrbvzcjv5diva7skrv0irpg5vp2msmai7i0g62mayh0"))))
     (build-system cargo-build-system)
     (arguments
      `(#:install-source? #f))
