@@ -1,0 +1,42 @@
+#! /usr/bin/env bash
+# Claude Code dunst desktop notifications
+
+get_project_name() {
+    local cwd="$1"
+    echo "$cwd" | rev | cut -d'/' -f1-2 | rev
+}
+
+# Read JSON from stdin (from Claude Code hooks)
+input=$(cat)
+hook_event=$(echo "$input" | jq -r '.hook_event_name // empty')
+cwd=$(echo "$input" | jq -r '.cwd // empty')
+project=$(get_project_name "$cwd")
+
+case "$hook_event" in
+    Notification)
+        notification_type=$(echo "$input" | jq -r '.notification_type // empty')
+        message=$(echo "$input" | jq -r '.message // empty')
+
+        case "$notification_type" in
+            idle_prompt)
+                dunstify -u normal "Claude Code" "Ожидает ввода [${project}]"
+                ;;
+            elicitation_dialog)
+                dunstify -u critical "Claude Code" "Требуется ввод: ${message} [${project}]"
+                ;;
+            *)
+                dunstify -u normal "Claude Code" "${message} [${project}]"
+                ;;
+        esac
+        ;;
+    PermissionRequest)
+        tool_name=$(echo "$input" | jq -r '.tool_name // empty')
+        dunstify -u critical "Claude Code" "Запрашивает разрешение: ${tool_name} [${project}]"
+        ;;
+    Stop)
+        dunstify -u low "Claude Code" "Завершил работу [${project}]"
+        ;;
+    *)
+        dunstify -u normal "Claude Code" "Event: ${hook_event} [${project}]"
+        ;;
+esac
