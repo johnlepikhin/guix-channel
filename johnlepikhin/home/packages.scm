@@ -298,9 +298,7 @@
    emacs-lsp-booster))
 
 (define %mail-packages
-  (list
-   isync
-   offlineimap3))
+  (list))
 
 (define %astro-packages
   (list
