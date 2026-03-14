@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2025 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2025, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -23,10 +23,12 @@
   #:use-module (gnu services)
   #:use-module (gnu services shepherd)
   #:use-module (gnu services configuration)
+  #:use-module (gnu packages admin)
   #:use-module (gnu packages linux)
   #:use-module (johnlepikhin system services utils)
   #:export (thinkfan-service-type
-            thinkfan-configuration))
+            thinkfan-configuration
+            thinkfan-sleep-hook-script))
 
 (define-record-type* <thinkfan-configuration>
   thinkfan-configuration
@@ -63,6 +65,20 @@ fan speed based on temperature sensors."
                            "-c" #$config-file
                            "-s" #$(number->string update-interval))))
            (stop #~(make-kill-destructor))))))
+
+(define thinkfan-sleep-hook-script
+  (mixed-text-file "thinkfan-sleep-hook"
+                   "#!/bin/sh
+case \"$1\" in
+  pre)
+    " (file-append shepherd "/bin/herd") " stop thinkfan
+    echo level auto > /proc/acpi/ibm/fan
+    ;;
+  post)
+    " (file-append shepherd "/bin/herd") " start thinkfan
+    ;;
+esac
+"))
 
 (define-public thinkfan-service-type
   (service-type
