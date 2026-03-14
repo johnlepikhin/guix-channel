@@ -240,6 +240,7 @@
    blueman
    cpio
    curl
+   fd
    ffmpeg
    file
    gnuplot
