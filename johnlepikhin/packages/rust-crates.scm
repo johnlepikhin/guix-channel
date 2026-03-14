@@ -3522,6 +3522,284 @@
                 "0r8swld9cwnyvdfamq4063ngwxdzckg4922ayk7likma4mc19kfz"))
 
 
+;; Crate sources for app-powerd dependencies
+(define rust-anstream-1.0.0
+  (crate-source "anstream" "1.0.0"
+                "13d2bj0xfg012s4rmq44zc8zgy1q8k9yp7yhvfnarscnmwpj2jl2"))
+
+(define rust-anstyle-1.0.14
+  (crate-source "anstyle" "1.0.14"
+                "0030szmgj51fxkic1hpakxxgappxzwm6m154a3gfml83lq63l2wl"))
+
+(define rust-anstyle-parse-1.0.0
+  (crate-source "anstyle-parse" "1.0.0"
+                "03hkv2690s0crssbnmfkr76kw1k7ah2i6s5amdy9yca2n8w7zkjj"))
+
+(define rust-app-powerd-core-0.1.0
+  (crate-source "app-powerd-core" "0.1.0"
+                "18gdinz6lsp3xxkdsj62jj9kyjxrn1r6fqc17lg0a76pk2h3aisg"))
+
+(define rust-as-raw-xcb-connection-1.0.1
+  (crate-source "as-raw-xcb-connection" "1.0.1"
+                "0sqgpz2ymv5yx76r5j2npjq2x5qvvqnw0vrs35cyv30p3pfp2m8p"))
+
+(define rust-async-broadcast-0.7.2
+  (crate-source "async-broadcast" "0.7.2"
+                "0ckmqcwyqwbl2cijk1y4r0vy60i89gqc86ijrxzz5f2m4yjqfnj3"))
+
+(define rust-async-channel-2.5.0
+  (crate-source "async-channel" "2.5.0"
+                "1ljq24ig8lgs2555myrrjighycpx2mbjgrm3q7lpa6rdsmnxjklj"))
+
+(define rust-async-executor-1.14.0
+  (crate-source "async-executor" "1.14.0"
+                "0al1rmxjy7p7r6h50z698q5lwssqs5a2vzmqbazm1z2sv1rgjsy9"))
+
+(define rust-async-io-2.6.0
+  (crate-source "async-io" "2.6.0"
+                "1z16s18bm4jxlmp6rif38mvn55442yd3wjvdfhvx4hkgxf7qlss5"))
+
+(define rust-async-lock-3.4.2
+  (crate-source "async-lock" "3.4.2"
+                "04c3xrrdrfrvh9v0ajxrangpy38qi76qq268zslphnxxjqjpy3r9"))
+
+(define rust-async-process-2.5.0
+  (crate-source "async-process" "2.5.0"
+                "0xfswxmng6835hjlfhv7k0jrfp7czqxpfj6y2s5dsp05q0g94l7w"))
+
+(define rust-async-recursion-1.1.1
+  (crate-source "async-recursion" "1.1.1"
+                "04ac4zh8qz2xjc79lmfi4jlqj5f92xjvfaqvbzwkizyqd4pl4hrv"))
+
+(define rust-async-signal-0.2.13
+  (crate-source "async-signal" "0.2.13"
+                "0k66mpb3xp86hj4vxs7w40v7qz2jfbblrm9ddc5mglwwynxp1h23"))
+
+(define rust-async-task-4.7.1
+  (crate-source "async-task" "4.7.1"
+                "1pp3avr4ri2nbh7s6y9ws0397nkx1zymmcr14sq761ljarh3axcb"))
+
+(define rust-async-trait-0.1.89
+  (crate-source "async-trait" "0.1.89"
+                "1fsxxmz3rzx1prn1h3rs7kyjhkap60i7xvi0ldapkvbb14nssdch"))
+
+(define rust-atomic-waker-1.1.2
+  (crate-source "atomic-waker" "1.1.2"
+                "1h5av1lw56m0jf0fd3bchxq8a30xv0b4wv8s4zkp4s0i7mfvs18m"))
+
+(define rust-blocking-1.6.2
+  (crate-source "blocking" "1.6.2"
+                "08bz3f9agqlp3102snkvsll6wc9ag7x5m1xy45ak2rv9pq18sgz8"))
+
+(define rust-clap-4.6.0
+  (crate-source "clap" "4.6.0"
+                "0l8k0ja5rf4hpn2g98bqv5m6lkh2q6b6likjpmm6fjw3cxdsz4xi"))
+
+(define rust-clap-builder-4.6.0
+  (crate-source "clap_builder" "4.6.0"
+                "17q6np22yxhh5y5v53y4l31ps3hlaz45mvz2n2nicr7n3c056jki"))
+
+(define rust-clap-derive-4.6.0
+  (crate-source "clap_derive" "4.6.0"
+                "0snapc468s7n3avr33dky4y7rmb7ha3qsp9l0k5vh6jacf5bs40i"))
+
+(define rust-clap-lex-1.1.0
+  (crate-source "clap_lex" "1.1.0"
+                "1ycqkpygnlqnndghhcxjb44lzl0nmgsia64x9581030yifxs7m68"))
+
+(define rust-colorchoice-1.0.5
+  (crate-source "colorchoice" "1.0.5"
+                "0w75k89hw39p0mnnhlrwr23q50rza1yjki44qvh2mgrnj065a1qx"))
+
+(define rust-concurrent-queue-2.5.0
+  (crate-source "concurrent-queue" "2.5.0"
+                "0wrr3mzq2ijdkxwndhf79k952cp4zkz35ray8hvsxl96xrx1k82c"))
+
+(define rust-endi-1.1.1
+  (crate-source "endi" "1.1.1"
+                "16a0076dx41vgrzzimm9clcym77h732czqjiajanmzvd1i1y5dv6"))
+
+(define rust-enumflags2-0.7.12
+  (crate-source "enumflags2" "0.7.12"
+                "1vzcskg4dca2jiflsfx1p9yw1fvgzcakcs7cpip0agl51ilgf9qh"))
+
+(define rust-enumflags2-derive-0.7.12
+  (crate-source "enumflags2_derive" "0.7.12"
+                "09rqffacafl1b83ir55hrah9gza0x7pzjn6lr6jm76fzix6qmiv7"))
+
+(define rust-event-listener-5.4.1
+  (crate-source "event-listener" "5.4.1"
+                "1asnp3agbr8shcl001yd935m167ammyi8hnvl0q1ycajryn6cfz1"))
+
+(define rust-event-listener-strategy-0.5.4
+  (crate-source "event-listener-strategy" "0.5.4"
+                "14rv18av8s7n8yixg38bxp5vg2qs394rl1w052by5npzmbgz7scb"))
+
+(define rust-futures-lite-2.6.1
+  (crate-source "futures-lite" "2.6.1"
+                "1ba4dg26sc168vf60b1a23dv1d8rcf3v3ykz2psb7q70kxh113pp"))
+
+(define rust-getrandom-0.4.2
+  (crate-source "getrandom" "0.4.2"
+                "0mb5833hf9pvn9dhvxjgfg5dx0m77g8wavvjdpvpnkp9fil1xr8d"))
+
+(define rust-hex-0.4.3
+  (crate-source "hex" "0.4.3"
+                "0w1a4davm1lgzpamwnba907aysmlrnygbqmfis2mqjx5m552a93z"))
+
+(define rust-inotify-0.11.1
+  (crate-source "inotify" "0.11.1"
+                "16fiffnqhfdwzgrv3wcnaih0a9xbx1a44nma1yn5idr83apkwnxx"))
+
+(define rust-js-sys-0.3.91
+  (crate-source "js-sys" "0.3.91"
+                "171rzgq33wc1nxkgnvhlqqwwnrifs13mg3jjpjj5nf1z0yvib5xl"))
+
+(define rust-libc-0.2.183
+  (crate-source "libc" "0.2.183"
+                "17c9gyia7rrzf9gsssvk3vq9ca2jp6rh32fsw6ciarpn5djlddmm"))
+
+(define rust-linux-raw-sys-0.12.1
+  (crate-source "linux-raw-sys" "0.12.1"
+                "0lwasljrqxjjfk9l2j8lyib1babh2qjlnhylqzl01nihw14nk9ij"))
+
+(define rust-once-cell-1.21.4
+  (crate-source "once_cell" "1.21.4"
+                "0l1v676wf71kjg2khch4dphwh1jp3291ffiymr2mvy1kxd5kwz4z"))
+
+(define rust-ordered-stream-0.2.0
+  (crate-source "ordered-stream" "0.2.0"
+                "0l0xxp697q7wiix1gnfn66xsss7fdhfivl2k7bvpjs4i3lgb18ls"))
+
+(define rust-parking-2.2.1
+  (crate-source "parking" "2.2.1"
+                "1fnfgmzkfpjd69v4j9x737b1k8pnn054bvzcn5dm3pkgq595d3gk"))
+
+(define rust-pin-project-lite-0.2.17
+  (crate-source "pin-project-lite" "0.2.17"
+                "1kfmwvs271si96zay4mm8887v5khw0c27jc9srw1a75ykvgj54x8"))
+
+(define rust-piper-0.2.5
+  (crate-source "piper" "0.2.5"
+                "1hd3j94mw5dwc457gs9ssb2r5b9iipywndf5srqx7pj38jd4fdf8"))
+
+(define rust-polling-3.11.0
+  (crate-source "polling" "3.11.0"
+                "0622qfbxi3gb0ly2c99n3xawp878fkrd1sl83hjdhisx11cly3jx"))
+
+(define rust-proc-macro-crate-3.5.0
+  (crate-source "proc-macro-crate" "3.5.0"
+                "0kv1g1d1zjwxlgcaba2qlshzyy32j03xic8rskqlcr5mnblsfyz6"))
+
+(define rust-quote-1.0.45
+  (crate-source "quote" "1.0.45"
+                "095rb5rg7pbnwdp6v8w5jw93wndwyijgci1b5lw8j1h5cscn3wj1"))
+
+(define rust-r-efi-6.0.0
+  (crate-source "r-efi" "6.0.0"
+                "1gyrl2k5fyzj9k7kchg2n296z5881lg7070msabid09asp3wkp7q"))
+
+(define rust-regex-syntax-0.8.10
+  (crate-source "regex-syntax" "0.8.10"
+                "02jx311ka0daxxc7v45ikzhcl3iydjbbb0mdrpc1xgg8v7c7v2fw"))
+
+(define rust-rustix-1.1.4
+  (crate-source "rustix" "1.1.4"
+                "14511f9yjqh0ix07xjrjpllah3325774gfwi9zpq72sip5jlbzmn"))
+
+(define rust-serde-repr-0.1.20
+  (crate-source "serde_repr" "0.1.20"
+                "1755gss3f6lwvv23pk7fhnjdkjw7609rcgjlr8vjg6791blf6php"))
+
+(define rust-signal-hook-registry-1.4.8
+  (crate-source "signal-hook-registry" "1.4.8"
+                "06vc7pmnki6lmxar3z31gkyg9cw7py5x9g7px70gy2hil75nkny4"))
+
+(define rust-socket2-0.6.3
+  (crate-source "socket2" "0.6.3"
+                "0gkjjcyn69hqhhlh5kl8byk5m0d7hyrp2aqwzbs3d33q208nwxis"))
+
+(define rust-tempfile-3.27.0
+  (crate-source "tempfile" "3.27.0"
+                "1gblhnyfjsbg9wjg194n89wrzah7jy3yzgnyzhp56f3v9jd7wj9j"))
+
+(define rust-tokio-1.50.0
+  (crate-source "tokio" "1.50.0"
+                "0bc2c5kd57p2xd4l6hagb0bkrp798k5vw0f3xzzwy0sf6ws5xb97"))
+
+(define rust-tokio-macros-2.6.1
+  (crate-source "tokio-macros" "2.6.1"
+                "172nwz3s7mmh266hb8l5xdnc7v9kqahisppqhinfd75nz3ps4maw"))
+
+(define rust-tokio-stream-0.1.18
+  (crate-source "tokio-stream" "0.1.18"
+                "0w3cj33605ab58wqd382gnla5pnd9hnr00xgg333np5bka04knij"))
+
+(define rust-toml-datetime-1.0.0+spec-1.1.0
+  (crate-source "toml_datetime" "1.0.0+spec-1.1.0"
+                "0gpiaddhignli6whj52ysjxwmmy82r8qxihckzss8y4md5f5bhij"))
+
+(define rust-toml-edit-0.25.4+spec-1.1.0
+  (crate-source "toml_edit" "0.25.4+spec-1.1.0"
+                "1whkik77grpr5qw8q0zhqx1admghpkdm2hzm6xh9dp2krv8cp4vi"))
+
+(define rust-tracing-subscriber-0.3.23
+  (crate-source "tracing-subscriber" "0.3.23"
+                "06fkr0qhggvrs861d7f74pn3i3a10h5jsp4n70jj9ys5b675fzyb"))
+
+(define rust-uds-windows-1.2.0
+  (crate-source "uds_windows" "1.2.0"
+                "1jn2yw59yc7r1kf0s7p00ix7mwps90qdyh0vf59zb4ays63hpdsi"))
+
+(define rust-uuid-1.22.0
+  (crate-source "uuid" "1.22.0"
+                "0dvsfn44sddhyhlhk7m3i559wyb125h86799fm5abky0067kr3d6"))
+
+(define rust-wasm-bindgen-0.2.114
+  (crate-source "wasm-bindgen" "0.2.114"
+                "13nkhw552hpllrrmkd2x9y4bmcxr82kdpky2n667kqzcq6jzjck5"))
+
+(define rust-wasm-bindgen-macro-0.2.114
+  (crate-source "wasm-bindgen-macro" "0.2.114"
+                "1rhq9kkl7n0zjrag9p25xsi4aabpgfkyf02zn4xv6pqhrw7xb8hq"))
+
+(define rust-wasm-bindgen-macro-support-0.2.114
+  (crate-source "wasm-bindgen-macro-support" "0.2.114"
+                "1qriqqjpn922kv5c7f7627fj823k5aifv06j2gvwsiy5map4rkh3"))
+
+(define rust-wasm-bindgen-shared-0.2.114
+  (crate-source "wasm-bindgen-shared" "0.2.114"
+                "05lc6w64jxlk4wk8rjci4z61lhx2ams90la27a41gvi3qaw2d8vm"))
+
+(define rust-winnow-0.7.15
+  (crate-source "winnow" "0.7.15"
+                "0i9rkl2rqpbnnxlgs20gmkj3nd0b2k8q55mjmpc2ybb84xwxjyfz"))
+
+(define rust-zbus-5.14.0
+  (crate-source "zbus" "5.14.0"
+                "1g305kwnw9f420c6m10i40cjdjm2s31ddpngac5a8hrrpmfzk0na"))
+
+(define rust-zbus-macros-5.14.0
+  (crate-source "zbus_macros" "5.14.0"
+                "08ljsjl1zhpzdf7hx37yaifi14rvysj354bfqjrc9al4drhpjzl9"))
+
+(define rust-zbus-names-4.3.1
+  (crate-source "zbus_names" "4.3.1"
+                "03y5f8xwzmk4y5wb4g95a1hl48mxlmhcbwqz62mrnqbqbdnszn7z"))
+
+(define rust-zvariant-5.10.0
+  (crate-source "zvariant" "5.10.0"
+                "02sls8pi570z1wssl150413x0mcwqhi9ywlliqsbwfwh46djj22p"))
+
+(define rust-zvariant-derive-5.10.0
+  (crate-source "zvariant_derive" "5.10.0"
+                "0b3mh0kzf6sz7vd5j9gimq86awjcigddh26cz5b6di79xc9b0nav"))
+
+(define rust-zvariant-utils-3.3.0
+  (crate-source "zvariant_utils" "3.3.0"
+                "1sf5i71in36gc08jhak83pprnkam8gk936cqlq9hzx7q9sk26p7p"))
+
+
 ;; Define cargo inputs mapping
 (define-cargo-inputs lookup-cargo-inputs
   (convco =>
@@ -4883,4 +5161,161 @@
                 rust-zerovec-0.11.5
                 rust-zerovec-derive-0.11.2
                 rust-zmij-1.0.16
+                ))
+  (app-powerd =>
+          (list rust-aho-corasick-1.1.4
+                rust-anstream-1.0.0
+                rust-anstyle-1.0.14
+                rust-anstyle-parse-1.0.0
+                rust-anstyle-query-1.1.5
+                rust-anstyle-wincon-3.0.11
+                rust-anyhow-1.0.102
+                rust-app-powerd-core-0.1.0
+                rust-as-raw-xcb-connection-1.0.1
+                rust-async-broadcast-0.7.2
+                rust-async-channel-2.5.0
+                rust-async-executor-1.14.0
+                rust-async-io-2.6.0
+                rust-async-lock-3.4.2
+                rust-async-process-2.5.0
+                rust-async-recursion-1.1.1
+                rust-async-signal-0.2.13
+                rust-async-task-4.7.1
+                rust-async-trait-0.1.89
+                rust-atomic-waker-1.1.2
+                rust-autocfg-1.5.0
+                rust-bitflags-2.11.0
+                rust-blocking-1.6.2
+                rust-bumpalo-3.20.2
+                rust-bytes-1.11.1
+                rust-cfg-if-1.0.4
+                rust-cfg-aliases-0.2.1
+                rust-clap-4.6.0
+                rust-clap-builder-4.6.0
+                rust-clap-derive-4.6.0
+                rust-clap-lex-1.1.0
+                rust-colorchoice-1.0.5
+                rust-concurrent-queue-2.5.0
+                rust-crossbeam-utils-0.8.21
+                rust-endi-1.1.1
+                rust-enumflags2-0.7.12
+                rust-enumflags2-derive-0.7.12
+                rust-equivalent-1.0.2
+                rust-errno-0.3.14
+                rust-event-listener-5.4.1
+                rust-event-listener-strategy-0.5.4
+                rust-fastrand-2.3.0
+                rust-foldhash-0.1.5
+                rust-futures-core-0.3.32
+                rust-futures-io-0.3.32
+                rust-futures-lite-2.6.1
+                rust-gethostname-1.1.0
+                rust-getrandom-0.4.2
+                rust-hashbrown-0.15.5
+                rust-hashbrown-0.16.1
+                rust-heck-0.5.0
+                rust-hermit-abi-0.5.2
+                rust-hex-0.4.3
+                rust-humantime-2.3.0
+                rust-humantime-serde-1.1.1
+                rust-id-arena-2.3.0
+                rust-indexmap-2.13.0
+                rust-inotify-0.11.1
+                rust-inotify-sys-0.1.5
+                rust-is-terminal-polyfill-1.70.2
+                rust-itoa-1.0.17
+                rust-js-sys-0.3.91
+                rust-lazy-static-1.5.0
+                rust-leb128fmt-0.1.0
+                rust-libc-0.2.183
+                rust-linux-raw-sys-0.12.1
+                rust-log-0.4.29
+                rust-matchers-0.2.0
+                rust-memchr-2.8.0
+                rust-memoffset-0.9.1
+                rust-mio-1.1.1
+                rust-nix-0.29.0
+                rust-nu-ansi-term-0.50.3
+                rust-once-cell-1.21.4
+                rust-once-cell-polyfill-1.70.2
+                rust-ordered-stream-0.2.0
+                rust-parking-2.2.1
+                rust-pin-project-lite-0.2.17
+                rust-piper-0.2.5
+                rust-polling-3.11.0
+                rust-prettyplease-0.2.37
+                rust-proc-macro-crate-3.5.0
+                rust-proc-macro2-1.0.106
+                rust-quote-1.0.45
+                rust-r-efi-6.0.0
+                rust-regex-1.12.3
+                rust-regex-automata-0.4.14
+                rust-regex-syntax-0.8.10
+                rust-rustix-1.1.4
+                rust-rustversion-1.0.22
+                rust-ryu-1.0.23
+                rust-semver-1.0.27
+                rust-serde-1.0.228
+                rust-serde-core-1.0.228
+                rust-serde-derive-1.0.228
+                rust-serde-json-1.0.149
+                rust-serde-repr-0.1.20
+                rust-serde-yaml-0.9.34+deprecated
+                rust-sharded-slab-0.1.7
+                rust-signal-hook-registry-1.4.8
+                rust-slab-0.4.12
+                rust-smallvec-1.15.1
+                rust-socket2-0.6.3
+                rust-strsim-0.11.1
+                rust-syn-2.0.117
+                rust-tempfile-3.27.0
+                rust-thiserror-2.0.18
+                rust-thiserror-impl-2.0.18
+                rust-thread-local-1.1.9
+                rust-tokio-1.50.0
+                rust-tokio-macros-2.6.1
+                rust-tokio-stream-0.1.18
+                rust-toml-datetime-1.0.0+spec-1.1.0
+                rust-toml-edit-0.25.4+spec-1.1.0
+                rust-toml-parser-1.0.9+spec-1.1.0
+                rust-tracing-0.1.44
+                rust-tracing-attributes-0.1.31
+                rust-tracing-core-0.1.36
+                rust-tracing-log-0.2.0
+                rust-tracing-subscriber-0.3.23
+                rust-uds-windows-1.2.0
+                rust-unicode-ident-1.0.24
+                rust-unicode-xid-0.2.6
+                rust-unsafe-libyaml-0.2.11
+                rust-utf8parse-0.2.2
+                rust-uuid-1.22.0
+                rust-valuable-0.1.1
+                rust-wasi-0.11.1+wasi-snapshot-preview1
+                rust-wasip2-1.0.2+wasi-0.2.9
+                rust-wasip3-0.4.0+wasi-0.3.0-rc-2026-01-06
+                rust-wasm-bindgen-0.2.114
+                rust-wasm-bindgen-macro-0.2.114
+                rust-wasm-bindgen-macro-support-0.2.114
+                rust-wasm-bindgen-shared-0.2.114
+                rust-wasm-encoder-0.244.0
+                rust-wasm-metadata-0.244.0
+                rust-wasmparser-0.244.0
+                rust-windows-link-0.2.1
+                rust-windows-sys-0.61.2
+                rust-winnow-0.7.15
+                rust-wit-bindgen-0.51.0
+                rust-wit-bindgen-core-0.51.0
+                rust-wit-bindgen-rust-0.51.0
+                rust-wit-bindgen-rust-macro-0.51.0
+                rust-wit-component-0.244.0
+                rust-wit-parser-0.244.0
+                rust-x11rb-0.13.2
+                rust-x11rb-protocol-0.13.2
+                rust-zbus-5.14.0
+                rust-zbus-macros-5.14.0
+                rust-zbus-names-4.3.1
+                rust-zmij-1.0.21
+                rust-zvariant-5.10.0
+                rust-zvariant-derive-5.10.0
+                rust-zvariant-utils-3.3.0
                 )))
