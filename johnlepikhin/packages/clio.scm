@@ -36,7 +36,7 @@
 (define-public clio
   (package
     (name "clio")
-    (version "0.12.2")
+    (version "1.0.0")
     (source (origin
              (method git-fetch)
              (uri (git-reference
@@ -45,21 +45,23 @@
              (file-name (git-file-name name version))
              (sha256
               (base32
-               "00y3yz9phgzpmir4drx7n24z19qsah4vvvk5zfjw0fb88zw5sal4"))))
+               "1yznnqbsfmvfg9cx6j9x058x9q20yc8gwn1jf5s7j8j3hnbfd36c"))))
     (build-system cargo-build-system)
     (arguments
      (list
       #:rust rust-binary-1.88
       #:install-source? #f
-      #:tests? #f
+      #:tests? #f ;no test suite in the crate
       #:phases
       #~(modify-phases %standard-phases
           (add-before 'configure 'create-cc-symlink
             (lambda* (#:key inputs #:allow-other-keys)
-              (let ((gcc (assoc-ref inputs "gcc-toolchain")))
-                (mkdir-p "/tmp/bin")
-                (symlink (string-append gcc "/bin/gcc") "/tmp/bin/cc")
-                (setenv "PATH" (string-append "/tmp/bin:" (getenv "PATH")))
+              (let* ((gcc (assoc-ref inputs "gcc-toolchain"))
+                     (bin-dir (string-append (getcwd) "/.cc-bin")))
+                (mkdir-p bin-dir)
+                (symlink (string-append gcc "/bin/gcc")
+                         (string-append bin-dir "/cc"))
+                (setenv "PATH" (string-append bin-dir ":" (getenv "PATH")))
                 (setenv "CC" (string-append gcc "/bin/gcc"))
                 (setenv "HOST_CC" (string-append gcc "/bin/gcc"))))))))
     (native-inputs (list gcc-toolchain pkg-config))
@@ -68,7 +70,7 @@
                                   #:module '(johnlepikhin packages rust-crates))))
     (home-page "https://github.com/johnlepikhin/clio")
     (synopsis "Clipboard manager with SQLite history and GTK4 UI")
-    (description "Clio is a clipboard manager for Linux.  It monitors the clipboard,
-stores history in SQLite, and provides a GTK4 UI for browsing and searching
-clipboard entries.")
+    (description "Clipboard manager for Linux that monitors the clipboard, stores
+history in SQLite, and provides a GTK4 UI for browsing and searching clipboard
+entries.")
     (license license:expat)))
