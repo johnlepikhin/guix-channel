@@ -30,30 +30,58 @@
 (define-public app-powerd
   (package
     (name "app-powerd")
-    (version "0.1.0")
+    (version "1.0.0")
     (source
      (origin
        (method url-fetch)
        (uri (crate-uri name version))
        (file-name (string-append name "-" version ".tar.gz"))
        (sha256
-        (base32 "086m4ba5g9ivinnqqicswd7k3cwhw2mz6a2kijdj6rh3hqz0mh7d"))))
+        (base32 "06ihkvb6s5lb6wkygw7xk6bjydqw6c1c8az28ddycih299f1k2y2"))))
     (build-system cargo-build-system)
     (arguments
      (list
       #:rust rust-binary-1.88
       #:install-source? #f
-      #:tests? #f
+      #:tests? #f ;no test suite in the crate
       #:phases
       #~(modify-phases %standard-phases
           (add-before 'configure 'create-cc-symlink
             (lambda* (#:key inputs #:allow-other-keys)
-              (let ((gcc (assoc-ref inputs "gcc-toolchain")))
-                (mkdir-p "/tmp/bin")
-                (symlink (string-append gcc "/bin/gcc") "/tmp/bin/cc")
-                (setenv "PATH" (string-append "/tmp/bin:" (getenv "PATH")))
+              (let* ((gcc (assoc-ref inputs "gcc-toolchain"))
+                     (bin-dir (string-append (getcwd) "/.cc-bin")))
+                (mkdir-p bin-dir)
+                (symlink (string-append gcc "/bin/gcc")
+                         (string-append bin-dir "/cc"))
+                (setenv "PATH" (string-append bin-dir ":" (getenv "PATH")))
                 (setenv "CC" (string-append gcc "/bin/gcc"))
-                (setenv "HOST_CC" (string-append gcc "/bin/gcc"))))))))
+                (setenv "HOST_CC" (string-append gcc "/bin/gcc")))))
+          (add-after 'configure 'remove-wayland-deps
+            ;; Remove optional wayland dependencies from Cargo.toml files
+            ;; to avoid vendoring the entire wayland crate tree.
+            (lambda _
+              (use-modules (ice-9 textual-ports) (ice-9 regex))
+              (define (remove-wayland-from-toml path)
+                (when (file-exists? path)
+                  (let* ((content (call-with-input-file path
+                                    get-string-all))
+                         (without-deps
+                          (regexp-substitute/global
+                           #f
+                           "\\[dependencies\\.wayland[^\\[]*"
+                           content 'pre 'post))
+                         (without-features
+                          (regexp-substitute/global
+                           #f
+                           "wayland = \\[[^]]*\\]\n"
+                           without-deps 'pre 'post)))
+                    (call-with-output-file path
+                      (lambda (port)
+                        (display without-features port))))))
+              (remove-wayland-from-toml
+               (string-append "guix-vendor/rust-app-powerd-core-"
+                              #$version ".tar.gz/Cargo.toml"))
+              (remove-wayland-from-toml "Cargo.toml"))))))
     (native-inputs (list gcc-toolchain pkg-config))
     (inputs (append (list libxcb)
                     (cargo-inputs 'app-powerd
@@ -61,7 +89,7 @@
     (home-page "https://github.com/johnlepikhin/app-powerd")
     (synopsis "Daemon that saves battery by freezing/throttling unfocused GUI apps")
     (description
-     "app-powerd is a user-level Linux daemon that automatically manages
-background GUI applications through cgroup v2 freeze and CPU throttling
-to save battery power.")
+     "User-level Linux daemon that automatically manages background GUI
+applications through cgroup v2 freeze and CPU throttling to save battery
+power.")
     (license license:expat)))

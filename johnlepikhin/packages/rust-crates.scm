@@ -2394,6 +2394,14 @@
   (crate-source "serde_spanned" "1.0.4"
                 "0xkp0qdzams5sqwndbw3xrhf4c0bb5r46w2ywkp1aqsdb8ggkfzq"))
 
+(define rust-serde-yaml-ng-0.9.36
+  (crate-source "serde_yaml_ng" "0.9.36"
+                "13034v2g90czaxfh7z1y1l0x9jhlk7mjvs4mijawz0p6arwk895x"))
+
+(define rust-serde-yaml-ng-0.10.0
+  (crate-source "serde_yaml_ng" "0.10.0"
+                "07ylpzx9xykdj4fqfa0vb6xz4c1pazrqqibv78hd8dlbp4kvckbv"))
+
 (define rust-sharded-slab-0.1.7
   (crate-source "sharded-slab" "0.1.7"
                 "1xipjr4nqsgw34k7a2cgj9zaasl2ds6jwn89886kww93d32a637l"))
@@ -3535,9 +3543,13 @@
   (crate-source "anstyle-parse" "1.0.0"
                 "03hkv2690s0crssbnmfkr76kw1k7ah2i6s5amdy9yca2n8w7zkjj"))
 
-(define rust-app-powerd-core-0.1.0
-  (crate-source "app-powerd-core" "0.1.0"
-                "18gdinz6lsp3xxkdsj62jj9kyjxrn1r6fqc17lg0a76pk2h3aisg"))
+(define rust-app-powerd-core-1.0.0
+  (crate-source "app-powerd-core" "1.0.0"
+                "13r2h0a3z17y2jh5jh7zaw6i534zjsqjk8vz9wbkg2aid41zwl8z"))
+
+(define rust-tokio-util-0.7.15
+  (crate-source "tokio-util" "0.7.15"
+                "1pypd9lm1fdnpw0779pqvc16qqrxjy63dgfm20ajhpbdmnlkk9b6"))
 
 (define rust-as-raw-xcb-connection-1.0.1
   (crate-source "as-raw-xcb-connection" "1.0.1"
@@ -4825,7 +4837,7 @@
                  rust-serde-derive-1.0.228
                  rust-serde-json-1.0.149
                  rust-serde-spanned-1.0.4
-                 rust-serde-yaml-0.9.34+deprecated
+                 rust-serde-yaml-ng-0.9.36
                  rust-shlex-1.3.0
                  rust-simd-adler32-0.3.8
                  rust-slab-0.4.12
@@ -5170,7 +5182,7 @@
                 rust-anstyle-query-1.1.5
                 rust-anstyle-wincon-3.0.11
                 rust-anyhow-1.0.102
-                rust-app-powerd-core-0.1.0
+                rust-app-powerd-core-1.0.0
                 rust-as-raw-xcb-connection-1.0.1
                 rust-async-broadcast-0.7.2
                 rust-async-channel-2.5.0
@@ -5209,6 +5221,10 @@
                 rust-futures-core-0.3.32
                 rust-futures-io-0.3.32
                 rust-futures-lite-2.6.1
+                rust-futures-macro-0.3.32
+                rust-futures-sink-0.3.13
+                rust-futures-task-0.3.32
+                rust-futures-util-0.3.32
                 rust-gethostname-1.1.0
                 rust-getrandom-0.4.2
                 rust-hashbrown-0.15.5
@@ -5260,7 +5276,7 @@
                 rust-serde-derive-1.0.228
                 rust-serde-json-1.0.149
                 rust-serde-repr-0.1.20
-                rust-serde-yaml-0.9.34+deprecated
+                rust-serde-yaml-ng-0.10.0
                 rust-sharded-slab-0.1.7
                 rust-signal-hook-registry-1.4.8
                 rust-slab-0.4.12
@@ -5275,6 +5291,7 @@
                 rust-tokio-1.50.0
                 rust-tokio-macros-2.6.1
                 rust-tokio-stream-0.1.18
+                rust-tokio-util-0.7.15
                 rust-toml-datetime-1.0.0+spec-1.1.0
                 rust-toml-edit-0.25.4+spec-1.1.0
                 rust-toml-parser-1.0.9+spec-1.1.0
