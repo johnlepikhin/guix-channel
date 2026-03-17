@@ -18,9 +18,10 @@
 
 (define-module (johnlepikhin system services)
   #:use-module (gnu packages cups)
-  #:use-module (gnu packages xorg)
   #:use-module (gnu packages gnome)
+  #:use-module (gnu packages linux)
   #:use-module (gnu packages networking)
+  #:use-module (gnu packages xorg)
   #:use-module (gnu services admin)
   #:use-module (gnu services avahi)
   #:use-module (gnu services base)
@@ -172,6 +173,17 @@
                                      (cpu-scaling-min-freq-on-ac (* 2300 1000))
                                      (cpu-scaling-max-freq-on-ac (* 5000 1000))
                                      (wifi-pwr-on-bat? #f)))
+         ;; Reset TLP manual mode on AC/battery switch.  The built-in
+         ;; 85-tlp.rules calls "tlp auto" which respects manual mode set
+         ;; by "tlp ac"/"tlp bat" and skips profile switching.  This rule
+         ;; (priority 86) calls "tlp start" to clear manual mode and
+         ;; re-apply the appropriate profile automatically.
+         (udev-rules-service 'tlp-start
+           (file->udev-rule "86-tlp-start.rules"
+             (mixed-text-file "86-tlp-start.rules"
+               "ACTION==\"change\", SUBSYSTEM==\"power_supply\", "
+               "KERNEL!=\"hidpp_battery*\", "
+               "RUN+=\"" (file-append tlp "/sbin/tlp") " start\"\n")))
          (service mcron-service-type
                   (mcron-configuration (jobs (list guix-pull-job guix-gc-job
                                                    fstrim-job))))
