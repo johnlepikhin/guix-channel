@@ -62,6 +62,7 @@ fan speed based on temperature sensors."
            (documentation "Fan control daemon for ThinkPad laptops")
            (start #~(make-forkexec-constructor
                      (list #$(file-append package "/sbin/thinkfan")
+                           "-n"
                            "-c" #$config-file
                            "-s" #$(number->string update-interval))))
            (stop #~(make-kill-destructor))))))
@@ -72,7 +73,6 @@ fan speed based on temperature sensors."
 case \"$1\" in
   pre)
     " (file-append shepherd "/bin/herd") " stop thinkfan
-    echo level auto > /proc/acpi/ibm/fan
     ;;
   post)
     " (file-append shepherd "/bin/herd") " start thinkfan
