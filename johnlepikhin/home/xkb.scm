@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2023 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2023, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -18,53 +18,76 @@
 
 (define-module (johnlepikhin home xkb)
   #:use-module (gnu services)
-  #:use-module (gnu services configuration)
   #:use-module (gnu home services)
   #:use-module (gnu packages xorg)
   #:use-module (johnlepikhin home xsession)
-  #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (guix gexp)
   #:export (home-xkb-configuration
             home-xkb-service-type
-            xkb-custom-symbols-path
-            home-xkb-load-keymap-command
-            home-xkb-reset-keymap-command))
+            home-xkb-load-keymap-script-path
+            home-xkb-reset-keymap-script-path))
 
 (define xkb-custom-symbols-path ".config/xkb/custom.xkb")
 (define custom-symbols-file (local-file "files/xkb/custom.xkb"))
 (define xkb-default-symbols-path ".config/xkb/default.xkb")
 (define default-symbols-file (local-file "files/xkb/default.xkb"))
 
-(define home-xkb-load-keymap-command
-  (string-append "xkbcomp $HOME/" xkb-custom-symbols-path " $DISPLAY >/dev/null 2>/dev/null"))
-(define home-xkb-reset-keymap-command
-  (string-append "xkbcomp $HOME/" xkb-default-symbols-path " $DISPLAY /dev/null 2>/dev/null"))
+(define home-xkb-load-keymap-script-path ".config/xkb/load-keymap.sh")
+(define home-xkb-reset-keymap-script-path ".config/xkb/reset-keymap.sh")
 
 (define-record-type* <home-xkb-configuration>
   home-xkb-configuration make-home-xkb-configuration
   home-xkb-configuration?
-  (symbols home-xkb-symbols (default custom-symbols-file)))
+  (symbols home-xkb-symbols (default custom-symbols-file))
+  (repeat-delay home-xkb-repeat-delay (default 300))
+  (repeat-rate home-xkb-repeat-rate (default 30)))
+
+(define (make-load-keymap-script config)
+  (let ((delay-str (number->string (home-xkb-repeat-delay config)))
+        (rate-str (number->string (home-xkb-repeat-rate config))))
+    (computed-file
+     "load-keymap.sh"
+     #~(begin
+         (with-output-to-file #$output
+           (lambda _
+             (display
+              (string-append
+               "#!/bin/sh\n"
+               "xkbcomp \"$HOME/" #$xkb-custom-symbols-path "\" \"$DISPLAY\" >/dev/null 2>&1\n"
+               "xset r rate " #$delay-str " " #$rate-str "\n"))))
+         (chmod #$output #o755)))))
+
+(define (make-reset-keymap-script config)
+  (computed-file
+   "reset-keymap.sh"
+   #~(begin
+       (with-output-to-file #$output
+         (lambda _
+           (display
+            (string-append
+             "#!/bin/sh\n"
+             "xkbcomp \"$HOME/" #$xkb-default-symbols-path "\" \"$DISPLAY\" >/dev/null 2>&1\n"))))
+       (chmod #$output #o755))))
 
 (define (add-xkb-files config)
   `((,xkb-custom-symbols-path ,(home-xkb-symbols config))
-    (,xkb-default-symbols-path ,default-symbols-file)))
+    (,xkb-default-symbols-path ,default-symbols-file)
+    (,home-xkb-load-keymap-script-path ,(make-load-keymap-script config))
+    (,home-xkb-reset-keymap-script-path ,(make-reset-keymap-script config))))
 
 (define (add-xkb-package config)
   (list xkbcomp setxkbmap))
 
-(define (activation-command _)
-  home-xkb-load-keymap-command)
-
 (define (add-xsession-component config)
   (xsession-component
-   (command (activation-command #t))
+   (command (string-append "$HOME/" home-xkb-load-keymap-script-path))
    (priority 20)))
 
 (define (home-xkb-activation config)
   `((,(string-append "files/" xkb-custom-symbols-path)
      ,(string-append "files/" xkb-default-symbols-path)
-     ,#~(system #$(activation-command #t)))))
+     ,#~(system #$(string-append "$HOME/" home-xkb-load-keymap-script-path)))))
 
 (define home-xkb-service-type
   (service-type
@@ -79,5 +102,4 @@
       home-run-on-change-service-type home-xkb-activation)
      (service-extension
       home-xsession-service-type add-xsession-component)))
-   (compose concatenate)
    (description "Create @file{~/.config/xkb/*}")))
