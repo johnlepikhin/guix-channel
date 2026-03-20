@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2023 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2023, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -86,7 +86,10 @@
     (list
      (service-extension
       home-files-service-type add-xsession-file)))
-   (compose identity)
+   (compose (lambda (extensions)
+              (append-map (lambda (ext)
+                            (if (list? ext) ext (list ext)))
+                          extensions)))
    (extend add-xsession-extensions)
    (default-value (home-xsession-configuration))
    (description "Create @file{~/.xsession}")))
