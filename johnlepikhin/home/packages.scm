@@ -49,9 +49,6 @@
   #:use-module (gnu packages gl)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages gnome-xyz)
-  #:use-module (gnu packages golang)
-  #:use-module (gnu packages golang-xyz)
-  #:use-module (gnu packages golang-apps)
   #:use-module (gnu packages graphviz)
   #:use-module (gnu packages guile)
   #:use-module (gnu packages haskell)
@@ -124,7 +121,6 @@
             %xdesktop-packages
             %tools-packages
             %devel-other-packages
-            %golang-packages
             %editors-packages
             %mail-packages
             %astro-packages
@@ -273,11 +269,6 @@
    zstd
    mikrotik-winbox
    ))
-
-(define %golang-packages
-  (list
-   go
-   gopls))
 
 (define %devel-other-packages
   (list
