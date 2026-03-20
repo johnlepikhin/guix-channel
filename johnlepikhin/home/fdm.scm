@@ -23,6 +23,7 @@
   #:use-module (gnu packages mail)
   #:use-module (guix records)
   #:use-module (guix gexp)
+  #:use-module (srfi srfi-1)
   #:export (home-fdm-macro-configuration
             home-fdm-macro-configuration?
             home-fdm-action-configuration
@@ -33,6 +34,7 @@
             home-fdm-match-configuration?
             home-fdm-configuration
             home-fdm-configuration?
+            home-fdm-configuration-extra-path
             home-fdm-service-type))
 
 ;;;
@@ -261,7 +263,9 @@
   (activate-directories home-fdm-configuration-activate-directories
                         (default '()))
   (extra-content        home-fdm-configuration-extra-content
-                        (default #f)))
+                        (default #f))
+  (extra-path           home-fdm-configuration-extra-path
+                        (default '())))
 
 ;;;
 ;;; Serialization
@@ -375,13 +379,21 @@
 
 (define (add-fdm-shepherd-service config)
   (let ((package (home-fdm-configuration-package config))
-        (interval (home-fdm-configuration-sync-interval config)))
+        (interval (home-fdm-configuration-sync-interval config))
+        (extra-path (home-fdm-configuration-extra-path config)))
     (list
      (shepherd-service
       (provision '(fdm))
       (documentation "Periodically fetch and filter mail with fdm.")
       (start #~(make-forkexec-constructor
                 (list #$(file-append package "/bin/fdm") "fetch")
+                #:environment-variables
+                (cons (string-append "PATH="
+                        (string-join (list #$@extra-path
+                                           (or (getenv "PATH") ""))
+                                     ":"))
+                      (remove (lambda (v) (string-prefix? "PATH=" v))
+                              (environ)))
                 #:log-file (string-append
                             (or (getenv "XDG_STATE_HOME")
                                 (string-append (getenv "HOME")
