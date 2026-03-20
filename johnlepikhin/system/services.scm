@@ -18,6 +18,7 @@
 
 (define-module (johnlepikhin system services)
   #:use-module (gnu packages cups)
+  #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages networking)
@@ -61,6 +62,12 @@
        (q #7D602902D3A2DBB83F8A0FB98602A754C5493B0B778C8D1DD4E0F41DE14DE34F#)
      ))"))
 
+(define lock-sessions-before-sleep
+  (program-file "lock-sessions-before-sleep"
+    #~(when (string=? (cadr (command-line)) "pre")
+        (system* #$(file-append elogind "/bin/loginctl")
+                 "lock-sessions"))))
+
 (define* (tuned-desktop-services #:key (authorized-keys '())
                                  (substitute-urls '()))
   (cons* (modify-services %desktop-services
@@ -99,7 +106,9 @@
                                                         (handle-power-key 'suspend)
                                                         (handle-lid-switch-external-power 'suspend)
                                                         (handle-lid-switch 'suspend)
-                                                        (suspend-state '("mem"))))
+                                                        (suspend-state '("mem"))
+                                                        (system-sleep-hook-files
+                                                         (list lock-sessions-before-sleep))))
 
            (network-manager-service-type
             config =>
@@ -175,15 +184,24 @@
                                      (wifi-pwr-on-bat? #f)))
          ;; Reset TLP manual mode on AC/battery switch.  The built-in
          ;; 85-tlp.rules calls "tlp auto" which respects manual mode set
-         ;; by "tlp ac"/"tlp bat" and skips profile switching.  This rule
-         ;; (priority 86) calls "tlp start" to clear manual mode and
-         ;; re-apply the appropriate profile automatically.
+         ;; by "tlp ac"/"tlp bat" and skips profile switching.  A power
+         ;; supply change generates multiple udev events (BAT0, AC, ucsi)
+         ;; causing a race between "tlp auto" and "tlp start".  This rule
+         ;; (priority 86) runs a wrapper that forks to background and
+         ;; waits 1 second before calling "tlp start", ensuring it runs
+         ;; after all "tlp auto" invocations from concurrent events.
          (udev-rules-service 'tlp-start
            (file->udev-rule "86-tlp-start.rules"
              (mixed-text-file "86-tlp-start.rules"
                "ACTION==\"change\", SUBSYSTEM==\"power_supply\", "
                "KERNEL!=\"hidpp_battery*\", "
-               "RUN+=\"" (file-append tlp "/sbin/tlp") " start\"\n")))
+               "RUN+=\"" (program-file "tlp-start-deferred"
+                           #~(when (zero? (primitive-fork))
+                               (setsid)
+                               (sleep 1)
+                               (execl #$(file-append tlp "/sbin/tlp")
+                                      "tlp" "start")))
+               "\"\n")))
          (service mcron-service-type
                   (mcron-configuration (jobs (list guix-pull-job guix-gc-job
                                                    fstrim-job))))
