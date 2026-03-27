@@ -385,20 +385,22 @@
      (shepherd-service
       (provision '(fdm))
       (documentation "Periodically fetch and filter mail with fdm.")
-      (start #~(make-forkexec-constructor
-                (list #$(file-append package "/bin/fdm") "fetch")
-                #:environment-variables
-                (cons (string-append "PATH="
-                        (string-join (list #$@extra-path
-                                           (or (getenv "PATH") ""))
-                                     ":"))
-                      (remove (lambda (v) (string-prefix? "PATH=" v))
-                              (environ)))
-                #:log-file (string-append
-                            (or (getenv "XDG_STATE_HOME")
-                                (string-append (getenv "HOME")
-                                               "/.local/state"))
-                            "/log/fdm.log")))
+      (start #~(begin
+                 (use-modules (srfi srfi-1))
+                 (make-forkexec-constructor
+                  (list #$(file-append package "/bin/fdm") "fetch")
+                  #:environment-variables
+                  (cons (string-append "PATH="
+                          (string-join (list #$@extra-path
+                                             (or (getenv "PATH") ""))
+                                       ":"))
+                        (remove (lambda (v) (string-prefix? "PATH=" v))
+                                (environ)))
+                  #:log-file (string-append
+                              (or (getenv "XDG_STATE_HOME")
+                                  (string-append (getenv "HOME")
+                                                 "/.local/state"))
+                              "/log/fdm.log"))))
       (stop #~(make-kill-destructor))
       (respawn? #t)
       (respawn-limit #~(cons 5 #$(* interval 5)))
