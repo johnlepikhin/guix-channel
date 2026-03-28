@@ -230,6 +230,7 @@
    (list isc-bind "utils")
    (make-git-sync "2020-11-09" "aa420e3f9681ce54cb3e2de10bd118f2664621ea" "0wrwmh852a2xjpzsd45fmpg9v1k20fwy5dl7cs5lc5c6k4mhigbi")
    apcalc
+   aria2
    aspell
    aspell-dict-en
    aspell-dict-ru
