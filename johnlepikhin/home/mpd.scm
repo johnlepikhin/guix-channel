@@ -20,7 +20,7 @@
   #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
-  #:use-module (gnu packages mpd)
+  #:use-module ((gnu packages mpd) #:hide (rmpc))
   #:use-module ((johnlepikhin packages rmpc) #:select (rmpc))
   #:use-module (guix records)
   #:use-module (guix gexp)
