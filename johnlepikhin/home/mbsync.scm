@@ -216,16 +216,31 @@
       (provision '(mbsync))
       (documentation "Periodically synchronize mail with mbsync.")
       (start #~(make-forkexec-constructor
-                (list #$(file-append package "/bin/mbsync") "--all")
+                (list
+                 #$(program-file "mbsync-sync-loop"
+                                 #~(begin
+                                     ;; Ensure child mbsync processes are in
+                                     ;; our process group so they get killed
+                                     ;; together with us on service stop.
+                                     (sigaction SIGTERM
+                                       (lambda (sig)
+                                         (kill 0 SIGTERM)
+                                         (primitive-exit 0)))
+                                     (let loop ()
+                                       (system* #$(file-append package
+                                                               "/bin/mbsync")
+                                                "--all")
+                                       (sleep #$interval)
+                                       (loop)))))
                 #:log-file (string-append
                             (or (getenv "XDG_STATE_HOME")
                                 (string-append (getenv "HOME")
                                                "/.local/state"))
                             "/log/mbsync.log")))
       (stop #~(make-kill-destructor))
-      (respawn? #t)
-      (respawn-limit #~(cons 5 #$(* interval 5)))
-      (respawn-delay interval)))))
+      ;; Respawn only on unexpected crashes; periodic sync is handled
+      ;; by the loop inside the wrapper script.
+      (respawn? #t)))))
 
 (define (add-mbsync-activation config)
   (let ((paths (map (lambda (account)
