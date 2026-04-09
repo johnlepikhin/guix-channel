@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2025 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2025, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is part of GNU Guix.
 ;;;
@@ -25,20 +25,22 @@
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (gnu packages base)
   #:use-module (gnu packages bash)
+  #:use-module (gnu packages compression)
   #:use-module (gnu packages elf)
-  #:use-module (gnu packages compression))
+  #:use-module (gnu packages rust-apps)
+  #:use-module (gnu packages version-control))
 
 (define-public opencode
   (package
     (name "opencode")
-    (version "0.5.28")
+    (version "1.4.2")
     (source
      (origin
        (method url-fetch)
-       (uri (string-append "https://github.com/sst/opencode/releases/download/v"
-                           version "/opencode-linux-x64.zip"))
+       (uri (string-append "https://github.com/anomalyco/opencode/releases/download/v"
+                           version "/opencode-linux-x64.tar.gz"))
        (sha256
-        (base32 "04r5n2w4x5qs15na810bb18d1c0yfhvm0n172xwslvrjjk4lral1"))))
+        (base32 "1r27d1cml7rf1k898pw5870lmr69vx115q4x0b7vrdqms3prv0bw"))))
     (build-system trivial-build-system)
     (arguments
      (list #:modules '((guix build utils))
@@ -46,53 +48,65 @@
            #~(begin
                (use-modules (guix build utils))
                (let* ((source #$source)
-                      (unzip #$(file-append unzip "/bin/unzip"))
+                      (tar (string-append #$(file-append tar "/bin/tar")))
                       (patchelf #$(file-append patchelf "/bin/patchelf"))
                       (bash #$(file-append bash-minimal "/bin/bash"))
-                      (libc #$(file-append glibc "/lib"))
                       (out #$output)
                       (bin (string-append out "/bin"))
                       (tmpdir "opencode-extract"))
-                 
+
                  ;; Создать директории
                  (mkdir-p bin)
                  (mkdir-p tmpdir)
-                 
-                 ;; Извлечь архив
-                 (invoke unzip source "-d" tmpdir)
-                 
+
+                 ;; Извлечь архив (tar.gz содержит единственный файл `opencode`).
+                 ;; gzip нужен GNU tar для распаковки `-z`.
+                 (setenv "PATH"
+                         (string-append #$(file-append gzip "/bin")))
+                 (invoke tar "-xzf" source "-C" tmpdir)
+
                  ;; Скопировать бинарник
                  (copy-file (string-append tmpdir "/opencode")
                             (string-append bin "/.opencode-real"))
                  (chmod (string-append bin "/.opencode-real") #o755)
-                 
+
                  ;; Пропатчить только интерпретатор
                  (invoke patchelf "--set-interpreter"
-                         (string-append #$(file-append glibc "/lib") "/ld-linux-x86-64.so.2")
+                         (string-append #$(file-append glibc "/lib")
+                                        "/ld-linux-x86-64.so.2")
                          (string-append bin "/.opencode-real"))
-                 
-                 ;; Создать wrapper script
+
+                 ;; Создать wrapper script.  Ripgrep и git обязательны в
+                 ;; runtime: без `rg` в PATH opencode попытается скачать
+                 ;; ripgrep с GitHub при первом запуске (см.
+                 ;; packages/opencode/src/file/ripgrep.ts), а git вызывается
+                 ;; напрямую из src/shell, src/project, src/cli/cmd/session.
                  (call-with-output-file (string-append bin "/opencode")
                    (lambda (port)
                      (format port "#!~a~%~
-                                  export PATH=~a:$PATH~%~
+                                  export PATH=~a:~a:~a:$PATH~%~
                                   export LD_LIBRARY_PATH=~a:$LD_LIBRARY_PATH~%~
                                   exec ~a \"$@\"~%"
                              bash
-                             (string-append #$(file-append coreutils "/bin"))
-                             (string-append #$(file-append glibc "/lib"))
+                             #$(file-append ripgrep "/bin")
+                             #$(file-append git-minimal "/bin")
+                             #$(file-append coreutils "/bin")
+                             #$(file-append glibc "/lib")
                              (string-append bin "/.opencode-real"))))
                  (chmod (string-append bin "/opencode") #o755)
-                 
+
                  ;; Очистить временные файлы
                  (delete-file-recursively tmpdir)))))
     (native-inputs
-     (list unzip patchelf))
+     (list tar gzip patchelf))
     (inputs
-     (list glibc bash-minimal coreutils))
-    (home-page "https://github.com/sst/opencode")
-    (synopsis "AI coding agent built for the terminal")
-    (description "OpenCode is an AI coding agent that helps with software development
-directly from the terminal.  It provides intelligent code completion, debugging
-assistance, and automated coding tasks using advanced AI models.")
+     (list glibc bash-minimal coreutils ripgrep git-minimal))
+    (home-page "https://github.com/anomalyco/opencode")
+    (synopsis "Open source AI coding agent for the terminal")
+    (description "OpenCode is an AI coding agent that runs directly in the
+terminal.  It exposes a TUI interface and a set of tools for code search,
+editing and shell execution.  The bundled binary relies on @code{ripgrep}
+for fast code search and @code{git} for repository operations; both are
+wired into the wrapper so the agent works offline without fetching extra
+binaries at first start.")
     (license license:expat)))
