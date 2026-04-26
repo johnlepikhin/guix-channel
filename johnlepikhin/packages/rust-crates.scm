@@ -3543,9 +3543,9 @@
   (crate-source "anstyle-parse" "1.0.0"
                 "03hkv2690s0crssbnmfkr76kw1k7ah2i6s5amdy9yca2n8w7zkjj"))
 
-(define rust-app-powerd-core-1.0.0
-  (crate-source "app-powerd-core" "1.0.0"
-                "13r2h0a3z17y2jh5jh7zaw6i534zjsqjk8vz9wbkg2aid41zwl8z"))
+(define rust-app-powerd-core-1.1.1
+  (crate-source "app-powerd-core" "1.1.1"
+                "0dbwhin6mpx0zqwyg335a6plkhc9d3nr7ybx8x2d775xp7sjvgj3"))
 
 (define rust-tokio-util-0.7.15
   (crate-source "tokio-util" "0.7.15"
@@ -5182,7 +5182,7 @@
                 rust-anstyle-query-1.1.5
                 rust-anstyle-wincon-3.0.11
                 rust-anyhow-1.0.102
-                rust-app-powerd-core-1.0.0
+                rust-app-powerd-core-1.1.1
                 rust-as-raw-xcb-connection-1.0.1
                 rust-async-broadcast-0.7.2
                 rust-async-channel-2.5.0
