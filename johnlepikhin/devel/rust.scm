@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2023 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2023, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -19,6 +19,7 @@
 (define-module (johnlepikhin devel rust)
   #:use-module (gnu home services)
   #:use-module (gnu packages llvm)
+  #:use-module (gnu packages mold)
   #:use-module (johnlepikhin packages rust-binary)
   #:use-module (gnu packages tls)
   #:use-module (gnu services configuration)
@@ -39,6 +40,7 @@
   (let ((rust-package (home-devel-rust-configuration-package config)))
     (list
      clang
+     mold
      openssl-1.1
      rust-package)))
      ;; (list rust-package "tools")
