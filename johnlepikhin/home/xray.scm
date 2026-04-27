@@ -22,6 +22,7 @@
   #:use-module (gnu packages linux)
   #:use-module (guix records)
   #:use-module (guix gexp)
+  #:use-module (srfi srfi-13)
   #:use-module (johnlepikhin packages xray-core)
   #:use-module (johnlepikhin packages tun2socks)
   #:export (home-xray-configuration
@@ -34,6 +35,7 @@
             home-xray-configuration-tun-name
             home-xray-configuration-tun-address
             home-xray-configuration-tun-gateway
+            home-xray-configuration-bypass-networks
             home-xray-service-type))
 
 ;;; Module: (johnlepikhin home xray)
@@ -67,7 +69,9 @@
   (tun-address    home-xray-configuration-tun-address
                   (default "198.18.0.1/15"))
   (tun-gateway    home-xray-configuration-tun-gateway
-                  (default "198.18.0.1")))
+                  (default "198.18.0.1"))
+  (bypass-networks home-xray-configuration-bypass-networks
+                   (default '())))
 
 (define (make-start-script config)
   (let ((xray-pkg    (home-xray-configuration-package config))
@@ -78,6 +82,8 @@
         (tun-name    (home-xray-configuration-tun-name config))
         (tun-address (home-xray-configuration-tun-address config))
         (tun-gateway (home-xray-configuration-tun-gateway config))
+        (bypass-list (string-join
+                      (home-xray-configuration-bypass-networks config) " "))
         (ip-cmd      (file-append iproute "/sbin/ip"))
         (ss-cmd      (file-append iproute "/sbin/ss")))
     (computed-file
@@ -91,6 +97,7 @@
                "set -e\n\n"
 
                "RUNTIME_DIR=\"${XDG_RUNTIME_DIR:-/run/user/$(id -u)}\"\n"
+               "mkdir -p \"$RUNTIME_DIR\"\n"
                "XRAY_PID=\"$RUNTIME_DIR/xray.pid\"\n"
                "T2S_PID=\"$RUNTIME_DIR/tun2socks.pid\"\n"
                "TUN=\"" #$tun-name "\"\n"
@@ -158,6 +165,11 @@
                "echo 'Configuring routes...'\n"
                "sudo " #$ip-cmd " route add \"$SERVER\"/32 via $ORIG_GW dev $ORIG_DEV 2>/dev/null || true\n\n"
 
+               ;; Add bypass routes for local/private networks (split tunnel)
+               "for NET in " #$bypass-list "; do\n"
+               "  sudo " #$ip-cmd " route add \"$NET\" via \"$ORIG_GW\" dev \"$ORIG_DEV\" 2>/dev/null || true\n"
+               "done\n\n"
+
                ;; Add default route through TUN with high priority
                "sudo " #$ip-cmd " route add default via " #$tun-gateway " dev \"$TUN\" metric 1\n\n"
 
@@ -165,8 +177,12 @@
          (chmod #$output #o755)))))
 
 (define (make-stop-script config)
-  (let ((tun-name (home-xray-configuration-tun-name config))
-        (ip-cmd  (file-append iproute "/sbin/ip")))
+  (let ((tun-name    (home-xray-configuration-tun-name config))
+        (config-file (home-xray-configuration-config-file config))
+        (bypass-list (string-join
+                      (home-xray-configuration-bypass-networks config) " "))
+        (ip-cmd      (file-append iproute "/sbin/ip"))
+        (pkill-cmd   (file-append procps "/bin/pkill")))
     (computed-file
      "xray-stop"
      #~(begin
@@ -177,23 +193,46 @@
                "#!/bin/sh\n\n"
 
                "RUNTIME_DIR=\"${XDG_RUNTIME_DIR:-/run/user/$(id -u)}\"\n"
+               "mkdir -p \"$RUNTIME_DIR\"\n"
                "XRAY_PID=\"$RUNTIME_DIR/xray.pid\"\n"
                "T2S_PID=\"$RUNTIME_DIR/tun2socks.pid\"\n"
                "TUN=\"" #$tun-name "\"\n\n"
 
-               ;; Kill tun2socks
+               ;; Helper: terminate PID with TERM, wait, then KILL if still alive
+               "stop_pid() {\n"
+               "  PID=$1\n"
+               "  [ -z \"$PID\" ] && return 0\n"
+               "  sudo kill \"$PID\" 2>/dev/null || true\n"
+               "  for _ in 1 2 3; do\n"
+               "    sudo kill -0 \"$PID\" 2>/dev/null || return 0\n"
+               "    sleep 1\n"
+               "  done\n"
+               "  sudo kill -9 \"$PID\" 2>/dev/null || true\n"
+               "}\n\n"
+
+               ;; Kill tun2socks (TUN device must be free before link delete)
                "if [ -f \"$T2S_PID\" ]; then\n"
                "  echo 'Stopping tun2socks...'\n"
-               "  sudo kill \"$(cat \"$T2S_PID\")\" 2>/dev/null || true\n"
+               "  stop_pid \"$(cat \"$T2S_PID\")\"\n"
                "  rm -f \"$T2S_PID\"\n"
-               "fi\n\n"
+               "fi\n"
+               ;; Fallback: stale PID file or process started outside script
+               "sudo " #$pkill-cmd
+               " -f \"tun2socks -device $TUN\" 2>/dev/null || true\n\n"
 
-               ;; Kill xray
+               ;; Kill xray (process may be root-owned if start ran under sudo)
                "if [ -f \"$XRAY_PID\" ]; then\n"
                "  echo 'Stopping xray...'\n"
-               "  kill \"$(cat \"$XRAY_PID\")\" 2>/dev/null || true\n"
+               "  stop_pid \"$(cat \"$XRAY_PID\")\"\n"
                "  rm -f \"$XRAY_PID\"\n"
-               "fi\n\n"
+               "fi\n"
+               "sudo " #$pkill-cmd
+               " -f \"xray run -c " #$config-file "\" 2>/dev/null || true\n\n"
+
+               ;; Remove bypass routes (they're on $ORIG_DEV, not on TUN)
+               "for NET in " #$bypass-list "; do\n"
+               "  sudo " #$ip-cmd " route del \"$NET\" 2>/dev/null || true\n"
+               "done\n\n"
 
                ;; Delete TUN — all routes through it are removed by kernel
                "if " #$ip-cmd " link show \"$TUN\" >/dev/null 2>&1; then\n"
@@ -219,6 +258,7 @@
                "#!/bin/sh\n\n"
 
                "RUNTIME_DIR=\"${XDG_RUNTIME_DIR:-/run/user/$(id -u)}\"\n"
+               "mkdir -p \"$RUNTIME_DIR\"\n"
                "XRAY_PID=\"$RUNTIME_DIR/xray.pid\"\n"
                "T2S_PID=\"$RUNTIME_DIR/tun2socks.pid\"\n"
                "TUN=\"" #$tun-name "\"\n\n"
