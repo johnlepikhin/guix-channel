@@ -3,3 +3,7 @@ CLAUDE.md
 .specify/
 specs/
 mcp_debug.log
+
+# MemPalace per-project files (issue #185)
+mempalace.yaml
+entities.json
