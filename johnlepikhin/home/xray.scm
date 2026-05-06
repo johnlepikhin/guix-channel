@@ -165,9 +165,11 @@
                "echo 'Configuring routes...'\n"
                "sudo " #$ip-cmd " route add \"$SERVER\"/32 via $ORIG_GW dev $ORIG_DEV 2>/dev/null || true\n\n"
 
-               ;; Add bypass routes for local/private networks (split tunnel)
+               ;; Add bypass routes for local/private networks (split tunnel).
+               ;; metric 1000 lets corp-VPN routes with smaller metric win
+               ;; for the same prefix while still beating the TUN default.
                "for NET in " #$bypass-list "; do\n"
-               "  sudo " #$ip-cmd " route add \"$NET\" via \"$ORIG_GW\" dev \"$ORIG_DEV\" 2>/dev/null || true\n"
+               "  sudo " #$ip-cmd " route add \"$NET\" via \"$ORIG_GW\" dev \"$ORIG_DEV\" metric 1000 2>/dev/null || true\n"
                "done\n\n"
 
                ;; Add default route through TUN with high priority
@@ -229,9 +231,14 @@
                "sudo " #$pkill-cmd
                " -f \"xray run -c " #$config-file "\" 2>/dev/null || true\n\n"
 
-               ;; Remove bypass routes (they're on $ORIG_DEV, not on TUN)
+               ;; Remove bypass routes (they're on $ORIG_DEV, not on TUN).
+               ;; Match by metric to avoid deleting unrelated routes for
+               ;; the same prefix (e.g. those installed by other VPNs).
+               ;; metric 0 is for compatibility with the pre-metric version
+               ;; that left dangling routes; safe to repeat.
                "for NET in " #$bypass-list "; do\n"
-               "  sudo " #$ip-cmd " route del \"$NET\" 2>/dev/null || true\n"
+               "  sudo " #$ip-cmd " route del \"$NET\" metric 1000 2>/dev/null || true\n"
+               "  sudo " #$ip-cmd " route del \"$NET\" metric 0 2>/dev/null || true\n"
                "done\n\n"
 
                ;; Delete TUN — all routes through it are removed by kernel
