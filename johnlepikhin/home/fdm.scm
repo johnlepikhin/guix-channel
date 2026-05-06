@@ -388,7 +388,22 @@
       (start #~(begin
                  (use-modules (srfi srfi-1))
                  (make-forkexec-constructor
-                  (list #$(file-append package "/bin/fdm") "fetch")
+                  (list
+                   #$(program-file "fdm-fetch-loop"
+                                   #~(begin
+                                       ;; Forward SIGTERM to the whole
+                                       ;; process group so a running fdm
+                                       ;; child stops with us.
+                                       (sigaction SIGTERM
+                                         (lambda (sig)
+                                           (kill 0 SIGTERM)
+                                           (primitive-exit 0)))
+                                       (let loop ()
+                                         (system* #$(file-append package
+                                                                 "/bin/fdm")
+                                                  "fetch")
+                                         (sleep #$interval)
+                                         (loop)))))
                   #:environment-variables
                   (cons (string-append "PATH="
                           (string-join (list #$@extra-path
@@ -402,9 +417,9 @@
                                                  "/.local/state"))
                               "/log/fdm.log"))))
       (stop #~(make-kill-destructor))
-      (respawn? #t)
-      (respawn-limit #~(cons 5 #$(* interval 5)))
-      (respawn-delay interval)))))
+      ;; Respawn only on unexpected crashes; periodic fetch is handled
+      ;; by the loop inside the wrapper script.
+      (respawn? #t)))))
 
 (define (add-fdm-activation config)
   (let ((dirs (home-fdm-configuration-activate-directories config))
