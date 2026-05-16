@@ -105,6 +105,7 @@
   #:use-module (johnlepikhin packages prettier)
   #:use-module (johnlepikhin packages puppet-lint)
   #:use-module (johnlepikhin packages ripsecrets)
+  #:use-module (johnlepikhin packages rpm-spec-tool)
   #:use-module (johnlepikhin packages rust-nightly)
   #:use-module (johnlepikhin packages shadowplay)
   #:use-module (johnlepikhin packages mikrotik-winbox)
@@ -152,7 +153,8 @@
    python-yamllint
    convco
    prettier
-   ripsecrets))
+   ripsecrets
+   rpm-spec-tool))
 
 (define %devel-common-libs-packages
   (list

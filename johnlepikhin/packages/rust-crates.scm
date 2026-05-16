@@ -4448,6 +4448,79 @@
   (crate-source "zerovec-derive" "0.11.3"
                 "0m85qj92mmfvhjra6ziqky5b1p4kcmp5069k7kfadp5hr8jw8pb2"))
 
+;; Crate sources for rpm-spec-tool dependencies
+(define rust-arraydeque-0.5.1
+  (crate-source "arraydeque" "0.5.1"
+                "0dn2xdfg3rkiqsh8a6achnmvf5nf11xk33xgjzpksliab4yjx43x"))
+
+(define rust-clap-complete-4.6.5
+  (crate-source "clap_complete" "4.6.5"
+                "0wnp1w338vwf20sbaps13cjx452ijw2hybw3b6g1z09mvfzsk9z0"))
+
+(define rust-codespan-reporting-0.12.0
+  (crate-source "codespan-reporting" "0.12.0"
+                "108g41xqzhr8fx8hlpy5qzmqq8ylldbj37wndkaqm34yy1d2wvgy"))
+
+(define rust-granit-parser-0.0.1
+  (crate-source "granit-parser" "0.0.1"
+                "04w1nms1ilj4100hn534q0zra824vmnvmh9gz7l1d6i7nc7bym73"))
+
+(define rust-hashbrown-0.17.1
+  (crate-source "hashbrown" "0.17.1"
+                "0jmqz7i4yl6cm7rbn0i2ffkfrmwi6xkmzkaldr2v8bcsx2v0jngd"))
+
+(define rust-nom-locate-5.0.0
+  (crate-source "nom_locate" "5.0.0"
+                "13a3d1f5gcqhjwchp1j2633wfk0wmpx2xdd2rd04fz42d4npwmqb"))
+
+(define rust-rpm-spec-0.3.4
+  (crate-source "rpm-spec" "0.3.4"
+                "13g7xyjlc1prxxd664byqlp0pb5achniz5h6irrbs5ihcda1v17r"))
+
+(define rust-rpm-spec-analyzer-0.1.1
+  (crate-source "rpm-spec-analyzer" "0.1.1"
+                "00y3b5xkigzkrj5yb31045gc25vk003d726gkfxbk3yyiazv0agw"))
+
+(define rust-rpm-spec-profile-0.1.1
+  (crate-source "rpm-spec-profile" "0.1.1"
+                "0zya6hdc04csa0a5bzkqxhmi1scg0a9iaiyw3qh6s9rwcv7pmwm3"))
+
+(define rust-semver-1.0.28
+  (crate-source "semver" "1.0.28"
+                "1kaimrpy876bcgi8bfj0qqfxk77zm9iz2zhn1hp9hj685z854y4a"))
+
+(define rust-serde-spanned-0.6.9
+  (crate-source "serde_spanned" "0.6.9"
+                "18vmxq6qfrm110caszxrzibjhy2s54n1g5w1bshxq9kjmz7y0hdz"))
+
+(define rust-serde-yaml-bw-2.5.6
+  (crate-source "serde_yaml_bw" "2.5.6"
+                "0lxbjrh7jav4sapf3s4x85rvxqbsiiixp8b1ysh0zqi7cxlrqmfr"))
+
+(define rust-similar-2.7.0
+  (crate-source "similar" "2.7.0"
+                "1aidids7ymfr96s70232s6962v5g9l4zwhkvcjp4c5hlb6b5vfxv"))
+
+(define rust-toml-0.8.23
+  (crate-source "toml" "0.8.23"
+                "0qnkrq4lm2sdhp3l6cb6f26i8zbnhqb7mhbmksd550wxdfcyn6yw"))
+
+(define rust-toml-datetime-0.6.11
+  (crate-source "toml_datetime" "0.6.11"
+                "077ix2hb1dcya49hmi1avalwbixmrs75zgzb3b2i7g2gizwdmk92"))
+
+(define rust-toml-edit-0.22.27
+  (crate-source "toml_edit" "0.22.27"
+                "16l15xm40404asih8vyjvnka9g0xs9i4hfb6ry3ph9g419k8rzj1"))
+
+(define rust-toml-write-0.1.2
+  (crate-source "toml_write" "0.1.2"
+                "008qlhqlqvljp1gpp9rn5cqs74gwvdgbvs92wnpq8y3jlz4zi6ax"))
+
+(define rust-unicode-width-0.2.2
+  (crate-source "unicode-width" "0.2.2"
+                "0m7jjzlcccw716dy9423xxh0clys8pfpllc5smvfxrzdf66h9b5l"))
+
 ;; Define cargo inputs mapping
 (define-cargo-inputs lookup-cargo-inputs
   (convco =>
@@ -6293,5 +6366,119 @@
                 rust-zerotrie-0.2.4
                 rust-zerovec-0.11.6
                 rust-zerovec-derive-0.11.3
+                rust-zmij-1.0.21
+                ))
+  (rpm-spec-tool =>
+          (list rust-aho-corasick-1.1.4
+                rust-anstream-1.0.0
+                rust-anstyle-1.0.14
+                rust-anstyle-parse-1.0.0
+                rust-anstyle-query-1.1.5
+                rust-anstyle-wincon-3.0.11
+                rust-anyhow-1.0.102
+                rust-arraydeque-0.5.1
+                rust-autocfg-1.5.0
+                rust-base64-0.22.1
+                rust-bitflags-2.11.1
+                rust-bytecount-0.6.9
+                rust-cfg-if-1.0.4
+                rust-clap-4.6.1
+                rust-clap-builder-4.6.0
+                rust-clap-complete-4.6.5
+                rust-clap-derive-4.6.1
+                rust-clap-lex-1.1.0
+                rust-codespan-reporting-0.12.0
+                rust-colorchoice-1.0.5
+                rust-deranged-0.5.8
+                rust-equivalent-1.0.2
+                rust-errno-0.3.14
+                rust-fastrand-2.4.1
+                rust-foldhash-0.1.5
+                rust-getrandom-0.4.2
+                rust-granit-parser-0.0.1
+                rust-hashbrown-0.15.5
+                rust-hashbrown-0.17.1
+                rust-heck-0.5.0
+                rust-id-arena-2.3.0
+                rust-indexmap-2.14.0
+                rust-is-terminal-polyfill-1.70.2
+                rust-itoa-1.0.18
+                rust-lazy-static-1.5.0
+                rust-leb128fmt-0.1.0
+                rust-libc-0.2.186
+                rust-linux-raw-sys-0.12.1
+                rust-log-0.4.29
+                rust-matchers-0.2.0
+                rust-memchr-2.8.0
+                rust-nom-8.0.0
+                rust-nom-locate-5.0.0
+                rust-nu-ansi-term-0.50.3
+                rust-num-conv-0.2.1
+                rust-num-traits-0.2.19
+                rust-once-cell-1.21.4
+                rust-once-cell-polyfill-1.70.2
+                rust-pin-project-lite-0.2.17
+                rust-powerfmt-0.2.0
+                rust-prettyplease-0.2.37
+                rust-proc-macro2-1.0.106
+                rust-quote-1.0.45
+                rust-r-efi-6.0.0
+                rust-regex-1.12.3
+                rust-regex-automata-0.4.14
+                rust-regex-syntax-0.8.10
+                rust-rpm-spec-0.3.4
+                rust-rpm-spec-analyzer-0.1.1
+                rust-rpm-spec-profile-0.1.1
+                rust-rustix-1.1.4
+                rust-semver-1.0.28
+                rust-serde-1.0.228
+                rust-serde-core-1.0.228
+                rust-serde-derive-1.0.228
+                rust-serde-json-1.0.149
+                rust-serde-spanned-0.6.9
+                rust-serde-yaml-bw-2.5.6
+                rust-sharded-slab-0.1.7
+                rust-similar-2.7.0
+                rust-smallvec-1.15.1
+                rust-strsim-0.11.1
+                rust-syn-2.0.117
+                rust-tempfile-3.27.0
+                rust-termcolor-1.4.1
+                rust-thiserror-2.0.18
+                rust-thiserror-impl-2.0.18
+                rust-thread-local-1.1.9
+                rust-time-0.3.47
+                rust-time-core-0.1.8
+                rust-toml-0.8.23
+                rust-toml-datetime-0.6.11
+                rust-toml-edit-0.22.27
+                rust-toml-write-0.1.2
+                rust-tracing-0.1.44
+                rust-tracing-attributes-0.1.31
+                rust-tracing-core-0.1.36
+                rust-tracing-log-0.2.0
+                rust-tracing-subscriber-0.3.23
+                rust-unicode-ident-1.0.24
+                rust-unicode-width-0.2.2
+                rust-unicode-xid-0.2.6
+                rust-unsafe-libyaml-norway-0.2.15
+                rust-utf8parse-0.2.2
+                rust-valuable-0.1.1
+                rust-wasip2-1.0.3+wasi-0.2.9
+                rust-wasip3-0.4.0+wasi-0.3.0-rc-2026-01-06
+                rust-wasm-encoder-0.244.0
+                rust-wasm-metadata-0.244.0
+                rust-wasmparser-0.244.0
+                rust-winapi-util-0.1.11
+                rust-windows-link-0.2.1
+                rust-windows-sys-0.61.2
+                rust-winnow-0.7.15
+                rust-wit-bindgen-0.51.0
+                rust-wit-bindgen-0.57.1
+                rust-wit-bindgen-core-0.51.0
+                rust-wit-bindgen-rust-0.51.0
+                rust-wit-bindgen-rust-macro-0.51.0
+                rust-wit-component-0.244.0
+                rust-wit-parser-0.244.0
                 rust-zmij-1.0.21
                 )))
