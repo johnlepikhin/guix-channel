@@ -18,49 +18,67 @@
 
 (define-module (johnlepikhin packages rpm-spec-tool)
   #:use-module ((guix licenses) #:prefix license:)
-  #:use-module (gnu packages commencement)
-  #:use-module (guix build-system cargo)
+  #:use-module (gnu packages base)
+  #:use-module (gnu packages compression)
+  #:use-module (gnu packages elf)
+  #:use-module (gnu packages gcc)
+  #:use-module (guix build-system gnu)
   #:use-module (guix download)
-  #:use-module (guix gexp)
-  #:use-module (guix packages)
-  #:use-module (johnlepikhin packages rust-binary)
-  #:use-module (johnlepikhin packages rust-crates))
+  #:use-module (guix packages))
 
 (define-public rpm-spec-tool
   (package
     (name "rpm-spec-tool")
-    (version "0.1.1")
+    (version "0.1.3")
     (source
      (origin
        (method url-fetch)
-       (uri (crate-uri name version))
-       (file-name (string-append name "-" version ".tar.gz"))
+       (uri (string-append
+             "https://github.com/johnlepikhin/rpm-spec-tool/releases/download/v"
+             version "/rpm-spec-tool-" version "-linux-x86_64.tar.gz"))
        (sha256
-        (base32 "1jawpnmyhalr83mblz3s0srs4hj7sg0qww3c2n8lcd15j7sswp4x"))))
-    (build-system cargo-build-system)
+        (base32 "0wxp0bm992b0k8qq8x2h9jfxv4kscy85j2mx3ss0y393s9zh8r9v"))))
+    (supported-systems '("x86_64-linux"))
+    (build-system gnu-build-system)
     (arguments
-     (list
-      #:rust rust-binary-1.88
-      #:install-source? #f
-      ;; Integration tests reference fixtures outside the crate tarball.
-      #:tests? #f
-      #:phases
-      #~(modify-phases %standard-phases
-          (add-before 'configure 'create-cc-symlink
-            (lambda* (#:key inputs #:allow-other-keys)
-              (let* ((gcc (assoc-ref inputs "gcc-toolchain"))
-                     (bin-dir (string-append (getcwd) "/.cc-bin")))
-                (mkdir-p bin-dir)
-                (symlink (string-append gcc "/bin/gcc")
-                         (string-append bin-dir "/cc"))
-                (setenv "PATH" (string-append bin-dir ":" (getenv "PATH")))
-                (setenv "CC" (string-append gcc "/bin/gcc"))
-                (setenv "HOST_CC" (string-append gcc "/bin/gcc"))))))))
-    (native-inputs (list gcc-toolchain))
-    (inputs (cargo-inputs 'rpm-spec-tool
-                          #:module '(johnlepikhin packages rust-crates)))
+     `(#:strip-binaries? #f
+       #:validate-runpath? #f
+       #:phases
+       (modify-phases %standard-phases
+         (delete 'configure)
+         (delete 'build)
+         (delete 'check)
+         (replace 'install
+           (lambda* (#:key inputs outputs #:allow-other-keys)
+             (let* ((out (assoc-ref outputs "out"))
+                    (bin (string-append out "/bin"))
+                    (patchelf (string-append
+                               (assoc-ref inputs "patchelf")
+                               "/bin/patchelf"))
+                    (libc (assoc-ref inputs "libc"))
+                    (ld-so (string-append libc "/lib/ld-linux-x86-64.so.2"))
+                    (gcc-lib (assoc-ref inputs "gcc"))
+                    (xz (assoc-ref inputs "xz"))
+                    (rpath (string-join
+                            (list (string-append libc "/lib")
+                                  (string-append gcc-lib "/lib")
+                                  (string-append xz "/lib"))
+                            ":")))
+               (for-each (lambda (binary)
+                           (install-file binary bin)
+                           (invoke patchelf
+                                   "--set-interpreter" ld-so
+                                   "--set-rpath" rpath
+                                   (string-append bin "/" binary)))
+                         '("rpm-spec-tool" "rpm-spec-lsp"))))))))
+    (native-inputs
+     (list patchelf))
+    (inputs
+     (list glibc
+           xz
+           `(,gcc "lib")))
     (home-page "https://github.com/johnlepikhin/rpm-spec-tool")
-    (synopsis "Pretty-printer and static analyzer for RPM .spec files")
+    (synopsis "Pretty-printer, static analyzer and LSP server for RPM .spec files")
     (description
      "@command{rpm-spec-tool} is a command-line pretty-printer and static
 analyzer for RPM @file{.spec} files.  It reformats spec files according to
@@ -68,5 +86,8 @@ configurable style rules and reports lint-style diagnostics about common
 authoring mistakes, helping packagers keep spec files consistent and
 correct.  The tool ships with built-in distribution profiles (generic,
 RHEL, Fedora, SUSE, ALT Linux) and optionally integrates with
-@command{shellcheck} to lint embedded shell sections.")
+@command{shellcheck} to lint embedded shell sections.  The package also
+provides @command{rpm-spec-lsp}, a Language Server Protocol implementation
+that powers editor integrations (diagnostics, formatting, completion) for
+@file{.spec} files.")
     (license (list license:expat license:asl2.0))))
