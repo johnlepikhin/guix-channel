@@ -25,6 +25,7 @@
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages xorg)
   #:use-module (guix build-system cargo)
+  #:use-module (johnlepikhin build rust)
   #:use-module (johnlepikhin packages rust-binary))
 
 (define-public app-powerd
@@ -46,16 +47,7 @@
       #:tests? #f ;no test suite in the crate
       #:phases
       #~(modify-phases %standard-phases
-          (add-before 'configure 'create-cc-symlink
-            (lambda* (#:key inputs #:allow-other-keys)
-              (let* ((gcc (assoc-ref inputs "gcc-toolchain"))
-                     (bin-dir (string-append (getcwd) "/.cc-bin")))
-                (mkdir-p bin-dir)
-                (symlink (string-append gcc "/bin/gcc")
-                         (string-append bin-dir "/cc"))
-                (setenv "PATH" (string-append bin-dir ":" (getenv "PATH")))
-                (setenv "CC" (string-append gcc "/bin/gcc"))
-                (setenv "HOST_CC" (string-append gcc "/bin/gcc")))))
+          #$%rust-cc-symlink-phase
           (add-after 'configure 'remove-wayland-deps
             ;; Remove optional wayland dependencies from Cargo.toml files
             ;; to avoid vendoring the entire wayland crate tree.

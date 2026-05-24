@@ -33,6 +33,7 @@
   #:use-module (guix git-download)
   #:use-module (guix packages)
   #:use-module (guix utils)
+  #:use-module (johnlepikhin build rust)
   #:use-module (johnlepikhin packages rust-binary)
   #:use-module (johnlepikhin packages rust-crates))
 
@@ -57,14 +58,7 @@
       #:tests? #f
       #:phases
       #~(modify-phases %standard-phases
-          (add-before 'configure 'create-cc-symlink
-            (lambda* (#:key inputs #:allow-other-keys)
-              (let ((gcc (assoc-ref inputs "gcc-toolchain")))
-                (mkdir-p "/tmp/bin")
-                (symlink (string-append gcc "/bin/gcc") "/tmp/bin/cc")
-                (setenv "PATH" (string-append "/tmp/bin:" (getenv "PATH")))
-                (setenv "CC" (string-append gcc "/bin/gcc"))
-                (setenv "HOST_CC" (string-append gcc "/bin/gcc")))))
+          #$%rust-cc-symlink-phase
           (add-after 'install 'wrap-binary
             (lambda* (#:key inputs outputs #:allow-other-keys)
               (let ((out (assoc-ref outputs "out")))

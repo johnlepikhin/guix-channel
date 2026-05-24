@@ -30,6 +30,7 @@
   #:use-module (guix git-download)
   #:use-module (guix packages)
   #:use-module (guix utils)
+  #:use-module (johnlepikhin build rust)
   #:use-module (johnlepikhin packages rust-binary)
   #:use-module (johnlepikhin packages rust-crates))
 
@@ -54,16 +55,7 @@
       #:tests? #f ;no test suite in the crate
       #:phases
       #~(modify-phases %standard-phases
-          (add-before 'configure 'create-cc-symlink
-            (lambda* (#:key inputs #:allow-other-keys)
-              (let* ((gcc (assoc-ref inputs "gcc-toolchain"))
-                     (bin-dir (string-append (getcwd) "/.cc-bin")))
-                (mkdir-p bin-dir)
-                (symlink (string-append gcc "/bin/gcc")
-                         (string-append bin-dir "/cc"))
-                (setenv "PATH" (string-append bin-dir ":" (getenv "PATH")))
-                (setenv "CC" (string-append gcc "/bin/gcc"))
-                (setenv "HOST_CC" (string-append gcc "/bin/gcc"))))))))
+          #$%rust-cc-symlink-phase)))
     (native-inputs (list gcc-toolchain pkg-config))
     (inputs (append (list bash-minimal gtk sqlite)
                     (cargo-inputs 'clio
