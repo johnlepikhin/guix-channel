@@ -21,6 +21,7 @@
   #:use-module (gnu packages cmake)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages cpp)
+  #:use-module (gnu packages elf)
   #:use-module (gnu packages oneapi)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages protobuf)
@@ -197,9 +198,40 @@ include(\"${CMAKE_CURRENT_LIST_DIR}/../../../runtime/cmake/OpenVINOConfig-versio
                             (string-append libdir "/" stem ".so")))
                        (unless (file-exists? unversioned)
                          (symlink base unversioned)))))
-                 (find-files libdir "\\.so\\.[0-9].*$")))))) ))
+                 (find-files libdir "\\.so\\.[0-9].*$")))))
+          ;; OpenVINO installs every plugin and frontend lib into
+          ;; `runtime/lib/intel64/` and links them with NEEDED entries
+          ;; like `libopenvino.so.2610` -- expecting the sibling
+          ;; libraries in the same directory to resolve at dlopen
+          ;; time.  Guix's `cmake-build-system` defaults
+          ;; `CMAKE_INSTALL_RPATH` to `$out/lib` (so RUNPATH only
+          ;; points at the (empty) top-level lib/) and never sees
+          ;; `runtime/lib/intel64`, so the libs cannot find each
+          ;; other.  Add `$ORIGIN` to every lib's RUNPATH after
+          ;; install via patchelf -- robust regardless of how
+          ;; upstream and `cmake-build-system` collaborate on RPATH.
+          (add-after 'add-standard-cmake-and-pkgconfig-shims
+                     'add-origin-rpath
+            (lambda* (#:key outputs #:allow-other-keys)
+              (let* ((out (assoc-ref outputs "out"))
+                     (libdir (string-append out "/runtime/lib/intel64")))
+                (for-each
+                 (lambda (so)
+                   ;; --add-rpath appends so the toolchain-injected
+                   ;; entries (glibc, gcc-lib, tbb, pugixml) stay.
+                   (invoke "patchelf" "--add-rpath" "$ORIGIN" so))
+                 ;; Filter to real files only -- find-files with
+                 ;; `#:stat lstat` returns both symlinks and the
+                 ;; final target; without the filter patchelf
+                 ;; would follow each symlink and re-patch the same
+                 ;; underlying ELF, accumulating duplicate $ORIGIN
+                 ;; entries.
+                 (filter (lambda (f)
+                           (eq? 'regular (stat:type (lstat f))))
+                         (find-files libdir "\\.so(\\.[0-9].*)?$"
+                                     #:stat lstat)))))))))
     (native-inputs
-     (list cmake-minimal pkg-config python-wrapper))
+     (list cmake-minimal patchelf pkg-config python-wrapper))
     (inputs
      (list flatbuffers
            nlohmann-json
@@ -211,7 +243,16 @@ include(\"${CMAKE_CURRENT_LIST_DIR}/../../../runtime/cmake/OpenVINOConfig-versio
     (native-search-paths
      (list (search-path-specification
             (variable "OPENVINO_INSTALL_DIR")
-            (files '("")))))
+            (files '(""))
+            ;; Single-value env var: openvino-finder, setupvars.sh
+            ;; and CMake's find_package(OpenVINO) all treat
+            ;; OPENVINO_INSTALL_DIR as a path to ONE install prefix.
+            ;; Without `(separator #f)` Guix Home aggregates the
+            ;; value across packages in colon-separated form, which
+            ;; openvino-finder then passes to PathBuf::from -- it
+            ;; gets a literal `:`-containing path that doesn't exist
+            ;; and the loader fails to find libopenvino_c.so.
+            (separator #f))))
     (home-page "https://github.com/openvinotoolkit/openvino")
     (synopsis "Intel OpenVINO inference runtime (CPU)")
     (description
