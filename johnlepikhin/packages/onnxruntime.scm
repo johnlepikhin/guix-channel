@@ -23,7 +23,8 @@
   #:use-module (guix utils)
   #:use-module (gnu packages cpp)
   #:use-module (gnu packages python-xyz)
-  #:use-module ((gnu packages machine-learning) #:prefix ml:))
+  #:use-module ((gnu packages machine-learning) #:prefix ml:)
+  #:use-module (johnlepikhin packages openvino))
 
 ;; ONNX 1.21.0 as a static C++ library, suitable for linking into
 ;; onnxruntime 1.25+ (which bumped its onnx dependency from 1.17 to 1.21).
@@ -108,3 +109,56 @@
        ;; onnxruntime 1.26's pybind11.cmake requires pybind11 >= 3.0;
        ;; the upstream Guix recipe still pinned pybind11-2 (2.13.6).
        (replace "pybind11" pybind11)))))
+
+;; onnxruntime with the OpenVINO Execution Provider compiled in.
+;;
+;; Kept as a separate variant rather than turning the EP on in the
+;; default `onnxruntime` package because:
+;;
+;;   1. The default `onnxruntime` is a heavy build already (~12 min on
+;;      8 cores).  Pulling in `openvino` adds 30-60 min of upstream
+;;      compile to every user who only wanted CPU EP.
+;;   2. Rolling back is cheap: a regression in the OpenVINO EP doesn't
+;;      brick CPU-only users.
+;;
+;; The Rust crate `ort 2.x` with the `load-dynamic` feature picks the
+;; OpenVINO EP up at runtime as long as the libonnxruntime.so it loads
+;; was built with `--use_openvino`; the OPENVINO_INSTALL_DIR env var
+;; published by the `openvino` package's search-path then lets ORT
+;; locate the OpenVINO runtime libraries without LD_LIBRARY_PATH
+;; gymnastics.
+(define-public onnxruntime-openvino
+  (package
+    (inherit onnxruntime)
+    (name "onnxruntime-openvino")
+    (arguments
+     (substitute-keyword-arguments (package-arguments onnxruntime)
+       ((#:configure-flags flags '())
+        #~(append (list "-Donnxruntime_USE_OPENVINO=ON"
+                        "-Donnxruntime_USE_OPENVINO_AUTO=ON")
+                  #$flags))
+       ((#:phases phases)
+        #~(modify-phases #$phases
+            ;; onnxruntime 1.26's OpenVINO EP wrappers compile with
+            ;; -Werror=unused-function / -Werror=unused-but-set-variable
+            ;; turned on, but the EP source itself trips both: the
+            ;; HETERO/MULTI/AUTO-only `parseDevices` helper is unused
+            ;; when only AUTO is requested, and inside it a dead
+            ;; `dev_options_update` captures the return value of an
+            ;; `std::set::emplace` that's only called for its side
+            ;; effect.  Patch both so the EP compiles without lowering
+            ;; the global warning gate.
+            (add-after 'unpack 'patch-openvino-ep-warnings
+              (lambda _
+                (substitute*
+                    "onnxruntime/core/providers/openvino/openvino_execution_provider.cc"
+                  (("auto dev_options_update = dev_options\\.emplace")
+                   "dev_options.emplace")
+                  (("^static std::vector<std::string> parseDevices")
+                   (string-append "[[maybe_unused]] static "
+                                  "std::vector<std::string> parseDevices"))))))) ))
+    (inputs
+     (modify-inputs (package-inputs onnxruntime)
+       (prepend openvino)))
+    (synopsis
+     "ONNX Runtime with the OpenVINO execution provider")))
