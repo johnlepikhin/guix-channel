@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+# Cancel an in-flight run if a newer push lands on the same branch:
+# pre-flight lint feedback is cheap to redo and lets us free Actions
+# minutes for the head commit.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: guix lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Guix
+        # Ubuntu ships a `guix` apt package whose `guix lint` and `guix
+        # repl` work fine for our purposes (loading the channel's
+        # modules and checking the `<package>` records).  No need for
+        # a full Guix system bootstrap or `guix pull`, which would
+        # cost 10+ extra minutes per run.
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends guix
+          guix --version
+
+      - name: Lint all channel packages
+        env:
+          # CI runners have 4 vCPUs; saturate them.  Set to 1 locally
+          # for sequential debug logs.
+          JOBS: 4
+        run: ./scripts/lint-all.sh
