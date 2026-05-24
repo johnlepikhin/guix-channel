@@ -21,6 +21,7 @@
   #:use-module (gnu packages cmake)
   #:use-module (gnu packages elf)
   #:use-module ((gnu packages oneapi) #:prefix gnu:)
+  #:use-module (gnu packages opencl)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages video)
   #:use-module (guix build-system cmake)
@@ -157,6 +158,16 @@
            intel-graphics-compiler
            level-zero
            libva))
+    ;; OpenCL consumers (e.g. OpenVINO's intel_gpu_plugin, clinfo)
+    ;; dlopen `libOpenCL.so.1` -- the ICD loader from ocl-icd -- which
+    ;; then walks `OCL_ICD_VENDORS` (declared above) to find this
+    ;; package's `intel.icd` and routes calls into `libigdrcl.so`.
+    ;; Without the loader on the consumer's lib path the OpenVINO GPU
+    ;; plugin's dlopen fails with "libOpenCL.so.1: cannot open shared
+    ;; object file" even when intel.icd is present.  Propagating
+    ;; ocl-icd ensures every profile carrying intel-compute-runtime
+    ;; also carries the loader so the GPU plugin loads transparently.
+    (propagated-inputs (list ocl-icd))
     (native-search-paths
      (list (search-path-specification
             (variable "OCL_ICD_VENDORS")
