@@ -30,11 +30,35 @@
   #:use-module (gnu packages tbb)
   #:use-module (gnu packages xml)
   #:use-module (guix build-system cmake)
+  #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module (guix git-download)
   #:use-module (guix packages)
   #:use-module (guix search-paths)
   #:use-module (guix utils))
+
+;; OpenVINO's `src/plugins/intel_npu/cmake/download_compiler_libs.cmake`
+;; fetches a prebuilt NPU compiler tarball from openvinotoolkit's
+;; storage at build time, then renames `libnpu_driver_compiler.so` to
+;; `libopenvino_intel_npu_compiler.so` and installs it next to the
+;; intel_npu plugin.  Without that file the NPU plugin's dlopen at
+;; `compile_model()` fails with `Cannot load library
+;; libopenvino_intel_npu_compiler.so`.
+;;
+;; In the Guix sandbox there is no network, so the upstream download
+;; quietly no-ops (the `lsb_release` probe returns empty and skips
+;; the whole Linux branch).  Stage the tarball as a regular `(origin)`
+;; and have a post-install phase do the rename + place the file at
+;; the expected path under `runtime/lib/intel64/`.
+(define %openvino-npu-compiler-source
+  (origin
+    (method url-fetch)
+    (uri (string-append "https://storage.openvinotoolkit.org"
+                        "/dependencies/thirdparty/linux"
+                        "/npu_compiler_vcl_ubuntu_24_04-7_6_0-da3cc32.tar.gz"))
+    (file-name "openvino-npu-compiler-vcl-7.6.0.tar.gz")
+    (sha256
+     (base32 "1an5fd88059k8ny4y6j4m0sgnx8b2lg5z9z953x5dhngk1bzvdn7"))))
 
 ;; Intel OpenVINO Toolkit -- inference runtime for CPU/GPU/NPU.
 ;;
@@ -229,7 +253,49 @@ include(\"${CMAKE_CURRENT_LIST_DIR}/../../../runtime/cmake/OpenVINOConfig-versio
                  (filter (lambda (f)
                            (eq? 'regular (stat:type (lstat f))))
                          (find-files libdir "\\.so(\\.[0-9].*)?$"
-                                     #:stat lstat)))))))))
+                                     #:stat lstat))))))
+          ;; OpenVINO's `download_compiler_libs.cmake` would normally
+          ;; fetch the NPU compiler tarball from openvinotoolkit's
+          ;; storage at build time and rename it to
+          ;; `libopenvino_intel_npu_compiler.so` next to the NPU
+          ;; plugin.  No network in the Guix sandbox; do it ourselves
+          ;; once the NPU plugin is built.  Only runs for variants
+          ;; that actually built the plugin (CPU-only base openvino
+          ;; skips this branch, no point dragging a 120 MB blob).
+          (add-after 'add-origin-rpath 'install-npu-compiler
+            (lambda* (#:key inputs outputs #:allow-other-keys)
+              (let* ((out (assoc-ref outputs "out"))
+                     (libdir (string-append out "/runtime/lib/intel64"))
+                     (plugin (string-append libdir
+                                            "/libopenvino_intel_npu_plugin.so")))
+                (when (file-exists? plugin)
+                  (let* ((work (string-append (getcwd) "/.npu-vcl-extract"))
+                         (compiler-dst
+                          (string-append
+                           libdir "/libopenvino_intel_npu_compiler.so")))
+                    (mkdir-p work)
+                    (invoke "tar" "xzf" #+%openvino-npu-compiler-source
+                            "-C" work)
+                    (copy-file (string-append
+                                work "/lib/libnpu_driver_compiler.so")
+                               compiler-dst)
+                    (chmod compiler-dst #o755)
+                    ;; Borrow the plugin's already-patched RUNPATH
+                    ;; (glibc, gcc-lib, tbb, pugixml, $ORIGIN) via a
+                    ;; shell `$(patchelf --print-rpath ...)` so we get
+                    ;; all toolchain paths without parsing them here;
+                    ;; prepend zlib + zstd which the prebuilt compiler
+                    ;; additionally needs but the plugin doesn't.
+                    (let ((cmd (string-append
+                                "patchelf --set-rpath \"\\$ORIGIN:"
+                                (assoc-ref inputs "zlib") "/lib:"
+                                (assoc-ref inputs "zstd") "/lib:"
+                                "$(patchelf --print-rpath '"
+                                plugin "')\" '"
+                                compiler-dst "'")))
+                      (unless (zero? (system cmd))
+                        (error "patchelf --set-rpath failed for"
+                               compiler-dst)))))))) )))
     (native-inputs
      (list cmake-minimal patchelf pkg-config python-wrapper))
     (inputs
@@ -239,7 +305,8 @@ include(\"${CMAKE_CURRENT_LIST_DIR}/../../../runtime/cmake/OpenVINOConfig-versio
            pugixml
            snappy
            tbb
-           zlib))
+           zlib
+           zstd))
     (native-search-paths
      (list (search-path-specification
             (variable "OPENVINO_INSTALL_DIR")
