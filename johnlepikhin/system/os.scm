@@ -31,9 +31,27 @@
   #:use-module (guix channels)
   #:use-module (johnlepikhin system services swap-file)
   #:export (make-desktop-operating-system
-            default-kernel-arguments))
+            default-kernel-arguments
+            default-firmware))
 
 (define default-kernel-arguments '("modprobe.blacklist=pcspkr,snd_pcsp"))
+
+;; Baseline firmware bundle for any desktop running this template.
+;; Callers can `cons` additional blobs (e.g. `intel-npu-firmware`) for
+;; hardware-specific needs.
+(define default-firmware
+  (list
+   sof-firmware
+   linux-firmware
+   realtek-firmware
+   iwlwifi-firmware
+   amdgpu-firmware
+   radeon-firmware
+   ibt-hw-firmware
+   i915-firmware
+   intel-microcode
+   amd-microcode
+   intel-media-driver/nonfree))
 
 (define* (make-desktop-operating-system
           #:key
@@ -44,19 +62,7 @@
           file-systems
           (linux-kernel linux-6.10)
           (kernel-loadable-modules (list v4l2loopback-linux-module))
-          (firmware
-           (list
-            sof-firmware
-            linux-firmware
-            realtek-firmware
-            iwlwifi-firmware
-            amdgpu-firmware
-            radeon-firmware
-            ibt-hw-firmware
-            i915-firmware
-            intel-microcode
-            amd-microcode
-            intel-media-driver/nonfree))
+          (firmware default-firmware)
           (timezone "Europe/Moscow")
           (sudoers-file-extras "")
           (kernel-arguments default-kernel-arguments)
