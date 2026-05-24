@@ -20,6 +20,7 @@
   #:use-module (guix packages)
   #:use-module (guix gexp)
   #:use-module (guix git-download)
+  #:use-module (guix search-paths)
   #:use-module (guix utils)
   #:use-module (gnu packages cpp)
   #:use-module (gnu packages python-xyz)
@@ -108,7 +109,27 @@
        (replace "onnx-for-onnxruntime" onnx-1.21-for-onnxruntime)
        ;; onnxruntime 1.26's pybind11.cmake requires pybind11 >= 3.0;
        ;; the upstream Guix recipe still pinned pybind11-2 (2.13.6).
-       (replace "pybind11" pybind11)))))
+       (replace "pybind11" pybind11)))
+    ;; Export `ORT_DYLIB_PATH` as a single-file search-path pointing
+    ;; at `<out>/lib/libonnxruntime.so`.  The Rust `ort 2.x` crate
+    ;; with the `load-dynamic` feature reads this variable to locate
+    ;; the runtime via dlopen at process start; without it FluxFrame
+    ;; (and any other ort load-dynamic consumer) hangs in dlopen
+    ;; inside `guix shell` since Guix relies on RUNPATH (not
+    ;; LD_LIBRARY_PATH) and the consumer binary doesn't directly
+    ;; link libonnxruntime.so.
+    ;;
+    ;; The path resolves to the unversioned `libonnxruntime.so`
+    ;; symlink rather than the SONAME-versioned file so it survives
+    ;; minor version bumps.  `separator #f` keeps the value
+    ;; single-valued; `file-type 'regular` makes Guix point at the
+    ;; file directly instead of synthesising the parent directory.
+    (native-search-paths
+     (list (search-path-specification
+            (variable "ORT_DYLIB_PATH")
+            (file-type 'regular)
+            (separator #f)
+            (files (list "lib/libonnxruntime.so")))))))
 
 ;; onnxruntime with the OpenVINO Execution Provider compiled in.
 ;;
