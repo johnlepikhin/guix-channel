@@ -1,0 +1,106 @@
+From: Evgenii Lepikhin <johnlepikhin@gmail.com>
+Subject: [PATCH] Honour ZE_DRIVER_PATH env var and dlopen UMDs by absolute path
+
+Upstream's `getLibrarySearchPaths()` only consults `LD_LIBRARY_PATH`
+and a list of well-known FHS directories (`/lib`, `/usr/lib`,
+`/lib/x86_64-linux-gnu`, ...) when looking for `libze_intel_*.so.1`.
+On Guix System none of those directories exist; the loader returns
+an empty driver list and consumers (OpenVINO, oneAPI tooling) see no
+NPU/GPU at all.
+
+Two changes, both in `source/loader/linux/driver_discovery_lin.cpp`:
+
+1. Read a parallel `ZE_DRIVER_PATH` env var with the same
+   colon-separated semantics as `LD_LIBRARY_PATH`.  The Guix
+   `level-zero` package declares a `native-search-paths` for that
+   variable pointing at `lib/`, so any package in the profile that
+   ships a Level Zero UMD (`intel-compute-runtime`,
+   `intel-npu-driver`, ...) contributes its store path automatically.
+   This solves the file-existence check.
+
+2. Have `discoverEnabledDrivers()` carry the absolute path at which
+   the UMD was found back to the loader instead of the bare SONAME.
+   Upstream then passes that string straight to `LOAD_DRIVER_LIBRARY`
+   (a dlopen wrapper) in `source/loader/ze_loader.cpp`, so the
+   dynamic linker sees an absolute path and loads the file directly
+   -- bypassing the `DT_RUNPATH` of `libze_loader.so` (which would
+   otherwise have to include every UMD's store path).  Without this
+   second change the stat-check finds the file but the subsequent
+   dlopen still goes through the linker's standard search and fails
+   because `DT_RUNPATH` doesn't list the UMD packages.
+
+Together: tools running under Guix don't need `LD_LIBRARY_PATH` (it
+would pollute every dlopen, not just the loader's) and the UMD
+packages don't have to be in `level-zero`'s `inputs` (which would
+make `intel-compute-runtime` / `intel-npu-driver` indirectly load via
+their build-time dependencies on `level-zero` -- a cycle).
+---
+--- a/source/loader/linux/driver_discovery_lin.cpp	2026-05-25 15:05:32.598502335 +0300
++++ b/source/loader/linux/driver_discovery_lin.cpp	2026-05-25 15:06:36.125801303 +0300
+@@ -40,6 +40,14 @@
+ // Helper to get all library search paths from LD_LIBRARY_PATH, standard locations, and /etc/ld.so.conf
+ static std::vector<std::string> getLibrarySearchPaths() {
+   std::vector<std::string> paths;
++  // ZE_DRIVER_PATH: Guix-friendly alternative to LD_LIBRARY_PATH for
++  // UMD discovery.  Declared as a `native-search-paths` in Guix's
++  // `level-zero` package; the profile fans out store paths there.
++  const char* zeDriverPath = getenv("ZE_DRIVER_PATH");
++  if (zeDriverPath) {
++    auto split = splitPaths(zeDriverPath);
++    paths.insert(paths.end(), split.begin(), split.end());
++  }
+   // LD_LIBRARY_PATH
+   const char* ldLibPath = getenv("LD_LIBRARY_PATH");
+   if (ldLibPath) {
+@@ -108,16 +116,21 @@
+   return paths;
+ }
+ 
+-// Main function: search for a library file in all known library paths
+-static bool libraryExistsInSearchPaths(const std::string& filename) {
++// Search for `filename` in all known library paths and return the
++// absolute path at which it was found (or empty if absent).  The
++// caller hands this absolute path straight to LOAD_DRIVER_LIBRARY so
++// dlopen bypasses DT_RUNPATH of libze_loader.so entirely -- crucial
++// on Guix where the loader's RUNPATH does not list the UMD packages
++// and we can't (and shouldn't) modify LD_LIBRARY_PATH.
++static std::string locateLibrary(const std::string& filename) {
+   auto paths = getLibrarySearchPaths();
+   for (const auto& dir : paths) {
+     std::string fullPath = dir + "/" + filename;
+     if (fileExistsReadable(fullPath)) {
+-      return true;
++      return fullPath;
+     }
+   }
+-  return false;
++  return std::string();
+ }
+ 
+ namespace loader {
+@@ -137,11 +150,12 @@
+   altDrivers = getenv("ZE_ENABLE_ALT_DRIVERS");
+   if (altDrivers == nullptr) {
+     // Standard drivers - not custom
+-    for (auto path : knownDriverNames) {
+-      if (libraryExistsInSearchPaths(path)) {
++    for (auto soname : knownDriverNames) {
++      const std::string fullPath = locateLibrary(soname);
++      if (!fullPath.empty()) {
+         // Extract the base library name for robust driver type detection
+-        // path is like "libze_intel_gpu.so.1"
+-        std::string libName = path;
++        // soname is like "libze_intel_gpu.so.1"
++        std::string libName = soname;
+ 
+         // Remove "lib" prefix if present
+         if (libName.compare(0, 3, "lib") == 0) {
+@@ -165,7 +179,7 @@
+           driverType = ZEL_DRIVER_TYPE_NPU;
+         }
+ 
+-        enabledDrivers.emplace_back(path, false, driverType);
++        enabledDrivers.emplace_back(fullPath, false, driverType);
+       }
+     }
+   } else {

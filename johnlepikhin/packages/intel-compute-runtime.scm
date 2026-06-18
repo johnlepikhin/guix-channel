@@ -34,6 +34,17 @@
 
 ;; Guix ships level-zero 1.27.0; intel-compute-runtime 26.18 uses
 ;; `ZE_COMMAND_LIST_FLAG_COPY_OFFLOAD_HINT` (added in 1.28).  Bump.
+;;
+;; Additionally, patch the Linux driver-discovery loop so it honours
+;; a Guix-friendly `ZE_DRIVER_PATH` env var alongside the existing
+;; `LD_LIBRARY_PATH` lookup.  Upstream's hard-coded FHS list (`/lib`,
+;; `/usr/lib/x86_64-linux-gnu`, ...) is empty on Guix System, so the
+;; loader never finds `libze_intel_*.so.1` even when the matching
+;; UMD packages are in the profile.  `ZE_DRIVER_PATH` is then
+;; declared as a `native-search-paths` for `files=lib`, so every
+;; package in the profile contributes its store-path's `lib/` to the
+;; UMD search list without touching `LD_LIBRARY_PATH` (which would
+;; pollute every other dlopen on the system).
 (define-public level-zero
   (package/inherit gnu:level-zero
     (version "1.28.6")
@@ -45,7 +56,14 @@
              (commit "v1.28.6")))
        (file-name (git-file-name "level-zero" "1.28.6"))
        (sha256
-        (base32 "0k0iliwadklj4ljbjbdqq3ccj6h213917ljfpsrspkjyzqxkhs24"))))))
+        (base32 "0k0iliwadklj4ljbjbdqq3ccj6h213917ljfpsrspkjyzqxkhs24"))
+       (patches
+        (list (local-file
+               "patches/level-zero-ze-driver-path-env.patch")))))
+    (native-search-paths
+     (list (search-path-specification
+            (variable "ZE_DRIVER_PATH")
+            (files (list "lib")))))))
 
 ;; nonguix ships gmmlib 22.8.0; the intel-compute-runtime 26.18 source
 ;; tree references `IGFX_XE3P_CORE`, `IGFX_CRI` and `IGFX_NVL` -- enum
