@@ -22,7 +22,7 @@
   #:use-module (gnu packages compression)
   #:use-module (gnu packages cpp)
   #:use-module (gnu packages elf)
-  #:use-module (gnu packages oneapi)
+  #:use-module ((gnu packages oneapi) #:prefix gnu:)
   #:use-module (gnu packages opencl)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages protobuf)
@@ -36,30 +36,23 @@
   #:use-module (guix git-download)
   #:use-module (guix packages)
   #:use-module (guix search-paths)
-  #:use-module (guix utils))
-
-;; OpenVINO's `src/plugins/intel_npu/cmake/download_compiler_libs.cmake`
-;; fetches a prebuilt NPU compiler tarball from openvinotoolkit's
-;; storage at build time, then renames `libnpu_driver_compiler.so` to
-;; `libopenvino_intel_npu_compiler.so` and installs it next to the
-;; intel_npu plugin.  Without that file the NPU plugin's dlopen at
-;; `compile_model()` fails with `Cannot load library
-;; libopenvino_intel_npu_compiler.so`.
-;;
-;; In the Guix sandbox there is no network, so the upstream download
-;; quietly no-ops (the `lsb_release` probe returns empty and skips
-;; the whole Linux branch).  Stage the tarball as a regular `(origin)`
-;; and have a post-install phase do the rename + place the file at
-;; the expected path under `runtime/lib/intel64/`.
-(define %openvino-npu-compiler-source
-  (origin
-    (method url-fetch)
-    (uri (string-append "https://storage.openvinotoolkit.org"
-                        "/dependencies/thirdparty/linux"
-                        "/npu_compiler_vcl_ubuntu_24_04-7_6_0-da3cc32.tar.gz"))
-    (file-name "openvino-npu-compiler-vcl-7.6.0.tar.gz")
-    (sha256
-     (base32 "1an5fd88059k8ny4y6j4m0sgnx8b2lg5z9z953x5dhngk1bzvdn7"))))
+  #:use-module (guix utils)
+  ;; Reach for the bumped `level-zero` 1.28.6 defined alongside
+  ;; intel-compute-runtime (the upstream Guix `gnu:level-zero` is
+  ;; 1.27.0; mixing two L0 loaders in the same profile is technically
+  ;; ABI-safe but confusing -- pin the same one everywhere).
+  #:use-module ((johnlepikhin packages intel-compute-runtime)
+                #:select (level-zero))
+  ;; Reuse the prebuilt VCL graph compiler `(origin)` declared by the
+  ;; NPU driver package.  Both intel-npu-driver and openvino-with-npu
+  ;; install the same upstream tarball -- the UMD under the bare name
+  ;; `libnpu_driver_compiler.so` (for the CID dlopen from
+  ;; `libze_intel_npu.so`), OpenVINO under the legacy
+  ;; `libopenvino_intel_npu_compiler.so` name (for the CIP dlopen from
+  ;; `compiler_impl.cpp`).  One `define %npu-driver-compiler-source`
+  ;; so a future hash bump only touches one place.
+  #:use-module ((johnlepikhin packages intel-npu-driver)
+                #:select (%npu-driver-compiler-source)))
 
 ;; Intel OpenVINO Toolkit -- inference runtime for CPU/GPU/NPU.
 ;;
@@ -255,6 +248,31 @@ include(\"${CMAKE_CURRENT_LIST_DIR}/../../../runtime/cmake/OpenVINOConfig-versio
                            (eq? 'regular (stat:type (lstat f))))
                          (find-files libdir "\\.so(\\.[0-9].*)?$"
                                      #:stat lstat))))))
+          ;; OpenVINO 2026.1's NPU and GPU plugins dlopen
+          ;; `libze_loader.so.1` lazily inside
+          ;; `Core::available_devices()` / `compile_model()` -- not at
+          ;; link time -- so the linker never sees `-lze_loader` and
+          ;; the loader's store path never lands in the plugin's
+          ;; RUNPATH automatically.  The same situation as
+          ;; `libigdfcl.so` for the NPU compiler.  Patch the plugins
+          ;; in place: add level-zero's `lib` to their RUNPATH so
+          ;; dlopen of the loader resolves at runtime without
+          ;; LD_LIBRARY_PATH hacks.
+          (add-after 'add-origin-rpath 'add-level-zero-rpath
+            (lambda* (#:key inputs outputs #:allow-other-keys)
+              (let* ((out (assoc-ref outputs "out"))
+                     (libdir (string-append out "/runtime/lib/intel64"))
+                     (lz (assoc-ref inputs "level-zero")))
+                (when lz
+                  (for-each
+                   (lambda (plugin-name)
+                     (let ((plugin (string-append libdir "/" plugin-name)))
+                       (when (file-exists? plugin)
+                         (invoke "patchelf" "--add-rpath"
+                                 (string-append lz "/lib")
+                                 plugin))))
+                   '("libopenvino_intel_npu_plugin.so"
+                     "libopenvino_intel_gpu_plugin.so"))))))
           ;; OpenVINO's `download_compiler_libs.cmake` would normally
           ;; fetch the NPU compiler tarball from openvinotoolkit's
           ;; storage at build time and rename it to
@@ -275,7 +293,7 @@ include(\"${CMAKE_CURRENT_LIST_DIR}/../../../runtime/cmake/OpenVINOConfig-versio
                           (string-append
                            libdir "/libopenvino_intel_npu_compiler.so")))
                     (mkdir-p work)
-                    (invoke "tar" "xzf" #+%openvino-npu-compiler-source
+                    (invoke "tar" "xzf" #+%npu-driver-compiler-source
                             "-C" work)
                     (copy-file (string-append
                                 work "/lib/libnpu_driver_compiler.so")
@@ -290,6 +308,12 @@ include(\"${CMAKE_CURRENT_LIST_DIR}/../../../runtime/cmake/OpenVINOConfig-versio
                     (let ((cmd (string-append
                                 "patchelf --set-rpath \"\\$ORIGIN:"
                                 (assoc-ref inputs "zlib") "/lib:"
+                                ;; The "zstd" input is declared as
+                                ;; `(,zstd "lib")` so this resolves
+                                ;; to zstd's `lib` output (where
+                                ;; libzstd.so.1 actually lives -- the
+                                ;; default `out` ships only
+                                ;; bin/etc/share).
                                 (assoc-ref inputs "zstd") "/lib:"
                                 "$(patchelf --print-rpath '"
                                 plugin "')\" '"
@@ -307,7 +331,15 @@ include(\"${CMAKE_CURRENT_LIST_DIR}/../../../runtime/cmake/OpenVINOConfig-versio
            snappy
            tbb
            zlib
-           zstd))
+           ;; zstd's shared library lives in the `lib` output -- the
+           ;; default `out` only ships bin/etc/share.  Pulling the
+           ;; lib output explicitly so the NPU compiler's RUNPATH
+           ;; ends up pointing somewhere libzstd.so.1 actually
+           ;; exists (and Guix keeps that store path as a gc-root).
+           ;; (The auto-generated label becomes "zstd:lib" -- which
+           ;; is what the install-npu-compiler phase asks for via
+           ;; `(assoc-ref inputs "zstd:lib")`.)
+           `(,zstd "lib")))
     (native-search-paths
      (list (search-path-specification
             (variable "OPENVINO_INSTALL_DIR")
