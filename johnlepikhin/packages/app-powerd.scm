@@ -31,14 +31,14 @@
 (define-public app-powerd
   (package
     (name "app-powerd")
-    (version "1.1.1")
+    (version "1.2.0")
     (source
      (origin
        (method url-fetch)
        (uri (crate-uri name version))
        (file-name (string-append name "-" version ".tar.gz"))
        (sha256
-        (base32 "0gry6wfj7h6w70msm6qkvpl60f3p8k756lq45jdm7yyjc5vq4npc"))))
+        (base32 "0zx1h85vgr2pz00ihfk7vbnwmgxq3ah6v2251dk75pab8bmfnhnr"))))
     (build-system cargo-build-system)
     (arguments
      (list
