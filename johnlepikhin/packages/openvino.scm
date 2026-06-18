@@ -23,6 +23,7 @@
   #:use-module (gnu packages cpp)
   #:use-module (gnu packages elf)
   #:use-module (gnu packages oneapi)
+  #:use-module (gnu packages opencl)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages protobuf)
   #:use-module (gnu packages python)
@@ -387,10 +388,36 @@ its kernel firmware list and grant the user access to
     (arguments
      (substitute-keyword-arguments (package-arguments openvino-with-npu)
        ((#:configure-flags flags)
-        #~(append (list "-DENABLE_INTEL_GPU=ON")
+        ;; ENABLE_SYSTEM_OPENCL=ON makes OpenVINO `find_package(OpenCL)`
+        ;; pick up `ocl-icd` from `inputs` and link the GPU plugin
+        ;; against its `libOpenCL.so.1` (and bake the store path into
+        ;; RUNPATH).  Without this flag OpenVINO builds its own
+        ;; bundled ICD loader at thirdparty/ocl/icd_loader, links the
+        ;; plugin against it, but the loader is marked
+        ;; `EXCLUDE_FROM_ALL` and never installed -- so the plugin's
+        ;; NEEDED `libOpenCL.so.1` is unresolvable at dlopen time.
+        #~(append (list "-DENABLE_INTEL_GPU=ON"
+                        "-DENABLE_SYSTEM_OPENCL=ON")
                   (filter (lambda (f)
-                            (not (string-prefix? "-DENABLE_INTEL_GPU=" f)))
+                            (not (or (string-prefix? "-DENABLE_INTEL_GPU=" f)
+                                     (string-prefix?
+                                      "-DENABLE_SYSTEM_OPENCL=" f))))
                           #$flags)))))
+    (inputs
+     (modify-inputs (package-inputs openvino-with-npu)
+       ;; The GPU plugin needs an OpenCL ICD loader to dlopen
+       ;; `libOpenCL.so.1` at runtime.  With both `ocl-icd` (the
+       ;; loader library) and `opencl-headers` (CL/cl.h, which
+       ;; ocl-icd itself does NOT ship) on the build inputs,
+       ;; CMake's `find_package(OpenCL)` -- gated by the
+       ;; `-DENABLE_SYSTEM_OPENCL=ON` flag above -- locates the
+       ;; system loader instead of building OpenVINO's bundled
+       ;; ICD-loader stub.  That bundled stub is marked
+       ;; `EXCLUDE_FROM_ALL` and never installed, so the plugin's
+       ;; NEEDED `libOpenCL.so.1` would be unresolvable at dlopen
+       ;; time.  Picking up ocl-icd makes the linker bake its store
+       ;; path into RUNPATH directly.
+       (prepend ocl-icd opencl-headers opencl-clhpp)))
     (synopsis "Intel OpenVINO inference runtime (CPU + GPU + NPU)")
     (description
      "Intel OpenVINO Toolkit with the CPU, GPU and NPU plugins all
