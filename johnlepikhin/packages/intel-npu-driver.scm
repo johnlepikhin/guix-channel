@@ -19,15 +19,64 @@
 (define-module (johnlepikhin packages intel-npu-driver)
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (gnu packages cmake)
+  #:use-module (gnu packages compression)
   #:use-module (gnu packages cpp)
+  #:use-module (gnu packages elf)
   #:use-module (gnu packages oneapi)
   #:use-module (gnu packages pkg-config)
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system copy)
+  #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module (guix git-download)
   #:use-module (guix packages)
-  #:use-module (nonguix licenses))
+  #:use-module (nonguix licenses)
+  #:export (%npu-driver-compiler-source))
+
+;; Prebuilt NPU graph compiler (VCL) tarball Intel publishes alongside
+;; OpenVINO releases.  Contains `libnpu_driver_compiler.so` (the actual
+;; graph compiler -- LLVM + MLIR + OV passes statically linked into one
+;; ~95 MB blob) plus its NEEDED `libtbb.so.12`/`libtbbmalloc.so.2`.
+;;
+;; This is loaded at runtime by two distinct call sites:
+;;
+;;  1. `libze_intel_npu.so` (the NPU UMD's Level Zero plugin) dlopens
+;;     the file *by its real name* `libnpu_driver_compiler.so` from
+;;     inside `Vcl::sym()` -- this is the path used in
+;;     "compiler-in-driver" (CID) mode, which is the default in
+;;     OpenVINO 2026+ and the one the NPU plugin calls via `pfnCreate2`.
+;;
+;;  2. The OpenVINO NPU plugin's `compiler_impl.cpp` dlopens the file
+;;     renamed to `libopenvino_intel_npu_compiler.so` -- this is the
+;;     legacy "compiler-in-plugin" (CIP) fallback path.
+;;
+;; Building this compiler from source would pull in a 50 GB LLVM/MLIR
+;; tree (Intel's NPU LLVM fork); upstream's `ENABLE_NPU_COMPILER_BUILD`
+;; would do exactly that and is intentionally disabled in
+;; `intel-npu-driver`.  Instead we install the prebuilt blob in
+;; `intel-npu-driver`'s own `lib/` so the UMD's RUNPATH resolves the
+;; dlopen there (CID path).  OpenVINO's `install-npu-compiler` phase
+;; installs the same file under the CIP name in its plugin dir.
+;;
+;; The tarball is built by Intel as part of the OpenVINO release
+;; pipeline; its license is OpenVINO's Apache 2.0 (the same license
+;; OpenVINO itself ships under).  Exported so `(johnlepikhin packages
+;; openvino)` can reuse the same `(origin)` and avoid two separate
+;; downloads / hash drifts of the same upstream artefact.
+(define %npu-driver-compiler-source
+  (origin
+    (method url-fetch)
+    (uri (string-append "https://storage.openvinotoolkit.org"
+                        "/dependencies/thirdparty/linux"
+                        "/npu_compiler_vcl_ubuntu_24_04-7_6_0-da3cc32.tar.gz"))
+    ;; File-name kept as `openvino-npu-compiler-vcl-7.6.0.tar.gz` for
+    ;; backward compatibility with the pre-extracted store path already
+    ;; baked into existing `openvino-full` and `openvino-with-npu`
+    ;; derivations -- renaming the source forces a 1.5h rebuild of
+    ;; OpenVINO with no actual content change.
+    (file-name "openvino-npu-compiler-vcl-7.6.0.tar.gz")
+    (sha256
+     (base32 "1an5fd88059k8ny4y6j4m0sgnx8b2lg5z9z953x5dhngk1bzvdn7"))))
 
 ;; Intel NPU (Neural Processing Unit) user-mode driver -- the Level Zero
 ;; backend that lets OpenVINO and other Level-Zero consumers talk to the
@@ -80,9 +129,44 @@
          ;; gtest/gmock against transitive symbols that GCC's LTO
          ;; doesn't keep visible across object boundaries.  Skip
          ;; them: we're not running the test suite anyway.
-         "-DSKIP_UNIT_TESTS=ON")
+         "-DSKIP_UNIT_TESTS=ON"
+         "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF")
       #:phases
       #~(modify-phases %standard-phases
+          ;; Upstream's `target_link_libraries(ze_intel_npu
+          ;; level_zero_driver)` lets the linker drop object files
+          ;; from `liblevel_zero_driver.a` whose symbols aren't
+          ;; *directly* reachable from the .so's exported `ze*` C API
+          ;; (via the `umd/level_zero_driver/api/ze.exports` version
+          ;; script).  The C ABI wrappers reach the `L0::*` C++
+          ;; classes only through dynamic dispatch / virtual calls
+          ;; that the linker can't trace through a static archive,
+          ;; so it discards them as "unused".  Result: our build
+          ;; produces a 650 KB `libze_intel_npu.so` with 185 dangling
+          ;; `L0::*` undefined references where Intel's Ubuntu deb
+          ;; produces a 1.3 MB binary with the same code linked in
+          ;; (just hidden by the version script).  Force the whole
+          ;; archive in via `--whole-archive` so every object file
+          ;; from the static lib ends up in the .so.
+          (add-after 'unpack 'force-whole-archive-level-zero-driver
+            (lambda _
+              ;; Both `liblevel_zero_driver.a` (the L0::* C++ classes)
+              ;; and `libvpu_driver.a` (the VPU::* helpers reached
+              ;; from L0::ElfParser etc.) need the whole-archive
+              ;; treatment.  The `--whole-archive` on level_zero_driver
+              ;; pulls in everything it directly defines, but
+              ;; vpu_driver is linked one level deeper (as
+              ;; `target_link_libraries(level_zero_driver
+              ;; vpu_driver ...)`) and the transitive dependency goes
+              ;; through static-archive resolution again, so its own
+              ;; .o files still get dropped unless we wrap it too.
+              (substitute*
+                  "umd/level_zero_driver/api/CMakeLists.txt"
+                (("target_link_libraries\\(\\$\\{TARGET_NAME_L0\\} level_zero_driver\\)")
+                 (string-append
+                  "target_link_libraries(${TARGET_NAME_L0} "
+                  "-Wl,--whole-archive level_zero_driver vpu_driver "
+                  "-Wl,--no-whole-archive)")))))
           ;; Upstream's CMake installs `libze_intel_npu.so.1.32.1`
           ;; with SONAME `libze_intel_npu.so.1` but never creates
           ;; the SONAME symlink -- so a Level Zero loader probing
@@ -99,7 +183,71 @@
                              "libze_intel_npu.so.1"))
                   (unless (file-exists? "libze_intel_npu.so")
                     (symlink "libze_intel_npu.so.1"
-                             "libze_intel_npu.so")))))))))
+                             "libze_intel_npu.so"))))))
+          ;; Place the prebuilt VCL graph compiler next to
+          ;; `libze_intel_npu.so` so the UMD's `Vcl::sym()` dlopen
+          ;; (CID mode -- the default for `pfnCreate2`) resolves
+          ;; `libnpu_driver_compiler.so` through the UMD's RUNPATH
+          ;; without any LD_LIBRARY_PATH crutch.  Without this the
+          ;; UMD silently returns `ZE_RESULT_ERROR_UNSUPPORTED_FEATURE`
+          ;; from inside `Compiler::getCompiledBlob` and the NPU plugin
+          ;; reports the cryptic top-level error
+          ;;     Level0 pfnCreate2 result: ZE_RESULT_ERROR_UNSUPPORTED_FEATURE
+          ;; with no log trail explaining the dlopen failure.
+          ;;
+          ;; The compiler additionally bundles its own `libtbb.so.12`
+          ;; and `libtbbmalloc.so.2` -- copy those as well so the .so
+          ;; satisfies its `NEEDED libtbb.so.12` from `$ORIGIN` without
+          ;; conflicting with a system TBB that might be a different
+          ;; ABI revision than the one Intel built against.
+          (add-after 'add-soname-symlinks 'install-npu-driver-compiler
+            (lambda* (#:key inputs outputs #:allow-other-keys)
+              (let* ((out (assoc-ref outputs "out"))
+                     (libdir (string-append out "/lib"))
+                     (umd (string-append libdir
+                                         "/libze_intel_npu.so." #$version))
+                     (work (string-append (getcwd) "/.npu-vcl-extract")))
+                (mkdir-p work)
+                (invoke "tar" "xzf" #+%npu-driver-compiler-source "-C" work)
+                (for-each
+                 (lambda (so)
+                   (let ((src (string-append work "/lib/" so))
+                         (dst (string-append libdir "/" so)))
+                     (copy-file src dst)
+                     (chmod dst #o755)))
+                 '("libnpu_driver_compiler.so"
+                   "libtbb.so.12"
+                   "libtbbmalloc.so.2"))
+                ;; All three bundled .so's land in this package's
+                ;; `lib/` with empty RUNPATH (Intel ships them for an
+                ;; FHS distro where glibc lives in `/lib`).  Borrow
+                ;; the UMD's already-patched RUNPATH (glibc, gcc-lib,
+                ;; level-zero, ...) via `$(patchelf --print-rpath ...)`
+                ;; so all toolchain paths flow through to each blob.
+                ;; libnpu_driver_compiler.so additionally needs
+                ;; `$ORIGIN` (to find its sibling libtbb.so.12) plus
+                ;; zlib and zstd's `lib` output (where libzstd.so.1
+                ;; lives -- zstd's default `out` ships only
+                ;; bin/etc/share, see the `(,zstd "lib")` input).
+                (let ((patch-cmd
+                       (lambda (extra-prefix so)
+                         (let ((cmd (string-append
+                                     "patchelf --set-rpath \""
+                                     extra-prefix
+                                     (assoc-ref inputs "zlib") "/lib:"
+                                     (assoc-ref inputs "zstd") "/lib:"
+                                     "$(patchelf --print-rpath '"
+                                     umd "')\" '"
+                                     libdir "/" so "'")))
+                           (unless (zero? (system cmd))
+                             (error "patchelf --set-rpath failed for" so))))))
+                  ;; `$ORIGIN` so libnpu_driver_compiler.so finds its
+                  ;; sibling libtbb.so.12 in the same dir.  The two
+                  ;; TBB blobs only need the toolchain paths
+                  ;; (libstdc++, glibc, gcc_s).
+                  (patch-cmd "\\$ORIGIN:" "libnpu_driver_compiler.so")
+                  (patch-cmd "" "libtbb.so.12")
+                  (patch-cmd "" "libtbbmalloc.so.2"))))))))
     ;; Upstream's firmware/CMakeLists.txt declares the firmware
     ;; install with `EXCLUDE_FROM_ALL`, so the default `make install`
     ;; in cmake-build-system skips the (non-free, absolute-path) blob
@@ -107,9 +255,19 @@
     ;; landing in this package's `out` are the UMD + Level Zero
     ;; plugin only; the blobs live in `intel-npu-firmware`.
     (native-inputs
-     (list cmake-minimal pkg-config))
+     (list cmake-minimal patchelf pkg-config))
     (inputs
-     (list level-zero))
+     ;; `zstd "lib"` is needed for libzstd.so.1 (referenced by NEEDED
+     ;; in libnpu_driver_compiler.so); zlib is borrowed from existing
+     ;; OpenVINO compiler RPATH pattern for safety (defensive against
+     ;; any dlopen the compiler may do internally).  zstd's shared
+     ;; library lives in the `lib` output -- the default `out` ships
+     ;; only bin/etc/share, so without `(,zstd "lib")` we'd reference
+     ;; a path with no libzstd.so.1 in it.  The auto-generated label
+     ;; becomes "zstd" (with a lint warning) which is what the
+     ;; install-npu-driver-compiler phase asks for via
+     ;; `(assoc-ref inputs "zstd")`.
+     (list level-zero zlib `(,zstd "lib")))
     (home-page "https://github.com/intel/linux-npu-driver")
     (synopsis "Intel NPU user-mode driver (Level Zero backend)")
     (description
