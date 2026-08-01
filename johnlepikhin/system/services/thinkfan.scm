@@ -19,13 +19,10 @@
 (define-module (johnlepikhin system services thinkfan)
   #:use-module (guix records)
   #:use-module (guix gexp)
-  #:use-module (srfi srfi-1)
   #:use-module (gnu services)
   #:use-module (gnu services shepherd)
-  #:use-module (gnu services configuration)
   #:use-module (gnu packages admin)
   #:use-module (gnu packages linux)
-  #:use-module (johnlepikhin system services utils)
   #:export (thinkfan-service-type
             thinkfan-configuration
             thinkfan-sleep-hook-script))
@@ -40,14 +37,6 @@
                         (default #f))
   (update-interval      thinkfan-configuration-update-interval
                         (default 1)))
-
-(define (thinkfan-activation config)
-  "Generate activation script to install thinkfan configuration file.
-This ensures the configuration file is copied to /etc/thinkfan during system activation."
-  (make-config-file-activation
-   (thinkfan-configuration-config-file config)
-   "/etc/thinkfan"
-   "thinkfan.yaml"))
 
 (define-public (thinkfan-shepherd-service config)
   "Create shepherd service for thinkfan.
@@ -84,10 +73,12 @@ esac
   (service-type
    (name 'thinkfan)
    (description "Thinkfan service")
+   ;; No activation extension on purpose: the daemon is started with
+   ;; "-c <store path>", so a copy under /etc would never be read.  Keeping
+   ;; the configuration in the store also makes it immutable and tied to the
+   ;; system generation.
    (extensions
     (list
-     (service-extension activation-service-type
-                        thinkfan-activation)
      (service-extension profile-service-type
                         (compose list thinkfan-configuration-package))
      (service-extension shepherd-root-service-type

@@ -19,13 +19,9 @@
 (define-module (johnlepikhin system services throttled)
   #:use-module (guix records)
   #:use-module (guix gexp)
-  #:use-module (srfi srfi-1)
   #:use-module (gnu services)
   #:use-module (gnu services shepherd)
-  #:use-module (gnu services configuration)
-  #:use-module (gnu services dbus)
   #:use-module (johnlepikhin packages throttled)
-  #:use-module (johnlepikhin system services utils)
   #:export (throttled-service-type
             throttled-configuration))
 
@@ -37,14 +33,6 @@
                         (default throttled))
   (config-file          throttled-configuration-config-file
                         (default #f)))
-
-(define (throttled-activation config)
-  "Generate activation script to install throttled configuration file.
-This ensures the configuration file is copied to /etc/throttled during system activation."
-  (make-config-file-activation
-   (throttled-configuration-config-file config)
-   "/etc/throttled"
-   "throttled.conf"))
 
 (define-public (throttled-shepherd-service config)
   "Create shepherd service for throttled.
@@ -65,10 +53,12 @@ power limits and temperature trip points to prevent excessive throttling."
   (service-type
    (name 'throttled)
    (description "Throttled service")
+   ;; No activation extension on purpose: the daemon is started with
+   ;; "--config <store path>", so a copy under /etc would never be read.
+   ;; Keeping the configuration in the store also makes it immutable and
+   ;; tied to the system generation.
    (extensions
     (list
-     (service-extension activation-service-type
-                        throttled-activation)
      (service-extension profile-service-type
                         (compose list throttled-configuration-package))
      (service-extension shepherd-root-service-type

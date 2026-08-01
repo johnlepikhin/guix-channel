@@ -20,22 +20,7 @@
   #:use-module (guix gexp)
   #:use-module (guix records)
   #:use-module (gnu services shepherd)
-  #:export (make-config-file-activation
-            make-simple-shepherd-service))
-
-(define* (make-config-file-activation config-file destination-dir destination-file)
-  "Create an activation gexp that copies CONFIG-FILE to DESTINATION-DIR/DESTINATION-FILE.
-This is a common pattern for services that need to install configuration files
-to /etc during system activation.
-
-Example:
-  (make-config-file-activation my-config \"/etc/myservice\" \"myservice.conf\")"
-  (with-imported-modules '((guix build utils))
-    #~(begin
-        (use-modules (guix build utils))
-        (mkdir-p #$destination-dir)
-        (copy-file #$config-file
-                   (string-append #$destination-dir "/" #$destination-file)))))
+  #:export (make-simple-shepherd-service))
 
 (define* (make-simple-shepherd-service
           #:key
