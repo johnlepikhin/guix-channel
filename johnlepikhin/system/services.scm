@@ -169,18 +169,23 @@
                                          (ssid "My Network")
                                          (channel
                                            12)))
+         ;; With intel_pstate + HWP the "powersave" governor is the normal
+         ;; operating mode: it still reaches full turbo on demand, while
+         ;; "performance" pins HWP min to HWP max so cores never clock down.
+         ;; Combined with an explicit 2.3 GHz scaling floor that kept the
+         ;; package around 86 C at idle, which in turn kept thinkfan pegged
+         ;; at its top level.  Frequency floors/caps are left unset so the
+         ;; governor and the energy/performance preference do the scaling.
          (service tlp-service-type
                   (tlp-configuration (cpu-scaling-governor-on-ac (list
-                                                                  "performance"))
+                                                                  "powersave"))
                                      (cpu-scaling-governor-on-bat (list
                                                                    "powersave"))
+                                     (energy-perf-policy-on-ac
+                                       "balance_performance")
                                      (sched-powersave-on-bat? #t)
                                      (cpu-boost-on-ac? #t)
                                      (max-lost-work-secs-on-bat 180)
-                                     (cpu-scaling-min-freq-on-bat (* 400 1000))
-                                     (cpu-scaling-max-freq-on-bat (* 800 1000))
-                                     (cpu-scaling-min-freq-on-ac (* 2300 1000))
-                                     (cpu-scaling-max-freq-on-ac (* 5000 1000))
                                      (wifi-pwr-on-bat? #f)))
          ;; Reset TLP manual mode on AC/battery switch.  The built-in
          ;; 85-tlp.rules calls "tlp auto" which respects manual mode set
