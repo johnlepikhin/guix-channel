@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2024 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2024, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -546,8 +546,10 @@
   (crate-source "bitflags" "2.9.4"
                 "157kkcv8s7vk6d17dar1pa5cqcz4c8pdrn16wm1ld7jnr86d2q92"))
 
+;; Defined locally: upstream (gnu packages rust-crates) dropped this version.
 (define rust-base64-0.20.0
-  (@@ (gnu packages rust-crates) rust-base64-0.20.0))
+  (crate-source "base64" "0.20.0"
+                "1r855djiv8rirg37w5arazk42ya5gm5gd2bww75v14w0sy02i8hf"))
 
 (define rust-fastrand-2.2.0
   (crate-source "fastrand" "2.2.0"
