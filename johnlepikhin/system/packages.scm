@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2023 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2023, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -21,6 +21,7 @@
   #:use-module (gnu packages admin)
   #:use-module (gnu packages bash)
   #:use-module (gnu packages certs)
+  #:use-module ((gnu packages containers) #:select (runc))
   #:use-module (gnu packages disk)
   #:use-module (gnu packages file)
   #:use-module (gnu packages gnome)
@@ -31,7 +32,7 @@
   #:use-module (gnu packages rust-apps)
   #:use-module (gnu packages tls)
   #:use-module (gnu packages vim)
-  #:use-module (gnu packages virtualization)
+  #:use-module ((gnu packages virtualization) #:select (qemu-minimal))
   #:export (system-packages))
 
 (define system-packages
