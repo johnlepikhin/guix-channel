@@ -25,7 +25,7 @@
 (define-public golangci-lint
   (package
     (name "golangci-lint")
-    (version "2.11.3")
+    (version "2.12.2")
     (source
      (origin
        (method url-fetch)
@@ -33,7 +33,7 @@
              "https://github.com/golangci/golangci-lint/releases/download/v"
              version "/golangci-lint-" version "-linux-amd64.tar.gz"))
        (sha256
-        (base32 "1lbm0i2wfkm7vq22jbsfgwj6nln08qdsks34idvxa9f8pkfqrfw7"))))
+        (base32 "0lx5jcw99qrag9f5y8b5wrsz53dgk5q51h5ahjlqzv8gcz981xcd"))))
     (supported-systems '("x86_64-linux"))
     (build-system gnu-build-system)
     (arguments

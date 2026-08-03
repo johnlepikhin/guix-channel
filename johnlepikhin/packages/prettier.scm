@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2025 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2025, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -26,14 +26,14 @@
 (define-public prettier
   (package
     (name "prettier")
-    (version "3.6.2")
+    (version "3.9.6")
     (source
      (origin
        (method url-fetch)
        (uri (string-append "https://registry.npmjs.org/prettier/-/prettier-"
                            version ".tgz"))
        (sha256
-        (base32 "1psvhwxg27w32lscypsavl3jbv28dxw17l5p0635l5sgcy1sp0dw"))))
+        (base32 "0br1zcjrbqgjn5zda6f6ybii5p78lqig37n7mwy0b0dfy9fajzcr"))))
     (build-system copy-build-system)
     (arguments
      `(#:install-plan '(("." "lib/node_modules/prettier"))

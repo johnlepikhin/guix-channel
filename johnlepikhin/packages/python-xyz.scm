@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2025 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2025, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is part of GNU Guix.
 ;;;
@@ -29,14 +29,14 @@
 (define-public uv-bin
   (package
     (name "uv-bin")
-    (version "0.7.20")
+    (version "0.12.1")
     (source
      (origin
        (method url-fetch)
        (uri (string-append "https://github.com/astral-sh/uv/releases/download/"
                           version "/uv-x86_64-unknown-linux-gnu.tar.gz"))
        (sha256
-        (base32 "0rh67y3sjb4f3cp724s5sbaai46i201isg5549fr527idx109whh"))))
+        (base32 "1fxwni0n2i9xffm311cq2ws5jy29yq0scz8ikss9vlb9zciz5clh"))))
     (build-system copy-build-system)
     (arguments
      `(#:install-plan
@@ -80,14 +80,14 @@ workflows.  This is the pre-built binary release.")
 (define-public ruff-bin
   (package
     (name "ruff-bin")
-    (version "0.12.2")
+    (version "0.16.1")
     (source
      (origin
        (method url-fetch)
        (uri (string-append "https://github.com/astral-sh/ruff/releases/download/"
                           version "/ruff-x86_64-unknown-linux-gnu.tar.gz"))
        (sha256
-        (base32 "0xyr769bipa4m500qylq87k0fp3chh8kmazdlv9v0hj7gzmv0dzb"))))
+        (base32 "0mjc1bkh25rp60g8zpblmhpq4zcrv0pk0xn0k0nbn4a9varwj73y"))))
     (build-system copy-build-system)
     (arguments
      `(#:install-plan
