@@ -1,3 +1,21 @@
+;;; GNU Guix --- Functional package management for GNU
+;;; Copyright © 2024, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;;
+;;; This file is not part of GNU Guix.
+;;;
+;;; GNU Guix is free software; you can redistribute it and/or modify it
+;;; under the terms of the GNU General Public License as published by
+;;; the Free Software Foundation; either version 3 of the License, or (at
+;;; your option) any later version.
+;;;
+;;; GNU Guix is distributed in the hope that it will be useful, but
+;;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;; GNU General Public License for more details.
+;;;
+;;; You should have received a copy of the GNU General Public License
+;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
+
 
 (define-module (johnlepikhin packages ansible-lint)
   #:use-module (guix packages)
@@ -18,16 +36,16 @@
 (define-public python-bracex
   (package
     (name "python-bracex")
-    (version "2.4")
+    (version "3.0.1")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "bracex" version))
        (sha256
-        (base32 "1ssb7339p60p3pfzmqc1dahix78jvwzqyylbspz63x9cyhfsyzm2"))))
+        (base32 "1r15kj1cw50qn5hf0q9qziy0a545gky4nr2xw47pi974j8iy6f2f"))))
     (build-system pyproject-build-system)
     (arguments (list #:tests? #false))
-    (propagated-inputs (list python-importlib-resources python-hatchling))
+    (native-inputs (list python-hatchling))
     (home-page "https://github.com/facelessuser/bracex")
     (synopsis "Bracex is a brace expanding library (à la Bash) for Python.")
     (description
@@ -45,8 +63,17 @@
        (sha256
         (base32 "14358xqjl4mrm5lswbhdkkyz9qxy1bmg5jjav24716mf7bdb9cli"))))
     (build-system pyproject-build-system)
-    (arguments (list #:tests? #false))
-    (propagated-inputs (list python-importlib-resources python-hatchling))
+    (arguments
+     (list #:tests? #false
+           #:phases
+           #~(modify-phases %standard-phases
+               ;; setuptools_scm derives the version from git metadata, which
+               ;; the release tarball does not carry.
+               (add-before 'build 'set-scm-version
+                 (lambda _
+                   (setenv "SETUPTOOLS_SCM_PRETEND_VERSION" #$version))))))
+    (native-inputs
+     (list python-setuptools python-setuptools-scm python-wheel))
     (home-page "https://github.com/pycontribs/subprocess-tee")
     (synopsis "This package provides a drop-in alternative to subprocess.run.")
     (description
@@ -60,13 +87,13 @@ Printing output in real-time while still capturing is valuable for any tool that
 (define-public python-wcmatch
   (package
     (name "python-wcmatch")
-    (version "8.5.2")
+    (version "11.0")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "wcmatch" version))
        (sha256
-        (base32 "1clygf42hc8qw8aggy6nic9nqx8hihkp6yyq5lwgp0padnw240m7"))))
+        (base32 "15ivnr07ggq5nslz1y7i31b8ps1r573yx30r9dvi55vq8wj5rnam"))))
     (build-system pyproject-build-system)
     (arguments
      (list
@@ -80,9 +107,9 @@ Printing output in real-time while still capturing is valuable for any tool that
          (list "-k" (string-append "not "
                                    (string-join disabled-tests
                                                 " and not "))))))
-    (propagated-inputs (list python-importlib-resources python-hatchling python-bracex))
+    (propagated-inputs (list python-bracex))
     (native-inputs
-     (list cmake pybind11 python-pytest))
+     (list cmake pybind11 python-hatchling python-pytest))
     (home-page "https://github.com/facelessuser/wcmatch")
     (synopsis "Wildcard Match provides an enhanced fnmatch, glob, and pathlib library.")
     (description
@@ -97,7 +124,7 @@ paths.")
 (define-public ansible-lint
   (package
     (name "ansible-lint")
-    (version "24.6.1")
+    (version "26.6.0")
     (source
      (origin
        (method git-fetch)
@@ -107,18 +134,21 @@ paths.")
        (file-name (git-file-name name version))
        (sha256
         (base32
-         "1k9zinpb3z6adw7jnnw8gz7rxk0h9hwww8h1xx57999ca3608xmf"))))
+         "13jl3ww55ds5gmn2g3526qfnriai9nxw5j4zgmy5qmxil7r0x4sk"))))
     (build-system pyproject-build-system)
     (arguments
      (list
       #:tests? #false
       #:phases
       #~(modify-phases %standard-phases
+          ;; setuptools_scm derives the version from git metadata, which the
+          ;; checkout does not carry once Guix strips the .git directory.
+          (add-before 'build 'set-scm-version
+            (lambda _
+              (setenv "SETUPTOOLS_SCM_PRETEND_VERSION" #$version)))
           (delete 'sanity-check))))
-    (inputs
-     (list ))
     (native-inputs
-     (list python))
+     (list python python-setuptools python-setuptools-scm python-wheel))
     (propagated-inputs
      (list python-wcmatch python-yamllint python-subprocess-tee))
     (synopsis "Checks playbooks for practices and behaviour that could potentially be improved")
