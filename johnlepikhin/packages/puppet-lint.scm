@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2022 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2022, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -41,7 +41,7 @@
     (home-page "http://puppet-lint.com")
     (license license:expat)))
 
-(define-public puppet-lint-2.4.2
-  (make-puppet-lint "2.4.2" "1pwpjxxr3wz71yl7jhhaa93fsrr72kz25isjydfhsf1igc9mfj9k"))
+(define-public puppet-lint-5.1.1
+  (make-puppet-lint "5.1.1" "11j46i4bankyvmknl69pqz15ysrd8l6nwhbl77lslrswx7dlwxqy"))
 
-(define-public puppet-lint puppet-lint-2.4.2)
+(define-public puppet-lint puppet-lint-5.1.1)
