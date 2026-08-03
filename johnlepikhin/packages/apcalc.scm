@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2022 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2022, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -78,9 +78,9 @@ programmed for difficult or long calculations. ")
    (home-page "https://github.com/lcn2/calc")
    (license lgpl2.1)))
 
-(define-public apcalc-2.15.1.0
-  (make-apcalc "2.15.1.0" "1xhya6r6k9hx1dir3z2ffj237gk9ky3w23mw1bvcmmbm4k0nyvz2"))
+(define-public apcalc-2.17.0.0
+  (make-apcalc "2.17.0.0" "1rds38fzzsbvpii8p8w2xwnbd1fmal53lb87yiy3mwxyw4akb2d9"))
 
-(define-public apcalc apcalc-2.15.1.0)
+(define-public apcalc apcalc-2.17.0.0)
 
 apcalc
