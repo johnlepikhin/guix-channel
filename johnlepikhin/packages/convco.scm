@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2025 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2025, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -37,20 +37,23 @@
 (define-public convco
   (package
     (name "convco")
-    (version "0.6.2")
+    (version "0.7.0")
     (source
      (origin
 	   (method url-fetch)
        (uri (crate-uri name version))
        (file-name (string-append name "-" version ".tar.gz"))
        (sha256
-        (base32 "1m8si96p1m60wg93syf3f77ksn0mg5cbd19n4n8hxn3n2ix9clhr"))))
+        (base32 "1ijinpqjfz9yy9h4pa5zw78192s9dx9six9arycxdq58mq097r3i"))))
     (build-system cargo-build-system)
     (arguments
      (list
       #:install-source? #f
-      ;; Disable default features which include zlib-ng
-      #:cargo-build-flags ''("--release" "--no-default-features")
+      ;; The default feature set links against libgit2 built with its
+      ;; experimental SHA-256 support (git2/unstable-sha256), which Guix's
+      ;; libgit2 does not provide.  Use the pure-Rust `gix' backend instead.
+      #:cargo-build-flags ''("--release" "--no-default-features"
+                             "--features" "gix")
       ;; Tests require zlib-ng, disable them
       #:tests? #f
       #:phases
@@ -65,7 +68,7 @@
 			  (setenv "OPENSSL_NO_VENDOR" "1")))
           (replace 'install
 		    (lambda* (#:key outputs #:allow-other-keys)
-		      ;; Install with --no-default-features flag
+		      ;; Install with the same feature selection as `build'.
 		      (let ((out (assoc-ref outputs "out")))
                 (invoke "cargo"
                         "install"
@@ -75,7 +78,9 @@
                         "."
                         "--root"
                         out
-                        "--no-default-features")))))))
+                        "--no-default-features"
+                        "--features"
+                        "gix")))))))
     (native-inputs (list cmake pkg-config))
     (inputs (append (list git-minimal zlib libgit2-1.9 libssh2 openssl)
                     ;; Use symbol instead of string

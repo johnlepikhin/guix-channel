@@ -33,16 +33,16 @@
 (define-public ast-index
   (package
     (name "ast-index")
-    (version "3.24.0")
+    (version "3.50.0")
     (source (origin
              (method git-fetch)
              (uri (git-reference
                    (url "https://github.com/defendend/Claude-ast-index-search.git")
-                   (commit "fceacdd8d41b7e07392895077cfbc0702684b450")))
+                   (commit "e499dcc6fcc90dfceafb629fbf5289824a40cccb")))
              (file-name (git-file-name name version))
              (sha256
               (base32
-               "13hqmn3da3p0k00wv9swvzrvmzadcz25hpynz66px08p4iad64l0"))))
+               "19l9ywv24vcsakqx3f18dg7ds21lhjrzdssk067nn9lnvh59ws4f"))))
     (build-system cargo-build-system)
     (arguments
      (list
@@ -56,12 +56,32 @@
             (lambda _
               (when (file-exists? "benches")
                 (delete-file-recursively "benches"))
-              (substitute* "Cargo.toml"
-                (("\\[\\[bench\\]\\]") "# [[bench]]")
-                (("name = \"parser_bench\"") "# name = \"parser_bench\"")
-                (("name = \"db_bench\"") "# name = \"db_bench\"")
-                (("name = \"pipeline_bench\"") "# name = \"pipeline_bench\"")
-                (("harness = false") "# harness = false")))))))
+              ;; Drop every [[bench]] table wholesale: the benchmarks pull in
+              ;; criterion, and the set of them changes between releases, so
+              ;; commenting out individual keys silently corrupts the file.
+              ;; [patch.crates-io] goes too: it pins tree-sitter-scss to a git
+              ;; revision for a Windows-only fix, and cargo cannot fetch git
+              ;; sources in the offline build environment.
+              (let* ((get-string-all (@ (ice-9 textual-ports) get-string-all))
+                     (drop-table? (lambda (line)
+                                    (or (string-prefix? "[[bench]]" line)
+                                        (string-prefix? "[patch.crates-io]"
+                                                        line))))
+                     (lines (string-split
+                             (call-with-input-file "Cargo.toml" get-string-all)
+                             #\newline))
+                     (kept (let loop ((rest lines) (drop? #f) (acc '()))
+                             (cond
+                              ((null? rest) (reverse acc))
+                              ((drop-table? (car rest))
+                               (loop (cdr rest) #t acc))
+                              ((and drop? (string-prefix? "[" (car rest)))
+                               (loop rest #f acc))
+                              (drop? (loop (cdr rest) #t acc))
+                              (else (loop (cdr rest) #f (cons (car rest) acc)))))))
+                (call-with-output-file "Cargo.toml"
+                  (lambda (port)
+                    (display (string-join kept "\n") port)))))))))
     (native-inputs (list gcc-toolchain pkg-config))
     (inputs (append (list sqlite)
                     (cargo-inputs 'ast-index
