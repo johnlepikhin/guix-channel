@@ -21,7 +21,6 @@
   #:use-module (gnu packages admin)
   #:use-module (gnu packages bash)
   #:use-module (gnu packages certs)
-  #:use-module ((gnu packages containers) #:select (runc))
   #:use-module (gnu packages disk)
   #:use-module (gnu packages file)
   #:use-module (gnu packages gnome)
@@ -34,6 +33,17 @@
   #:use-module (gnu packages vim)
   #:use-module ((gnu packages virtualization) #:select (qemu-minimal))
   #:export (system-packages))
+
+;; 'runc' moved from (gnu packages virtualization) to (gnu packages
+;; containers), which leaves the channel unloadable on whichever side of
+;; the move the running guix happens to be: importing the new location
+;; breaks an older guix, importing the old one hits a deprecated alias.
+;; Resolve it at run time so both work.  Drop once every guix in use has
+;; the package in (gnu packages containers).
+(define runc
+  (or (false-if-exception
+       (module-ref (resolve-interface '(gnu packages containers)) 'runc))
+      (module-ref (resolve-interface '(gnu packages virtualization)) 'runc)))
 
 (define system-packages
   (cons*
