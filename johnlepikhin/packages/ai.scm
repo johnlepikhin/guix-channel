@@ -50,7 +50,7 @@
 (define-public claude-code
   (package
     (name "claude-code")
-    (version "2.1.220")
+    (version "2.1.236")
     (source
      (origin
        (method url-fetch)
@@ -58,7 +58,7 @@
                            "@anthropic-ai/claude-code-linux-x64/-/"
                            "claude-code-linux-x64-" version ".tgz"))
        (sha256
-        (base32 "03dd4x9c0p9r0nrimyjywian9ha57kl05nphxb7dblfkwv5f5li5"))))
+        (base32 "17dwqyjbqcs73mmj62l2h3qimzj97izhs3z5r0f3w0q5ap1z4514"))))
     (build-system trivial-build-system)
     (arguments
      (list #:modules '((guix build utils))
