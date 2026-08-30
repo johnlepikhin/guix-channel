@@ -57,7 +57,6 @@
   #:use-module (gnu packages image)
   #:use-module (gnu packages image-viewers)
   #:use-module (gnu packages inkscape)
-  #:use-module (gnu packages java)
   #:use-module (gnu packages libreoffice)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages llvm)
@@ -282,7 +281,6 @@
    emacs-guix
    emacs-geiser
    shellcheck
-   openjdk
    rpm
    shadowplay))
 
