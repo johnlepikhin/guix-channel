@@ -101,6 +101,7 @@
   #:use-module (johnlepikhin packages dbeaver)
   #:use-module (johnlepikhin packages convco)
   #:use-module (johnlepikhin packages git-sync)
+  #:use-module (johnlepikhin packages imdu)
   #:use-module (johnlepikhin packages oping)
   #:use-module (johnlepikhin packages prettier)
   #:use-module (johnlepikhin packages puppet-lint)
@@ -245,6 +246,7 @@
    gnuplot
    graphviz
    grep
+   imdu
    jmtpfs
    macchanger
    netcat
