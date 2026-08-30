@@ -33,7 +33,7 @@
 (define-public imdu
   (package
     (name "imdu")
-    (version "0.1.0")
+    (version "0.2.0")
     (source (origin
              (method git-fetch)
              (uri (git-reference
@@ -42,7 +42,7 @@
              (file-name (git-file-name name version))
              (sha256
               (base32
-               "1jlmnbf5pkazalzpp59gdna27z76ibxyzfyrd8ns1bmf9ms1sw1p"))))
+               "0l3cvvbyfv0c9c7i2skyglc7sm7wp7n353c125nxgjlbg4nwxa3h"))))
     (build-system cargo-build-system)
     (arguments
      (list
