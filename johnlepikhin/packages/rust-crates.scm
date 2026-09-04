@@ -3545,17 +3545,9 @@
   (crate-source "anstyle-parse" "1.0.0"
                 "03hkv2690s0crssbnmfkr76kw1k7ah2i6s5amdy9yca2n8w7zkjj"))
 
-(define rust-app-powerd-core-1.2.0
-  (crate-source "app-powerd-core" "1.2.0"
-                "06jx9yd52mknk9c3lishrqw02iwjs0avxnvvwhbyq9whx00mi1sh"))
-
-(define rust-tokio-util-0.7.15
-  (crate-source "tokio-util" "0.7.15"
-                "1pypd9lm1fdnpw0779pqvc16qqrxjy63dgfm20ajhpbdmnlkk9b6"))
-
-(define rust-as-raw-xcb-connection-1.0.1
-  (crate-source "as-raw-xcb-connection" "1.0.1"
-                "0sqgpz2ymv5yx76r5j2npjq2x5qvvqnw0vrs35cyv30p3pfp2m8p"))
+(define rust-app-powerd-core-2.0.0
+  (crate-source "app-powerd-core" "2.0.0"
+                "1pzj3qy29kq2hk6np6a874lyqfa0x9g8djg9xc66nlpdcgjxr58r"))
 
 (define rust-async-broadcast-0.7.2
   (crate-source "async-broadcast" "0.7.2"
@@ -7612,8 +7604,7 @@
                 rust-anstyle-query-1.1.5
                 rust-anstyle-wincon-3.0.11
                 rust-anyhow-1.0.102
-                rust-app-powerd-core-1.2.0
-                rust-as-raw-xcb-connection-1.0.1
+                rust-app-powerd-core-2.0.0
                 rust-async-broadcast-0.7.2
                 rust-async-channel-2.5.0
                 rust-async-executor-1.14.0
@@ -7652,7 +7643,7 @@
                 rust-futures-io-0.3.32
                 rust-futures-lite-2.6.1
                 rust-futures-macro-0.3.32
-                rust-futures-sink-0.3.13
+                rust-futures-sink-0.3.32
                 rust-futures-task-0.3.32
                 rust-futures-util-0.3.32
                 rust-gethostname-1.1.0
@@ -7721,7 +7712,7 @@
                 rust-tokio-1.50.0
                 rust-tokio-macros-2.6.1
                 rust-tokio-stream-0.1.18
-                rust-tokio-util-0.7.15
+                rust-tokio-util-0.7.18
                 rust-toml-datetime-1.0.0+spec-1.1.0
                 rust-toml-edit-0.25.4+spec-1.1.0
                 rust-toml-parser-1.0.9+spec-1.1.0

@@ -19,6 +19,7 @@
 (define-module (johnlepikhin home app-powerd)
   #:use-module (gnu services)
   #:use-module (gnu home services)
+  #:use-module (gnu home services admin)
   #:use-module (johnlepikhin home xsession)
   #:use-module (johnlepikhin packages app-powerd)
   #:use-module (guix gexp)
@@ -32,6 +33,8 @@
             app-powerd-timing-configuration?
             app-powerd-mode-configuration
             app-powerd-mode-configuration?
+            app-powerd-protection-configuration
+            app-powerd-protection-configuration?
             app-powerd-defaults-configuration
             app-powerd-defaults-configuration?
             app-powerd-profile-configuration
@@ -121,6 +124,20 @@
            (default 'enable)
            (sanitize (sanitize-mode-value 'battery))))
 
+;; Tuning for app-powerd's never-suspend protections.  The built-in
+;; deny-list (session infrastructure, modal dialogs) is deliberately not
+;; exposed by the daemon and always takes precedence over user rules; only
+;; the D-Bus second tier, which costs bus traffic, is configurable.
+(define-record-type* <app-powerd-protection-configuration>
+  app-powerd-protection-configuration make-app-powerd-protection-configuration
+  app-powerd-protection-configuration?
+  ;; Also protect processes owning a well-known name on the session bus.
+  (dbus-check            app-powerd-protection-configuration-dbus-check
+                         (default #t))
+  (dbus-refresh-interval
+   app-powerd-protection-configuration-dbus-refresh-interval
+   (default "5m")))
+
 (define-record-type* <app-powerd-defaults-configuration>
   app-powerd-defaults-configuration make-app-powerd-defaults-configuration
   app-powerd-defaults-configuration?
@@ -133,7 +150,13 @@
   (maintenance-resume app-powerd-defaults-configuration-maintenance-resume
                       (default (app-powerd-maintenance-configuration)))
   (guards             app-powerd-defaults-configuration-guards
-                      (default (app-powerd-guards-configuration))))
+                      (default (app-powerd-guards-configuration)))
+  ;; How often the daemon re-checks that tracked processes still exist.
+  ;; Raising this is the escape hatch if the sweep ever misbehaves.
+  (reconcile-interval app-powerd-defaults-configuration-reconcile-interval
+                      (default "30s"))
+  (protection         app-powerd-defaults-configuration-protection
+                      (default (app-powerd-protection-configuration))))
 
 (define-record-type* <app-powerd-profile-configuration>
   app-powerd-profile-configuration make-app-powerd-profile-configuration
@@ -208,7 +231,18 @@
   (profiles home-app-powerd-configuration-profiles
             (default %default-profiles))
   (rules    home-app-powerd-configuration-rules
-            (default %default-rules)))
+            (default %default-rules))
+  ;; `#f' → $XDG_STATE_HOME/log/app-powerd.log (or
+  ;; $HOME/.local/state/log/app-powerd.log when XDG_STATE_HOME is unset).
+  (log-file home-app-powerd-configuration-log-file
+            (default #f)))
+
+(define (app-powerd-log-file config)
+  "Return the absolute path of app-powerd's log file."
+  (or (home-app-powerd-configuration-log-file config)
+      (string-append (or (getenv "XDG_STATE_HOME")
+                         (string-append (getenv "HOME") "/.local/state"))
+                     "/log/app-powerd.log")))
 
 ;;;
 ;;; YAML serialization helpers
@@ -239,6 +273,19 @@
          (yaml-field (+ level 1) "input_idle"
                      (string-append "\"" idle "\""))
          ""))))
+
+(define (serialize-protection protection level)
+  (string-append
+   (indent level "protection:\n")
+   (yaml-field (+ level 1) "dbus_check"
+               (if (app-powerd-protection-configuration-dbus-check protection)
+                   "true" "false"))
+   (yaml-field (+ level 1) "dbus_refresh_interval"
+               (string-append
+                "\""
+                (app-powerd-protection-configuration-dbus-refresh-interval
+                 protection)
+                "\""))))
 
 (define (serialize-maintenance maint level)
   (string-append
@@ -283,7 +330,16 @@
    (serialize-maintenance
     (app-powerd-defaults-configuration-maintenance-resume defaults) 1)
    "\n"
-   (serialize-guards (app-powerd-defaults-configuration-guards defaults) 1)))
+   (serialize-guards (app-powerd-defaults-configuration-guards defaults) 1)
+   "\n"
+   (yaml-field 1 "reconcile_interval"
+               (string-append
+                "\""
+                (app-powerd-defaults-configuration-reconcile-interval defaults)
+                "\""))
+   "\n"
+   (serialize-protection
+    (app-powerd-defaults-configuration-protection defaults) 1)))
 
 (define (serialize-profile profile)
   (let ((name (app-powerd-profile-configuration-name profile))
@@ -687,7 +743,7 @@
    (app-powerd-rule-configuration
     (id "discord")
     (match (app-powerd-match-configuration
-            (executable '("discord" "Discord"))))
+            (executable '("discord"))))
     (policy (app-powerd-policy-configuration
              (use-profile "messenger"))))
 
@@ -745,7 +801,7 @@
    (app-powerd-rule-configuration
     (id "smplayer")
     (match (app-powerd-match-configuration
-            (wm-class '("Smplayer" "smplayer"))))
+            (wm-class '("smplayer"))))
     (policy (app-powerd-policy-configuration
              (use-profile "ignore"))))
 
@@ -999,7 +1055,14 @@
   (list (home-app-powerd-configuration-package config)))
 
 (define (add-xsession-component config)
-  "app-powerd run >$XDG_STATE_HOME/log/app-powerd.log 2>&1 &")
+  (string-append "app-powerd run >>" (app-powerd-log-file config) " 2>&1 &"))
+
+(define (add-app-powerd-log-rotation config)
+  "Hand the log file over to the Shepherd's log rotation timer.  It is an
+\"external\" log file (app-powerd is started from ~/.xsession, not by the
+Shepherd), so rotation is done with copy+truncate and the daemon's open
+descriptor stays valid."
+  (list (app-powerd-log-file config)))
 
 (define (add-app-powerd-xdg-config-file config)
   (list
@@ -1017,6 +1080,8 @@
     (list
      (service-extension home-profile-service-type add-app-powerd-package)
      (service-extension home-xsession-service-type add-xsession-component)
+     (service-extension home-log-rotation-service-type
+                        add-app-powerd-log-rotation)
      (service-extension home-xdg-configuration-files-service-type
                         add-app-powerd-xdg-config-file)))
    (default-value (home-app-powerd-configuration))
