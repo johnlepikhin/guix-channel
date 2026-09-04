@@ -19,6 +19,7 @@
 (define-module (johnlepikhin home xray)
   #:use-module (gnu services)
   #:use-module (gnu home services)
+  #:use-module (gnu home services admin)
   #:use-module (gnu packages linux)
   #:use-module (guix records)
   #:use-module (guix gexp)
@@ -71,7 +72,19 @@
   (tun-gateway    home-xray-configuration-tun-gateway
                   (default "198.18.0.1"))
   (bypass-networks home-xray-configuration-bypass-networks
-                   (default '())))
+                   (default '()))
+  ;; `#f' → $XDG_STATE_HOME/log (or $HOME/.local/state/log when
+  ;; XDG_STATE_HOME is unset), matching what the start script computes at
+  ;; run time.  Only used to hand the log files to log rotation.
+  (log-directory  home-xray-configuration-log-directory
+                  (default #f)))
+
+(define (xray-log-directory config)
+  "Return the absolute path of the directory holding xray's log files."
+  (or (home-xray-configuration-log-directory config)
+      (string-append (or (getenv "XDG_STATE_HOME")
+                         (string-append (getenv "HOME") "/.local/state"))
+                     "/log")))
 
 (define (make-start-script config)
   (let ((xray-pkg    (home-xray-configuration-package config))
@@ -323,6 +336,15 @@
   (list (home-xray-configuration-package config)
         (home-xray-configuration-tun2socks config)))
 
+(define (add-xray-log-rotation config)
+  "Hand xray's and tun2socks' logs over to the Shepherd's log rotation
+timer.  Both are \"external\" log files: the start script appends to them
+from the shell, so rotation is done with copy+truncate and the running
+processes' descriptors stay valid."
+  (let ((dir (xray-log-directory config)))
+    (list (string-append dir "/xray.log")
+          (string-append dir "/tun2socks.log"))))
+
 (define home-xray-service-type
   (service-type
    (name 'home-xray)
@@ -331,5 +353,7 @@
      (service-extension home-files-service-type add-xray-files)
      (service-extension home-xdg-configuration-files-service-type
                         add-xray-config-files)
-     (service-extension home-profile-service-type add-xray-packages)))
+     (service-extension home-profile-service-type add-xray-packages)
+     (service-extension home-log-rotation-service-type
+                        add-xray-log-rotation)))
    (description "Install Xray VPN proxy with tun2socks start/stop scripts.")))
