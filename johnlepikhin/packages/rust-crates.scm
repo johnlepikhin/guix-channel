@@ -3545,9 +3545,9 @@
   (crate-source "anstyle-parse" "1.0.0"
                 "03hkv2690s0crssbnmfkr76kw1k7ah2i6s5amdy9yca2n8w7zkjj"))
 
-(define rust-app-powerd-core-2.0.0
-  (crate-source "app-powerd-core" "2.0.0"
-                "1pzj3qy29kq2hk6np6a874lyqfa0x9g8djg9xc66nlpdcgjxr58r"))
+(define rust-app-powerd-core-2.0.1
+  (crate-source "app-powerd-core" "2.0.1"
+                "1060jwv9cl5ivjcnrfdqdgqaywg9ngy2i7y5mkl7mzk3gcvpsnj8"))
 
 (define rust-async-broadcast-0.7.2
   (crate-source "async-broadcast" "0.7.2"
@@ -7604,7 +7604,7 @@
                 rust-anstyle-query-1.1.5
                 rust-anstyle-wincon-3.0.11
                 rust-anyhow-1.0.102
-                rust-app-powerd-core-2.0.0
+                rust-app-powerd-core-2.0.1
                 rust-async-broadcast-0.7.2
                 rust-async-channel-2.5.0
                 rust-async-executor-1.14.0
