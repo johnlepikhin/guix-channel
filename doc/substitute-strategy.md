@@ -6,6 +6,8 @@ Some channel packages take a long time to build from source:
 |---------|---------------------|-----------|-------|
 | `onnxruntime` 1.26 | ≈12 min | ~8 GB | LTO link is the long tail |
 | `openvino` 2026.1 (CPU) | ≈30–60 min | ~10 GB | Planned (P0) |
+| `openvino-full` 2026.1 | ≈35–65 min | ~10 GB | On `fluxframe`'s default path; 355 MiB closure vs 189 MiB for CPU-only |
+| `intel-npu-driver` 1.32.1 | not measured | — | On `fluxframe`'s default path; 170 MiB closure, ~97 MiB of it a second copy of the VCL blob already in `openvino-full` |
 | `intel-compute-runtime` (NEO) | ≈20–40 min | ~5 GB | Planned (P1) |
 | `intel-graphics-compiler` (IGC) | **2–4 h** | **~50 GB** | Planned (P1.5); bundles LLVM fork |
 
@@ -102,8 +104,10 @@ When P1.5 work begins, before merging the IGC package:
       `make-channel-introduction` can pin it.
 - [ ] Add a `release.yml` GitHub Actions workflow:
   - Trigger: `push` to `master` (or a `release-*` tag).
-  - Matrix: `[onnxruntime, openvino, intel-compute-runtime]` on
-    `ubuntu-latest`; IGC on the self-hosted runner.
+  - Matrix: `[onnxruntime, openvino-full, intel-npu-driver,
+    intel-compute-runtime]` on `ubuntu-latest`; IGC on the self-hosted
+    runner.  `openvino-full` rather than the CPU-only `openvino`:
+    that is what `fluxframe` builds against.
   - Steps: `guix build PKG`, `guix archive --export PKG | gzip >
     PKG.nar.gz`, sign, upload to a GitHub Release.
 - [ ] Document the substitute URL in README and `CONTRIBUTING.md`.

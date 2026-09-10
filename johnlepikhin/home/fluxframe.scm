@@ -119,9 +119,9 @@ with ENOENT."
           "  preset uses relative model paths."
           ""
           "Dlopen libraries:"
-          "  ORT_DYLIB_PATH, OPENVINO_INSTALL_DIR and OCL_ICD_VENDORS"
-          "  are baked into the `fluxframe' wrapper at package build"
-          "  time — not set here.  See"
+          "  ORT_DYLIB_PATH, OPENVINO_INSTALL_DIR, OCL_ICD_VENDORS and"
+          "  ZE_DRIVER_PATH are baked into the `fluxframe' wrapper at"
+          "  package build time — not set here.  See"
           "  johnlepikhin/packages/fluxframe.scm `wrap-binaries' phase."
           ""
           "Known quirk:"
@@ -156,9 +156,10 @@ with ENOENT."
           #:environment-variables
           (append
            (list
-            ;; ORT_DYLIB_PATH, OPENVINO_INSTALL_DIR and OCL_ICD_VENDORS
-            ;; come from the fluxframe wrapper itself — see TZ R1/R2 and
-            ;; the `wrap-binaries' phase in the package recipe.
+            ;; ORT_DYLIB_PATH, OPENVINO_INSTALL_DIR, OCL_ICD_VENDORS and
+            ;; ZE_DRIVER_PATH come from the fluxframe wrapper itself —
+            ;; see TZ R1/R2/R6 and the `wrap-binaries' phase in the
+            ;; package recipe.
             (string-append "XDG_RUNTIME_DIR="
                            (or (getenv "XDG_RUNTIME_DIR")
                                (format #f "/run/user/~a" (getuid))))
@@ -189,5 +190,6 @@ with ENOENT."
    (description "Run fluxframe (virtual-camera daemon) under shepherd
 with explicit working directory, log file, XDG environment, and an
 optional CPU-only blur backend.  Dlopen runtime paths
-(ORT_DYLIB_PATH, OPENVINO_INSTALL_DIR, OCL_ICD_VENDORS) live in the
-@code{fluxframe} package wrapper, not here.")))
+(ORT_DYLIB_PATH, OPENVINO_INSTALL_DIR, OCL_ICD_VENDORS,
+ZE_DRIVER_PATH) live in the @code{fluxframe} package wrapper, not
+here.")))
