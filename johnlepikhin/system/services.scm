@@ -18,6 +18,7 @@
 
 (define-module (johnlepikhin system services)
   #:use-module (gnu packages cups)
+  #:use-module (gnu packages dns)
   #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages linux)
@@ -100,6 +101,44 @@
                  ;; cold cache; refreshing popular entries before they expire
                  ;; keeps that off the critical path.
                  (prefetch . #t))))))))
+
+;; unbound-control needs a configuration file only to learn where the control
+;; socket is.  Pointing it at the daemon's own config would tie the dispatcher
+;; script below to a store path that changes on every reconfigure, so it gets
+;; its own two lines instead.  Keep the socket in step with the service.
+(define %unbound-control-configuration
+  (plain-file "unbound-control.conf"
+              (string-append "remote-control:\n"
+                             "\tcontrol-enable: \"yes\"\n"
+                             "\tcontrol-interface: \"/run/unbound.sock\"\n")))
+
+;; Drop what unbound learned about server reachability whenever the network
+;; changes underneath it.
+;;
+;; While an interface is down every outgoing query times out, and unbound
+;; records the servers it was talking to as unreachable for `infra-host-ttl'
+;; -- 900 seconds by default.  Reconnecting does not clear that: a zone whose
+;; nameservers were being asked at the moment the link dropped keeps answering
+;; SERVFAIL for the rest of the quarter hour, on a working network, while
+;; zones that happened to be idle resolve fine.  On a laptop that changes
+;; networks several times a day this is the common case, not an edge one.
+(define unbound-flush-infra-on-network-change
+  (program-file "unbound-flush-infra-on-network-change"
+    #~(let* ((args (command-line))
+             ;; NetworkManager passes the interface first, the action second.
+             (action (and (>= (length args) 3) (caddr args))))
+        (when (member action '("up" "vpn-up" "connectivity-change"))
+          (system* #$(file-append unbound "/sbin/unbound-control")
+                   "-c" #$%unbound-control-configuration
+                   "flush_infra" "all")))))
+
+;; NetworkManager runs every regular, root-owned, non-group-writable
+;; executable in this directory, symlinks included, so a store entry qualifies.
+(define unbound-flush-dispatcher-service
+  (simple-service 'unbound-flush-dispatcher
+                  special-files-service-type
+                  `(("/etc/NetworkManager/dispatcher.d/10-unbound-flush-infra"
+                     ,unbound-flush-infra-on-network-change))))
 
 ;; Hand dnsmasq the local resolver as an upstream.  NetworkManager keeps
 ;; programming it over D-Bus with the servers of the current connection,
@@ -318,6 +357,7 @@
          polkit-network-manager-service
 
          unbound-recursive-service
+         unbound-flush-dispatcher-service
 
          (tuned-desktop-services #:authorized-keys authorized-keys
                                  #:substitute-urls substitute-urls)))
