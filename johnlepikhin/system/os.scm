@@ -29,6 +29,8 @@
   #:use-module (gnu system pam)
   #:use-module (gnu system nss)
   #:use-module (guix channels)
+  #:use-module (johnlepikhin packages intel-npu-driver) ; intel-npu-firmware
+  #:use-module (johnlepikhin system services accel)
   #:use-module (johnlepikhin system services swap-file)
   #:export (make-desktop-operating-system
             default-kernel-arguments
@@ -37,10 +39,16 @@
 (define default-kernel-arguments '("modprobe.blacklist=pcspkr,snd_pcsp"))
 
 ;; Baseline firmware bundle for any desktop running this template.
-;; Callers can `cons` additional blobs (e.g. `intel-npu-firmware`) for
-;; hardware-specific needs.
+;; Callers can `cons` additional blobs for hardware-specific needs.
+;;
+;; `intel-npu-firmware' is included because `fluxframe' now builds
+;; against `openvino-full' and runs ML segmentation on the NPU when one
+;; is present; without the firmware the `intel_vpu' module never
+;; exposes /dev/accel/accel0 and that path silently falls back to the
+;; GPU or CPU.  It is a no-op on hosts without an Intel NPU.
 (define default-firmware
   (list
+   intel-npu-firmware
    sof-firmware
    linux-firmware
    realtek-firmware
@@ -85,10 +93,19 @@
    (host-name hostname)
    (users users)
    (packages packages)
-   (services (if swap-file
-                 (cons (service swap-file-service-type swap-file)
-                       services)
-                 services))
+   ;; `accel-udev-rules-service' hands /dev/accel/* to the "accel"
+   ;; group.  It is unconditional so that it stays in step with
+   ;; `intel-npu-firmware' in `default-firmware' above: without both,
+   ;; an Intel NPU either never appears or appears unreadable, and
+   ;; OpenVINO's AUTO device silently falls back to GPU or CPU.  Costs
+   ;; one udev rule and one system group on hosts with no accelerator.
+   ;; Users still need "accel" among their supplementary-groups.
+   (services
+    (cons accel-udev-rules-service
+          (if swap-file
+              (cons (service swap-file-service-type swap-file)
+                    services)
+              services)))
    ;; resolve .local hostnames with mDNS
    (name-service-switch %mdns-host-lookup-nss)
    (sudoers-file
