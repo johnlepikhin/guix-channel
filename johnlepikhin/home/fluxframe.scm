@@ -47,9 +47,12 @@
                      (default #f))
   (preset            home-fluxframe-configuration-preset
                      (default "default"))
-  ;; `#f' → cwd of the daemon defaults to $HOME at runtime.  Set to an
-  ;; absolute path when the preset's TOML references models via
-  ;; relative paths (`model = "models/foo.onnx"').
+  ;; `#f' → cwd of the daemon defaults to $HOME at runtime.  Since
+  ;; fluxframe 0.10.0 relative paths in the config (`model',
+  ;; `image_fill.path', `idle.placeholder_path') resolve against the
+  ;; config file's directory, so this only matters when
+  ;; `extra-arguments' carries `--no-default-config' without a config
+  ;; file.
   (working-directory home-fluxframe-configuration-working-directory
                      (default #f))
   (extra-arguments   home-fluxframe-configuration-extra-arguments
@@ -112,11 +115,12 @@ with ENOENT."
           "  /tmp/fluxframe.sock otherwise (mode 0600).  This is what"
           "  fluxframe-gui connects to."
           ""
-          "Models:"
-          "  Paths under `model = …' in a preset are resolved relative to"
-          "  the daemon's working directory (`#:directory' here) OR taken"
-          "  as absolute.  Set `working-directory' on the service when a"
-          "  preset uses relative model paths."
+          "Relative paths:"
+          "  `model', `image_fill.path' and `idle.placeholder_path' are"
+          "  resolved against the config file's directory, or taken as"
+          "  absolute.  The daemon's working directory (`working-directory',"
+          "  $HOME by default) is used only when running without a config"
+          "  file."
           ""
           "Dlopen libraries:"
           "  ORT_DYLIB_PATH, OPENVINO_INSTALL_DIR, OCL_ICD_VENDORS and"
