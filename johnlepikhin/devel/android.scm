@@ -154,6 +154,10 @@ leading \"~/\" has to become \"$HOME/\" explicitly."
   (list zlib ncurses expat libxml2 libbsd
         libx11 libxext libxrender libxi libxtst libxfixes libxcursor
         libxrandr libxcb libxkbcommon
+        ;; libxkbfile, wanted by the Qt WebEngine the emulator vendors;
+        ;; libSM/libICE, by its xcb platform plugin -- without the latter
+        ;; the emulator has no way to open a window at all.
+        libxkbfile libsm libice
         mesa libdrm fontconfig freetype
         alsa-lib pulseaudio dbus glib
         nspr libpng libjpeg-turbo eudev
@@ -306,17 +310,20 @@ new_rpath () {
     # loads siblings from a *neighbouring* directory by plain soname:
     #   lib64/gles_swiftshader/*      -> lib64/libc++.so.1        ($ORIGIN/..)
     #   lib64/qt/plugins/*/*          -> lib64/qt/lib/libQt6*     (../../lib)
+    #   lib64/qt/plugins/*/*          -> lib64/libc++.so.1        (../../..)
     #   lib64/qt/lib/*                -> lib64/libc++.so.1        (../..)
     #   lib64/gles_llvmpipe/*         -> lib64/vulkan/libLLVM.so  (../vulkan)
     #   qemu/linux-x86_64/qemu-*      -> lib64/libtcmalloc*       (../../lib64)
+    #   qemu/linux-x86_64/qemu-*      -> lib64/qt/lib/libQt6*     (../../lib64/qt/lib)
     # The ladder is fixed, and upstream's own $ORIGIN entries are *not*
     # carried over: it is already a superset of what the SDK ships, and
     # appending whatever the file currently holds would re-append the ladder
     # itself on every run, growing the RUNPATH without bound and destroying
     # idempotency.  A constant value is also what lets --check compare.
-    _origin='$ORIGIN:$ORIGIN/..:$ORIGIN/../..:$ORIGIN/lib64'
+    _origin='$ORIGIN:$ORIGIN/..:$ORIGIN/../..:$ORIGIN/../../..:$ORIGIN/lib64'
     _origin=$_origin':$ORIGIN/../lib:$ORIGIN/../lib64:$ORIGIN/../vulkan'
     _origin=$_origin':$ORIGIN/../../lib:$ORIGIN/../../lib64:$ORIGIN/../../../lib64'
+    _origin=$_origin':$ORIGIN/../../lib64/qt/lib'
     echo \"$_origin:$LIBS\"
 }
 
