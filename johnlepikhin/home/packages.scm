@@ -131,6 +131,7 @@
   (list
    git
    git-lfs
+   github-cli
    (list git "send-email")
    (list git "credential-netrc")
    strace
