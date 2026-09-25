@@ -164,7 +164,8 @@
                  "lock-sessions"))))
 
 (define* (tuned-desktop-services #:key (authorized-keys '())
-                                 (substitute-urls '()))
+                                 (substitute-urls '())
+                                 (sleep-hooks '()))
   (cons* (modify-services %desktop-services
            (gdm-service-type config =>
                              (gdm-configuration (inherit config)
@@ -203,7 +204,8 @@
                                                         (handle-lid-switch 'suspend)
                                                         (suspend-state '("mem"))
                                                         (system-sleep-hook-files
-                                                         (list lock-sessions-before-sleep))))
+                                                         (cons lock-sessions-before-sleep
+                                                               sleep-hooks))))
 
            (network-manager-service-type
             config =>
@@ -256,7 +258,8 @@
                                (substitute-urls (list
                                                  "https://substitutes.nonguix.org"
                                                  "https://ci.guix.gnu.org"
-                                                 "https://bordeaux.guix.gnu.org/")))
+                                                 "https://bordeaux.guix.gnu.org/"))
+                               (sleep-hooks '()))
   (cons*
 
          (set-xorg-configuration
@@ -360,4 +363,5 @@
          unbound-flush-dispatcher-service
 
          (tuned-desktop-services #:authorized-keys authorized-keys
-                                 #:substitute-urls substitute-urls)))
+                                 #:substitute-urls substitute-urls
+                                 #:sleep-hooks sleep-hooks)))

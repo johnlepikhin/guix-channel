@@ -21,11 +21,10 @@
   #:use-module (guix gexp)
   #:use-module (gnu services)
   #:use-module (gnu services shepherd)
-  #:use-module (gnu packages admin)
   #:use-module (gnu packages linux)
   #:export (thinkfan-service-type
             thinkfan-configuration
-            thinkfan-sleep-hook-script))
+            thinkfan-sleep-hook))
 
 (define-record-type* <thinkfan-configuration>
   thinkfan-configuration
@@ -56,18 +55,27 @@ fan speed based on temperature sensors."
                            "-s" #$(number->string update-interval))))
            (stop #~(make-kill-destructor))))))
 
-(define thinkfan-sleep-hook-script
-  (mixed-text-file "thinkfan-sleep-hook"
-                   "#!/bin/sh
-case \"$1\" in
-  pre)
-    " (file-append shepherd "/bin/herd") " stop thinkfan
-    ;;
-  post)
-    " (file-append shepherd "/bin/herd") " start thinkfan
-    ;;
-esac
-"))
+(define %thinkfan-tpacpi-fan "/proc/acpi/ibm/fan")
+
+;; elogind system-sleep hook; the host enabling thinkfan-service-type must
+;; pass it to elogind, whose service type cannot be extended.
+(define thinkfan-sleep-hook
+  (program-file "thinkfan-sleep-hook"
+    ;; The system profile holds the herd matching the running shepherd; the
+    ;; `shepherd' package variable may be an older major version.
+    #~(let ((herd "/run/current-system/profile/bin/herd"))
+        (cond
+         ((string=? (cadr (command-line)) "pre")
+          (system* herd "stop" "thinkfan")
+          ;; On exit thinkfan restores the fan level it read at startup,
+          ;; not "auto", so a manual level may survive into s2idle, where
+          ;; the EC keeps it for the whole sleep.  Force "auto" after the
+          ;; stop, even if the stop failed.
+          (call-with-output-file #$%thinkfan-tpacpi-fan
+            (lambda (port)
+              (display "level auto" port))))
+         ((string=? (cadr (command-line)) "post")
+          (system* herd "start" "thinkfan"))))))
 
 (define-public thinkfan-service-type
   (service-type
