@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2024 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2024, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 
 (define-module (johnlepikhin packages rust-binary)
   #:use-module (gnu packages)
@@ -16,17 +16,17 @@
   #:use-module ((guix licenses) #:prefix license:))
 
 ;; Separate rust-src package that can be used with rust-binary
-(define-public rust-src-1.88
+(define-public rust-src-1.99
   (package
     (name "rust-src")
-    (version "1.88.0")
+    (version "1.99.0")
     (source
      (origin
        (method url-fetch)
        (uri (string-append "https://static.rust-lang.org/dist/"
                           "rust-src-" version ".tar.xz"))
        (sha256
-        (base32 "1ivnrw9cqiivldr2hyrdp9wnn96sskynz16q2pjvslsybcp4dryn"))))
+        (base32 "1akpvfmf15y6n0ddn8lwbjjkcwvlc4y7p6w8hzy9cicgsiz9n7rz"))))
     (build-system gnu-build-system)
     (arguments
      `(#:phases
@@ -59,17 +59,17 @@ library, which is used by rust-analyzer and other tools for code completion
 and analysis.")
     (license (list license:expat license:asl2.0))))
 
-(define-public rust-binary-1.88
+(define-public rust-binary-1.99
   (package
     (name "rust-binary")
-    (version "1.88.0")
+    (version "1.99.0")
     (source
      (origin
        (method url-fetch)
        (uri (string-append "https://static.rust-lang.org/dist/"
                           "rust-" version "-x86_64-unknown-linux-gnu.tar.xz"))
        (sha256
-        (base32 "1jhvw9kp96z9bs6zg7y0rzf8h8n34an8x8akwam4y5was70kfm3v"))))
+        (base32 "0xm3qr11s1ikfhz2ig7brckwi6iw7zk3rh54pjhfs3qhsxk66749"))))
     (build-system gnu-build-system)
     (outputs '("out" "cargo" "tools"))
     (arguments
@@ -134,7 +134,26 @@ and analysis.")
                (when (file-exists? (string-append out "/lib/rustlib"))
                  (mkdir-p (string-append cargo "/lib"))
                  (mkdir-p (string-append tools "/lib"))))))
-         (add-after 'split-outputs 'wrap-rust-analyzer
+         ;; Since 1.90 rustc links x86_64-linux-gnu with its self-contained
+         ;; rust-lld, bypassing Guix's ld-wrapper, so produced binaries
+         ;; (including build scripts) lack the RUNPATH to libgcc_s.  Fall back
+         ;; to the system linker; the flag goes first so users can override it.
+         (add-after 'split-outputs 'disable-self-contained-lld
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let ((bin (string-append (assoc-ref outputs "out") "/bin")))
+               (for-each
+                (lambda (prog)
+                  (let ((file (string-append bin "/" prog))
+                        (real (string-append bin "/." prog "-real")))
+                    (rename-file file real)
+                    (call-with-output-file file
+                      (lambda (port)
+                        (format port "#!~a
+exec -a \"$0\" \"~a\" -Clinker-features=-lld \"$@\""
+                                (which "bash") real)))
+                    (chmod file #o755)))
+                '("rustc" "rustdoc")))))
+         (add-after 'disable-self-contained-lld 'wrap-rust-analyzer
            (lambda* (#:key inputs outputs #:allow-other-keys)
              (let* ((tools (assoc-ref outputs "tools"))
                     (rust-src (assoc-ref inputs "rust-src"))
@@ -158,7 +177,7 @@ exec -a \"$0\" \"~a\" \"$@\""
        ("glibc" ,glibc)
        ("zlib" ,zlib)
        ;; Optional: include rust-src for rust-analyzer
-       ("rust-src" ,rust-src-1.88)))
+       ("rust-src" ,rust-src-1.99)))
     (home-page "https://www.rust-lang.org")
     (synopsis "The Rust programming language - binary distribution")
     (description "This package provides a binary distribution of the Rust
@@ -167,9 +186,9 @@ and various developer tools like rustfmt, clippy, and rust-analyzer.")
     (license (list license:expat license:asl2.0))))
 
 ;; Convenience package that includes rust-binary with rust-src
-(define-public rust-binary-complete-1.88
+(define-public rust-binary-complete-1.99
   (package
-    (inherit rust-binary-1.88)
+    (inherit rust-binary-1.99)
     (name "rust-binary-complete")
     (outputs '("out"))  ; Single output for meta-package
     (source #f)
@@ -188,10 +207,10 @@ and various developer tools like rustfmt, clippy, and rust-analyzer.")
                (mkdir-p out)
                #t))))))
     (propagated-inputs
-     `(("rust-binary" ,rust-binary-1.88 "out")
-       ("rust-binary-cargo" ,rust-binary-1.88 "cargo")
-       ("rust-binary-tools" ,rust-binary-1.88 "tools")
-       ("rust-src" ,rust-src-1.88)))
+     `(("rust-binary" ,rust-binary-1.99 "out")
+       ("rust-binary-cargo" ,rust-binary-1.99 "cargo")
+       ("rust-binary-tools" ,rust-binary-1.99 "tools")
+       ("rust-src" ,rust-src-1.99)))
     (native-inputs '())
     (inputs '())
     (synopsis "Complete Rust binary distribution with source code")

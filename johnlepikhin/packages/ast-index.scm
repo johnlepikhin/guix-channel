@@ -46,7 +46,7 @@
     (build-system cargo-build-system)
     (arguments
      (list
-      #:rust rust-binary-1.88
+      #:rust rust-binary-1.99
       #:install-source? #f
       #:tests? #f
       #:phases

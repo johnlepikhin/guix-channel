@@ -48,7 +48,7 @@
      (list
       ;; Cargo.toml declares edition 2024 and rust-version 1.88 (ratatui and
       ;; the let-chains in the walker both need it).
-      #:rust rust-binary-1.88
+      #:rust rust-binary-1.99
       #:install-source? #f
       #:phases
       #~(modify-phases %standard-phases

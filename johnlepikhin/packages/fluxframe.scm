@@ -40,7 +40,7 @@
   #:use-module (johnlepikhin packages intel-npu-driver) ; L0 NPU UMD
   #:use-module (johnlepikhin packages onnxruntime) ; onnxruntime
   #:use-module (johnlepikhin packages openvino)    ; openvino-full
-  #:use-module (johnlepikhin packages rust-binary) ; rust-binary-1.88
+  #:use-module (johnlepikhin packages rust-binary) ; rust-binary-1.99
   #:use-module (johnlepikhin packages rust-crates))
 
 (define-public fluxframe
@@ -59,7 +59,7 @@
     (build-system cargo-build-system)
     (arguments
      (list
-      #:rust rust-binary-1.88
+      #:rust rust-binary-1.99
       #:install-source? #f
       ;; Default is #:tests? #t.  Cargo skips #[ignore] tests
       ;; (e2e/v4l2/ml integration suites) automatically; the remaining
