@@ -91,7 +91,7 @@
   #:use-module (gnu packages virtualization)
   #:use-module (gnu packages vnc)
   #:use-module (gnu packages web)
-  #:use-module (gnu packages wm)
+  #:use-module (gnu packages window-management)
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages xorg)
   #:use-module (johnlepikhin home bash)

@@ -19,7 +19,7 @@
 (define-module (johnlepikhin home claude-dunst)
   #:use-module (gnu services)
   #:use-module (gnu home services)
-  #:use-module (gnu packages wm)
+  #:use-module (gnu packages window-management)
   #:use-module (gnu packages web)
   #:use-module (guix gexp)
   #:export (home-claude-dunst-service-type))

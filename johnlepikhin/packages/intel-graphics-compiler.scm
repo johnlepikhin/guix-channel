@@ -22,7 +22,7 @@
   #:use-module (gnu packages cmake)
   #:use-module ((gnu packages compiler-tools) #:select (flex))
   #:use-module (gnu packages compression)
-  #:use-module (gnu packages ninja)
+  #:use-module (gnu packages build-tools)
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages version-control)

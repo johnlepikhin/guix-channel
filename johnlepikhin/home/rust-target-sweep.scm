@@ -19,7 +19,7 @@
 (define-module (johnlepikhin home rust-target-sweep)
   #:use-module (gnu home services)
   #:use-module (gnu home services mcron)
-  #:use-module (gnu packages wm)
+  #:use-module (gnu packages window-management)
   #:use-module (gnu services)
   #:use-module (guix gexp)
   #:use-module (guix records)
