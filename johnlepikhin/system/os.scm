@@ -32,7 +32,9 @@
   #:use-module (johnlepikhin packages intel-npu-driver) ; intel-npu-firmware
   #:use-module (johnlepikhin system services accel)
   #:use-module (johnlepikhin system services swap-file)
-  #:export (make-desktop-operating-system
+  #:export (make-base-operating-system
+            make-desktop-operating-system
+            make-server-operating-system
             default-kernel-arguments
             default-firmware))
 
@@ -61,21 +63,26 @@
    amd-microcode
    intel-media-driver/nonfree))
 
-(define* (make-desktop-operating-system
+(define* (make-base-operating-system
           #:key
           hostname
           users
           services
           packages
           file-systems
-          (linux-kernel linux-6.10)
-          (kernel-loadable-modules (list v4l2loopback-linux-module))
-          (firmware default-firmware)
-          (timezone "Europe/Moscow")
+          linux-kernel
+          (kernel-loadable-modules '())
+          (firmware '())
+          timezone
           (sudoers-file-extras "")
-          (kernel-arguments default-kernel-arguments)
+          (kernel-arguments '())
           (mapped-devices '())
-          (swap-file #f))
+          (swap-devices '())
+          (name-service-switch %default-nss)
+          (grub-theme (grub-theme)))
+  "Return an operating system with what every host of ours shares: the
+nonfree kernel with x86 microcode in the initrd, locales, keyboard layout,
+sudoers and GRUB on EFI."
   (operating-system
    (kernel linux-kernel)
    (kernel-loadable-modules kernel-loadable-modules)
@@ -93,21 +100,8 @@
    (host-name hostname)
    (users users)
    (packages packages)
-   ;; `accel-udev-rules-service' hands /dev/accel/* to the "accel"
-   ;; group.  It is unconditional so that it stays in step with
-   ;; `intel-npu-firmware' in `default-firmware' above: without both,
-   ;; an Intel NPU either never appears or appears unreadable, and
-   ;; OpenVINO's AUTO device silently falls back to GPU or CPU.  Costs
-   ;; one udev rule and one system group on hosts with no accelerator.
-   ;; Users still need "accel" among their supplementary-groups.
-   (services
-    (cons accel-udev-rules-service
-          (if swap-file
-              (cons (service swap-file-service-type swap-file)
-                    services)
-              services)))
-   ;; resolve .local hostnames with mDNS
-   (name-service-switch %mdns-host-lookup-nss)
+   (services services)
+   (name-service-switch name-service-switch)
    (sudoers-file
     (plain-file "etc-sudoers-config"
                 (string-append "root ALL=(ALL) ALL
@@ -118,7 +112,83 @@
      (bootloader grub-efi-bootloader)
      (targets (list "/boot/efi"))
      (keyboard-layout keyboard-layout)
-     (theme (grub-theme
-             (gfxmode '("1440x900x32" "auto"))))))
+     (theme grub-theme)))
    (mapped-devices mapped-devices)
-   (file-systems file-systems)))
+   (file-systems file-systems)
+   (swap-devices swap-devices)))
+
+(define* (make-desktop-operating-system
+          #:key
+          hostname
+          users
+          services
+          packages
+          file-systems
+          (linux-kernel linux)
+          (kernel-loadable-modules (list v4l2loopback-linux-module))
+          (firmware default-firmware)
+          (timezone "Europe/Moscow")
+          (sudoers-file-extras "")
+          (kernel-arguments default-kernel-arguments)
+          (mapped-devices '())
+          (swap-file #f))
+  (make-base-operating-system
+   #:hostname hostname
+   #:users users
+   #:packages packages
+   #:file-systems file-systems
+   #:linux-kernel linux-kernel
+   #:kernel-loadable-modules kernel-loadable-modules
+   #:firmware firmware
+   #:timezone timezone
+   #:sudoers-file-extras sudoers-file-extras
+   #:kernel-arguments kernel-arguments
+   #:mapped-devices mapped-devices
+   ;; `accel-udev-rules-service' hands /dev/accel/* to the "accel"
+   ;; group.  It is unconditional so that it stays in step with
+   ;; `intel-npu-firmware' in `default-firmware' above: without both,
+   ;; an Intel NPU either never appears or appears unreadable, and
+   ;; OpenVINO's AUTO device silently falls back to GPU or CPU.  Costs
+   ;; one udev rule and one system group on hosts with no accelerator.
+   ;; Users still need "accel" among their supplementary-groups.
+   #:services
+   (cons accel-udev-rules-service
+         (if swap-file
+             (cons (service swap-file-service-type swap-file)
+                   services)
+             services))
+   ;; resolve .local hostnames with mDNS
+   #:name-service-switch %mdns-host-lookup-nss
+   #:grub-theme (grub-theme
+                 (gfxmode '("1440x900x32" "auto")))))
+
+;; A headless machine: no desktop firmware bundle and no out-of-tree modules.
+;; FIRMWARE lists what the hardware of the particular host needs; x86
+;; microcode is already part of the initrd.
+(define* (make-server-operating-system
+          #:key
+          hostname
+          users
+          services
+          packages
+          file-systems
+          (linux-kernel linux)
+          (firmware '())
+          (timezone "Europe/Moscow")
+          (sudoers-file-extras "")
+          (kernel-arguments '())
+          (mapped-devices '())
+          (swap-devices '()))
+  (make-base-operating-system
+   #:hostname hostname
+   #:users users
+   #:services services
+   #:packages packages
+   #:file-systems file-systems
+   #:linux-kernel linux-kernel
+   #:firmware firmware
+   #:timezone timezone
+   #:sudoers-file-extras sudoers-file-extras
+   #:kernel-arguments kernel-arguments
+   #:mapped-devices mapped-devices
+   #:swap-devices swap-devices))
