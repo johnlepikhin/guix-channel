@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2022 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2022, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -116,10 +116,16 @@
   #:use-module (nongnu packages messaging)
   #:use-module (nongnu packages chrome)
   #:use-module (johnlepikhin packages google-chrome)
-  #:export (%devel-common-tools-packages
+  #:export (%devel-cli-tools-packages
+            %devel-gui-tools-packages
+            %devel-common-tools-packages
+            %devel-cli-libs-packages
+            %devel-desktop-libs-packages
             %devel-common-libs-packages
             %i3wm-packages
             %xdesktop-packages
+            %cli-tools-packages
+            %desktop-tools-packages
             %tools-packages
             %devel-other-packages
             %editors-packages
@@ -127,7 +133,8 @@
             %astro-packages
             %mapping-packages))
 
-(define %devel-common-tools-packages
+;; Usable without a graphical session, e.g. on a headless server.
+(define %devel-cli-tools-packages
   (list
    git
    git-lfs
@@ -140,7 +147,6 @@
    patchelf
    postgresql
    global
-   dbeaver
    puppet-lint
    tcpdump
    socat
@@ -157,13 +163,23 @@
    ripsecrets
    rpm-spec-tool))
 
-(define %devel-common-libs-packages
+(define %devel-gui-tools-packages
+  (list dbeaver))
+
+(define %devel-common-tools-packages
+  (append %devel-gui-tools-packages %devel-cli-tools-packages))
+
+(define %devel-cli-libs-packages
   (list
    cloc
    liboping
-   alsa-lib
-   libxcomposite
    nss-certs))
+
+(define %devel-desktop-libs-packages
+  (list alsa-lib libxcomposite))
+
+(define %devel-common-libs-packages
+  (append %devel-desktop-libs-packages %devel-cli-libs-packages))
 
 (define %i3wm-packages
   (list i3-wm
@@ -228,7 +244,7 @@
     xwininfo
     )))
 
-(define %tools-packages
+(define %cli-tools-packages
   (list
    (list isc-bind "utils")
    (make-git-sync "2020-11-09" "aa420e3f9681ce54cb3e2de10bd118f2664621ea" "0wrwmh852a2xjpzsd45fmpg9v1k20fwy5dl7cs5lc5c6k4mhigbi")
@@ -237,7 +253,6 @@
    aspell
    aspell-dict-en
    aspell-dict-ru
-   blueman
    cpio
    curl
    fd
@@ -247,12 +262,8 @@
    graphviz
    grep
    imdu
-   jmtpfs
-   macchanger
    netcat
    pigz
-   playerctl
-   powertop
    procps
    psmisc
    pv
@@ -263,17 +274,27 @@
    sed
    sshfs
    texlive-scheme-full
-   ;; tgcli ;; Temporarily disabled due to python-mkdocs-material build failure
    unzip
    which
    whois
-   wireshark
    xz
    yt-dlp
    zip
-   zstd
-   mikrotik-winbox
-   ))
+   zstd))
+
+;; For a laptop's own hardware and desktop.
+(define %desktop-tools-packages
+  (list
+   blueman
+   jmtpfs
+   macchanger
+   playerctl
+   powertop
+   wireshark
+   mikrotik-winbox))
+
+(define %tools-packages
+  (append %desktop-tools-packages %cli-tools-packages))
 
 (define %devel-other-packages
   (list
