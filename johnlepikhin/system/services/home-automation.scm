@@ -150,7 +150,8 @@ frontend back to the file, which therefore must never be replaced."
         (environment (zigbee2mqtt-configuration-environment-file config)))
     #~(begin
         (use-modules (guix build utils)
-                     (ice-9 binary-ports))
+                     (ice-9 binary-ports)
+                     (rnrs bytevectors))
         (define (random-hex bytes)
           (call-with-input-file "/dev/urandom"
             (lambda (port)
@@ -165,7 +166,9 @@ frontend back to the file, which therefore must never be replaced."
             (copy-file #$(zigbee2mqtt-seed-configuration config) file)
             (chmod file #o600)))
         (mkdir-p (dirname #$environment))
-        (unless (file-exists? #$environment)
+        ;; An empty file is what a failed earlier attempt leaves behind.
+        (unless (and (file-exists? #$environment)
+                     (> (stat:size (stat #$environment)) 0))
           (call-with-output-file #$environment
             (lambda (port)
               (chmod port #o600)
