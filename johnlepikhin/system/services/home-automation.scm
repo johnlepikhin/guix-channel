@@ -247,6 +247,11 @@ environment file.")))
            (image (home-assistant-configuration-image config))
            (network "host")
            (respawn? #t)
+           ;; Started after BlueZ has the adapter up, otherwise Home
+           ;; Assistant takes the unpowered adapter for missing rights.
+           (requirement (if (home-assistant-configuration-bluetooth? config)
+                            '(bluetooth)
+                            '()))
            (log-file "/var/log/home-assistant.log")
            (environment
             `(("TZ" . ,(home-assistant-configuration-timezone config))))
