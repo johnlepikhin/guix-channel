@@ -100,6 +100,8 @@ makes dnsmasq serve the hosts file of CONFIG."
                   (network-location-hosts-configuration-hosts-file config)
                   "\n"))))
 
+(define %dnsmasq-pid-file "/var/run/NetworkManager/dnsmasq.pid")
+
 (define (network-location-dispatcher config)
   (program-file
    "network-location-hosts"
@@ -179,8 +181,7 @@ makes dnsmasq serve the hosts file of CONFIG."
 
        (define (reload-dnsmasq)
          (let ((pid (false-if-exception
-                     (call-with-input-file
-                         "/var/run/NetworkManager/dnsmasq.pid" read))))
+                     (call-with-input-file #$%dnsmasq-pid-file read))))
            (when (integer? pid)
              (false-if-exception (kill pid SIGHUP)))))
 
@@ -204,15 +205,23 @@ makes dnsmasq serve the hosts file of CONFIG."
          (_ #t)))))
 
 (define (network-location-hosts-activation config)
-  ;; dnsmasq complains about a missing addn-hosts file; start empty until the
-  ;; first network event.
   #~(begin
       (use-modules (guix build utils))
-      (let ((file #$(network-location-hosts-configuration-hosts-file config)))
-        (mkdir-p (dirname file))
-        (unless (file-exists? file)
-          (call-with-output-file file (const #t))
-          (chmod file #o644)))))
+      (mkdir-p
+       (dirname #$(network-location-hosts-configuration-hosts-file config)))
+      ;; dnsmasq reads its configuration directory only at startup, so a
+      ;; running one would never learn about the addn-hosts file.  Stop it;
+      ;; NetworkManager starts it again with the current directory.
+      (let ((pid (false-if-exception
+                  (call-with-input-file #$%dnsmasq-pid-file read))))
+        (when (integer? pid)
+          (false-if-exception (kill pid SIGTERM))
+          (sleep 2)))
+      ;; Resolve right away rather than at the next network event, so that a
+      ;; reconfigure takes effect at once.  At boot, before NetworkManager
+      ;; is up, this matches no location and leaves an empty file, which
+      ;; also keeps dnsmasq from complaining about a missing addn-hosts file.
+      (system* #$(network-location-dispatcher config) "activation" "up")))
 
 ;; NetworkManager runs every regular, root-owned, non-group-writable
 ;; executable in this directory, symlinks included, so a store entry qualifies.
