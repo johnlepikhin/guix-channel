@@ -228,14 +228,41 @@ environment file.")))
   ;; Reach the host's BlueZ over the system D-Bus and let Home Assistant
   ;; manage the adapter.  Needs `bluetooth-service-type' on the host.
   (bluetooth?        home-assistant-configuration-bluetooth?
-                     (default #f)))
+                     (default #f))
+  ;; Integrations that do not ship with Home Assistant, as an alist of
+  ;; names to file-like directories, e.g. a pinned checkout of a release.
+  ;; Installed into custom_components/ at every activation, replacing what
+  ;; was there under that name.
+  (custom-components home-assistant-configuration-custom-components
+                     (default '())))
 
 (define (home-assistant-activation config)
-  #~(begin
-      (use-modules (guix build utils))
-      (mkdir-p #$(home-assistant-configuration-config-directory config))
-      (chmod #$(home-assistant-configuration-config-directory config)
-             #o700)))
+  (let ((directory (home-assistant-configuration-config-directory config)))
+    #~(begin
+        (use-modules (guix build utils))
+        (mkdir-p #$directory)
+        (chmod #$directory #o700)
+        (for-each
+         (lambda (component)
+           (let ((target (string-append #$directory "/custom_components/"
+                                        (car component))))
+             (when (file-exists? target)
+               (delete-file-recursively target))
+             (mkdir-p (dirname target))
+             (copy-recursively (cdr component) target #:log (%make-void-port "w"))
+             ;; Writable copy: Home Assistant writes __pycache__ there.
+             (for-each (lambda (file) (chmod file #o644))
+                       (find-files target))
+             (for-each (lambda (dir) (chmod dir #o755))
+                       (cons target
+                             (find-files target
+                                         (lambda (file stat)
+                                           (eq? 'directory (stat:type stat)))
+                                         #:directories? #t)))))
+         (list #$@(map (lambda (component)
+                         #~(cons #$(car component) #$(cdr component)))
+                       (home-assistant-configuration-custom-components
+                        config)))))))
 
 (define (home-assistant-oci-extension config)
   (oci-extension
