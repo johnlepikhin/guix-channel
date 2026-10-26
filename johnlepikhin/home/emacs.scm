@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2023 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2023, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -23,7 +23,6 @@
   #:use-module (gnu packages mail)
   #:use-module (gnu packages version-control)
   #:use-module (gnu home services)
-  #:use-module (johnlepikhin home xsession)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (guix gexp)
@@ -59,16 +58,13 @@
          (delete-file local.el)))
      ;; Clone main config repository
      (let ((clone-path (string-append (getenv "HOME") "/.emacs.d/public")))
-       (mkdir-p clone-path)
+       (mkdir-p (dirname clone-path))
        (when (not (file-exists? clone-path))
          (system*
           (ungexp (file-append git "/bin/git"))
           "clone"
           (ungexp (home-emacs-configuration-configs-git-repo config))
           clone-path))))))
-
-(define (add-xsession-component config)
-  "emacs --daemon &")
 
 (define home-emacs-service-type
   (service-type
@@ -80,8 +76,6 @@
      (service-extension home-profile-service-type
                         add-emacs-package)
      (service-extension home-activation-service-type
-                        activate-service)
-     (service-extension home-xsession-service-type
-                        add-xsession-component)))
+                        activate-service)))
    (compose concatenate)
    (description "Install emacs and add configs")))
