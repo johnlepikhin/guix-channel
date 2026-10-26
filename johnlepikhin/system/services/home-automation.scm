@@ -224,7 +224,11 @@ environment file.")))
   (image             home-assistant-configuration-image)   ;string, with tag
   (timezone          home-assistant-configuration-timezone) ;string
   (config-directory  home-assistant-configuration-config-directory
-                     (default "/var/lib/home-assistant")))
+                     (default "/var/lib/home-assistant"))
+  ;; Reach the host's BlueZ over the system D-Bus and let Home Assistant
+  ;; manage the adapter.  Needs `bluetooth-service-type' on the host.
+  (bluetooth?        home-assistant-configuration-bluetooth?
+                     (default #f)))
 
 (define (home-assistant-activation config)
   #~(begin
@@ -248,7 +252,14 @@ environment file.")))
             `(("TZ" . ,(home-assistant-configuration-timezone config))))
            (volumes
             `((,(home-assistant-configuration-config-directory config)
-               . "/config"))))))))
+               . "/config")
+              ,@(if (home-assistant-configuration-bluetooth? config)
+                    '(("/run/dbus" . "/run/dbus:ro"))
+                    '())))
+           (extra-arguments
+            (if (home-assistant-configuration-bluetooth? config)
+                '("--cap-add" "NET_ADMIN" "--cap-add" "NET_RAW")
+                '())))))))
 
 (define home-assistant-service-type
   (service-type
