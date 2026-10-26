@@ -43,25 +43,13 @@
   #:use-module (gnu services)
   #:use-module (guix gexp)
   #:use-module (johnlepikhin system services brightnessctl)
+  #:use-module (johnlepikhin system services common)
   #:use-module (johnlepikhin system services polkit-network-manager)
   #:use-module (srfi srfi-1)
-  #:export (make-system-services))
-
-(define-public nonguix-signing-key
-  (plain-file "non-guix.pub"
-   "(public-key
-     (ecc
-       (curve Ed25519)
-       (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)
-     ))"))
-
-(define-public bordeaux-signing-key
-  (plain-file "bordeaux.guix.gnu.org.pub"
-   "(public-key
-     (ecc
-       (curve Ed25519)
-       (q #7D602902D3A2DBB83F8A0FB98602A754C5493B0B778C8D1DD4E0F41DE14DE34F#)
-     ))"))
+  #:export (make-system-services)
+  ;; Kept for manifests that take the keys from this module.
+  #:re-export (nonguix-signing-key
+               bordeaux-signing-key))
 
 ;; Port NetworkManager's dnsmasq forwards to.  Not 53: dnsmasq itself owns
 ;; that one on the loopback.
@@ -244,13 +232,6 @@
 
 (define guix-pull-job
   #~(job "30 5   * * *" "guix pull"))
-
-(define guix-gc-job
-  #~(job "30 4   * * *" "guix gc -F 30G"))
-
-;; trim free blocks on SSD
-(define fstrim-job
-  #~(job "40 */2   * * *" "fstrim -v /"))
 
 (define* (make-system-services #:key (zram-size "2G")
                                (authorized-keys (list nonguix-signing-key
