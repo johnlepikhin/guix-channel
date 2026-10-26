@@ -32,7 +32,8 @@
   #:use-module (gnu packages tls)
   #:use-module (gnu packages vim)
   #:use-module ((gnu packages virtualization) #:select (qemu-minimal))
-  #:export (system-packages))
+  #:export (common-system-packages
+            system-packages))
 
 ;; 'runc' moved from (gnu packages virtualization) to (gnu packages
 ;; containers), which leaves the channel unloadable on whichever side of
@@ -45,21 +46,14 @@
        (module-ref (resolve-interface '(gnu packages containers)) 'runc))
       (module-ref (resolve-interface '(gnu packages virtualization)) 'runc)))
 
-(define system-packages
+(define common-system-packages
   (cons*
-   network-manager-openvpn
    net-tools
-   bluez
-   macchanger
-   wireshark
    tcpdump
-   hostapd
-   powertop
    rsync
    bash-completion
    openssl
    efibootmgr
-   tlp
    vim
    file
    ripgrep
@@ -70,6 +64,17 @@
    smartmontools
    nvme-cli
    iftop
+   %base-packages))
+
+(define system-packages
+  (cons*
+   network-manager-openvpn
+   bluez
+   macchanger
+   wireshark
+   hostapd
+   powertop
+   tlp
    qemu-minimal
    runc
-   %base-packages))
+   common-system-packages))
