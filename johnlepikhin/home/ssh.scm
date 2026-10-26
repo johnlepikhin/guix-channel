@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2022 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2022, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -91,7 +91,11 @@
   (hosts home-ssh-configuration-hosts (default '())))
 
 (define (ssh-control-path _)
-  (string-append (getenv "XDG_CACHE_HOME") "/ssh-connections"))
+  ;; XDG_CACHE_HOME is set by the home environment itself, so it is missing
+  ;; when the first one is built on a fresh machine.
+  (string-append (or (getenv "XDG_CACHE_HOME")
+                     (string-append (getenv "HOME") "/.cache"))
+                 "/ssh-connections"))
 
 (define (add-ssh-config-file config)
   `((".ssh/config"
