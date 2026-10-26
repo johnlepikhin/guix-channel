@@ -46,7 +46,8 @@
   #:use-module (johnlepikhin system services common)
   #:use-module (johnlepikhin system services polkit-network-manager)
   #:use-module (srfi srfi-1)
-  #:export (make-system-services)
+  #:export (%desktop-substitute-urls
+            make-system-services)
   ;; Kept for manifests that take the keys from this module.
   #:re-export (nonguix-signing-key
                bordeaux-signing-key))
@@ -151,8 +152,19 @@
         (system* #$(file-append elogind "/bin/loginctl")
                  "lock-sessions"))))
 
+(define %desktop-substitute-urls
+  (list
+   ;; https://substitutes.nonguix.org is now available via IPv6 only
+   "https://nonguix-proxy.ditigal.xyz"
+   "https://mirror.yandex.ru/mirrors/guix"
+   ;; "https://bordeaux-singapore-mirror.cbaines.net"
+   ;; "https://ci.guix.gnu.org"
+   ;; "https://bordeaux.guix.gnu.org/"
+   ))
+
 (define* (tuned-desktop-services #:key (authorized-keys '())
                                  (substitute-urls '())
+                                 (dnsmasq-configuration-files '())
                                  (sleep-hooks '()))
   (cons* (modify-services %desktop-services
            (gdm-service-type config =>
@@ -164,14 +176,7 @@
 
            (guix-service-type config =>
                               (guix-configuration (inherit config)
-                                                  (substitute-urls (list
-                                                                    ;; https://substitutes.nonguix.org is now available via IPv6 only
-                                                                    "https://nonguix-proxy.ditigal.xyz"
-                                                                    "https://mirror.yandex.ru/mirrors/guix"
-                                                                    ;; "https://bordeaux-singapore-mirror.cbaines.net"
-                                                                    ;; "https://ci.guix.gnu.org"
-                                                                    ;; "https://bordeaux.guix.gnu.org/"
-                                                                    ))
+                                                  (substitute-urls substitute-urls)
                                                   (discover? #t)
                                                   (extra-options
                                                    (list "--gc-keep-derivations=yes"
@@ -225,7 +230,8 @@
                  ,(plain-file "99-rc-manager.conf"
                               "[main]\nrc-manager=symlink\n"))))
              (dnsmasq-configuration-files
-              %dnsmasq-upstream-configuration-files)))
+              (append %dnsmasq-upstream-configuration-files
+                      dnsmasq-configuration-files))))
 
            (avahi-service-type config =>
                                (avahi-configuration (ipv6? #f))))))
@@ -236,10 +242,10 @@
 (define* (make-system-services #:key (zram-size "2G")
                                (authorized-keys (list nonguix-signing-key
                                                       bordeaux-signing-key))
-                               (substitute-urls (list
-                                                 "https://substitutes.nonguix.org"
-                                                 "https://ci.guix.gnu.org"
-                                                 "https://bordeaux.guix.gnu.org/"))
+                               (substitute-urls %desktop-substitute-urls)
+                               ;; Extra entries for NetworkManager's dnsmasq,
+                               ;; as (NAME FILE-LIKE).
+                               (dnsmasq-configuration-files '())
                                (sleep-hooks '()))
   (cons*
 
@@ -345,4 +351,6 @@
 
          (tuned-desktop-services #:authorized-keys authorized-keys
                                  #:substitute-urls substitute-urls
+                                 #:dnsmasq-configuration-files
+                                 dnsmasq-configuration-files
                                  #:sleep-hooks sleep-hooks)))
