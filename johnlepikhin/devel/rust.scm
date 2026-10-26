@@ -41,7 +41,9 @@
     (list
      clang
      mold
-     openssl-1.1
+     ;; The same openssl that postgresql propagates (e.g. through
+     ;; perl-dbd-pg); a different one makes the profile conflict.
+     openssl
      rust-package)))
      ;; (list rust-package "tools")
      ;; (list rust-package "rust-src")
