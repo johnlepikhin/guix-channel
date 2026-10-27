@@ -83,6 +83,7 @@
             grafana-dashboard
             grafana-dashboard?
             %grafana-node-exporter-dashboard
+            %grafana-mktxp-dashboard
             grafana-configuration
             grafana-configuration?
             grafana-service-type
@@ -91,6 +92,22 @@
             blackbox-exporter-configuration?
             blackbox-exporter-service-type
 
+            mktxp-router
+            mktxp-router?
+            mktxp-configuration
+            mktxp-configuration?
+            mktxp-service-type
+
+            loki-configuration
+            loki-configuration?
+            loki-service-type
+
+            log-source
+            log-source?
+            alloy-configuration
+            alloy-configuration?
+            alloy-service-type
+
             %node-textfile-directory
             node-textfile-collectors-configuration
             node-textfile-collectors-configuration?
@@ -98,7 +115,9 @@
 
             host-alert-rules
             service-alert-rules
-            stack-alert-rules))
+            stack-alert-rules
+            network-alert-rules
+            log-alert-rules))
 
 
 ;;;
@@ -680,8 +699,30 @@ alerts repeat more often than warnings.")))
   grafana-dashboard
   make-grafana-dashboard
   grafana-dashboard?
-  (name  grafana-dashboard-name)                   ;file name, "x.json"
-  (file  grafana-dashboard-file))                  ;file-like
+  (name         grafana-dashboard-name)            ;file name, "x.json"
+  (file         grafana-dashboard-file)            ;file-like
+  ;; Dashboards exported for sharing refer to their datasources as inputs,
+  ;; ${DS_NAME}: an alist of such names to datasource uids.
+  (datasources  grafana-dashboard-datasources
+                (default '())))
+
+(define (grafana-dashboard-json dashboard)
+  "The JSON file of DASHBOARD, its datasource inputs replaced by uids."
+  (match-record dashboard <grafana-dashboard> (name file datasources)
+    (if (null? datasources)
+        file
+        (computed-file
+         name
+         (with-imported-modules '((guix build utils))
+           #~(begin
+               (use-modules (guix build utils))
+               (copy-file #$file #$output)
+               (chmod #$output #o644)
+               (for-each (lambda (input)
+                           (substitute* #$output
+                             (((string-append "\\$\\{" (car input) "\\}"))
+                              (cdr input))))
+                         '#$datasources)))))))
 
 ;; "Node Exporter Full", whose datasource is a variable defaulting to the
 ;; default Prometheus datasource.
@@ -695,6 +736,19 @@ alerts repeat more often than warnings.")))
            (sha256
             (base32
              "11hrll7fm626ikbva5md4gm0rca537vp4xsxa9sxl1pk15s6nk0q"))))))
+
+;; "Mikrotik MKTXP Exporter", for `mktxp-service-type'.
+(define %grafana-mktxp-dashboard
+  (grafana-dashboard
+   (name "mktxp.json")
+   (file (origin
+           (method url-fetch)
+           (uri "https://grafana.com/api/dashboards/13679/revisions/32/download")
+           (file-name "grafana-dashboard-mktxp-32.json")
+           (sha256
+            (base32
+             "09dxx6s11qhnpv6ckn8n84m6lqxrziwvsi8gxqzlcm7vs3zgjwiz"))))
+   (datasources '(("DS_PROMETHEUS" . "prometheus")))))
 
 (define-record-type* <grafana-configuration>
   grafana-configuration
@@ -766,7 +820,7 @@ alerts repeat more often than warnings.")))
        ,@(map (lambda (dashboard)
                 (cons (string-append "dashboards/json/"
                                      (grafana-dashboard-name dashboard))
-                      (grafana-dashboard-file dashboard)))
+                      (grafana-dashboard-json dashboard)))
               dashboards))
      ;; Grafana logs errors about the provisioning directories it misses.
      #:directories '("plugins" "alerting"))))
@@ -923,6 +977,576 @@ datasources and dashboards.  Its own alerting is off.")))
    (default-value (blackbox-exporter-configuration))
    (description "Run the Prometheus blackbox exporter in a container, for
 HTTP, TCP and ICMP probes declared with @code{blackbox-scrape-job}.")))
+
+
+;;;
+;;; mktxp, the MikroTik RouterOS exporter.
+;;;
+
+(define %mktxp-image
+  "ghcr.io/akpw/mktxp:2.1.0@sha256:4cbb31321914c8a0a95cfed8edbf2647f681311f1926bf06deb8866d40baaa1c")
+
+;; mktxp wants every key of its configuration files and tries to write the
+;; missing ones back, which fails on the read-only mount: these are the
+;; defaults of the image, apart from the probe endpoint, which is off.
+(define %mktxp-system-settings
+  '(("socket_timeout" . 5)
+    ("initial_delay_on_failure" . 120)
+    ("max_delay_on_failure" . 900)
+    ("delay_inc_div" . 5)
+    ("bandwidth" . #f)
+    ("bandwidth_test_dns_server" . "8.8.8.8")
+    ("bandwidth_test_interval" . 600)
+    ("minimal_collect_interval" . 5)
+    ("verbose_mode" . #f)
+    ("fetch_routers_in_parallel" . #f)
+    ("max_worker_threads" . 5)
+    ("max_scrape_duration" . 30)
+    ("total_max_scrape_duration" . 90)
+    ("http_server_threads" . 16)
+    ("persistent_router_connection_pool" . #t)
+    ("persistent_dhcp_cache" . #t)
+    ("compact_default_conf_values" . #f)
+    ("prometheus_headers_deduplication" . #f)
+    ("probe_connection_pool" . #f)
+    ("probe_connection_pool_ttl" . 300)
+    ("probe_connection_pool_max_size" . 128)
+    ("enable_probe" . #f)
+    ("probe_allowed_targets" . "None")))
+
+(define %mktxp-diag-settings
+  '(("low_signal_threshold" . -75)
+    ("min_signal_threshold" . -60)
+    ("low_rate_threshold" . "'18M'")
+    ("recent_duration" . "'15m'")
+    ("top_connections_count" . 10)
+    ("rate_above_threshold" . "'1M'")
+    ("degraded_threshold" . "'100M'")))
+
+;; The [default] router settings of the image, with only the cheap
+;; collectors on: the
+;; interfaces, their link state and rate, the routes and the system
+;; resources, which mktxp always collects.  Small routers answer slowly to
+;; the others.
+(define %mktxp-router-settings
+  '(("enabled" . #t)
+    ("module_only" . #f)
+    ("probe_allowed_targets" . "None")
+    ("custom_labels" . "None")
+    ("use_ssl" . #f)
+    ("no_ssl_certificate" . #f)
+    ("ssl_certificate_verify" . #f)
+    ("ssl_check_hostname" . #t)
+    ("ssl_ca_file" . "\"\"")
+    ("plaintext_login" . #t)
+    ("health" . #t)
+    ("installed_packages" . #f)
+    ("dhcp" . #f)
+    ("dhcp_lease" . #f)
+    ("connections" . #f)
+    ("connection_stats" . #f)
+    ("connection_stats_destinations" . #f)
+    ("interface" . #t)
+    ("interface_with_default_name" . #f)
+    ("routerboard" . #f)
+    ("wireguard_peers" . #f)
+    ("bridge_vlan" . #f)
+    ("route" . #t)
+    ("pool" . #f)
+    ("firewall" . #f)
+    ("neighbor" . #f)
+    ("address_list" . "None")
+    ("address_list_entries" . #f)
+    ("total_address_list_counts" . #f)
+    ("dns" . #f)
+    ("ipv6_route" . #f)
+    ("ipv6_pool" . #f)
+    ("ipv6_firewall" . #f)
+    ("ipv6_neighbor" . #f)
+    ("ipv6_address_list" . "None")
+    ("ipv6_address_list_entries" . #f)
+    ("ipv6_total_address_list_counts" . #f)
+    ("poe" . #f)
+    ("monitor" . #t)
+    ("netwatch" . #f)
+    ("public_ip" . #f)
+    ("wireless" . #f)
+    ("wireless_clients" . #f)
+    ("capsman" . #f)
+    ("capsman_clients" . #f)
+    ("w60g" . #f)
+    ("eoip" . #f)
+    ("gre" . #f)
+    ("ipip" . #f)
+    ("lte" . #f)
+    ("ipsec" . #f)
+    ("switch_port" . #f)
+    ("kid_control_assigned" . #f)
+    ("kid_control_dynamic" . #f)
+    ("user" . #f)
+    ("queue" . #f)
+    ("bfd" . #f)
+    ("bgp" . #f)
+    ("routing_stats" . #f)
+    ("certificate" . #f)
+    ("container" . #f)
+    ("remote_dhcp_entry" . "None")
+    ("remote_capsman_entry" . "None")
+    ("interface_name_format" . "name")
+    ("check_for_updates" . #f)
+    ("rsc_ssh_port" . "None")
+    ("rsc_ssh_user" . "None")))
+
+(define-record-type* <mktxp-router>
+  mktxp-router
+  make-mktxp-router
+  mktxp-router?
+  (name      mktxp-router-name)                    ;routerboard_name label
+  (address   mktxp-router-address)                 ;string
+  (port      mktxp-router-port
+             (default 8728))
+  ;; Overrides of %mktxp-router-settings, e.g. '(("health" . #f)) for a
+  ;; router without health sensors.
+  (settings  mktxp-router-settings
+             (default '())))
+
+(define-record-type* <mktxp-configuration>
+  mktxp-configuration
+  make-mktxp-configuration
+  mktxp-configuration?
+  (image             mktxp-configuration-image
+                     (default %mktxp-image))
+  (uid               mktxp-configuration-uid
+                     (default 65534))
+  (gid               mktxp-configuration-gid
+                     (default 65534))
+  (listen-address    mktxp-configuration-listen-address
+                     (default "127.0.0.1:49090"))
+  ;; Secret YAML file with the "username" and "password" of a RouterOS user
+  ;; of a group with the policies read and api only.
+  (credentials-file  mktxp-configuration-credentials-file
+                     (default "/etc/mktxp/credentials.yml"))
+  (routers           mktxp-configuration-routers)  ;list of <mktxp-router>
+  ;; Small routers take seconds to answer; scraping more often than this
+  ;; only loads them.
+  (scrape-interval   mktxp-configuration-scrape-interval
+                     (default "60s")
+                     (sanitize (sanitize-duration "scrape-interval")))
+  (memory            mktxp-configuration-memory
+                     (default "256m")))
+
+(define %mktxp-config-path "/etc/mktxp")
+(define %mktxp-credentials-path "/run/secrets/mktxp-credentials.yml")
+
+(define (ini-value value)
+  (cond ((eq? value #t) "True")
+        ((eq? value #f) "False")
+        ((number? value) (number->config-string value))
+        (else value)))
+
+(define (ini-section name settings)
+  (string-append
+   "[" name "]\n"
+   (string-concatenate
+    (map (match-lambda
+           ((key . value)
+            (string-append "    " key " = " (ini-value value) "\n")))
+         settings))
+   "\n"))
+
+(define (merge-settings defaults overrides)
+  "DEFAULTS with the values of OVERRIDES, in the order of DEFAULTS."
+  (map (match-lambda
+         ((key . value)
+          (cons key (match (assoc key overrides)
+                      ((_ . override) override)
+                      (#f value)))))
+       defaults))
+
+(define (mktxp-config-directory config)
+  (match-record config <mktxp-configuration> (listen-address routers)
+    (file-tree
+     "mktxp-config"
+     `(("_mktxp.conf"
+        . ,(plain-file
+            "_mktxp.conf"
+            (string-append
+             (ini-section "MKTXP"
+                          (cons `("listen" . ,(string-append
+                                               "'" listen-address "'"))
+                                %mktxp-system-settings))
+             (ini-section "DIAG" %mktxp-diag-settings))))
+       ("mktxp.conf"
+        . ,(plain-file
+            "mktxp.conf"
+            (string-concatenate
+             (cons
+              (ini-section "default"
+                           `(("hostname" . "localhost")
+                             ("port" . 8728)
+                             ("username" . "username")
+                             ("password" . "password")
+                             ("credentials_file" . ,%mktxp-credentials-path)
+                             ,@%mktxp-router-settings))
+              (map (lambda (router)
+                     (match-record router <mktxp-router>
+                       (name address port settings)
+                       (ini-section name
+                                    `(("hostname" . ,address)
+                                      ("port" . ,port)
+                                      ,@settings))))
+                   routers)))))))))
+
+(define (mktxp-oci-extension config)
+  (match-record config <mktxp-configuration>
+    (image uid gid credentials-file memory)
+    (oci-extension
+     (containers
+      (list (oci-container-configuration
+             (provision "mktxp")
+             (user "root")
+             (group "root")
+             (image image)
+             (network "host")
+             (container-user (container-user uid gid))
+             (respawn? #t)
+             (log-file "/var/log/mktxp.log")
+             (volumes
+              `((,(mktxp-config-directory config)
+                 . ,(string-append %mktxp-config-path ":ro"))
+                (,credentials-file
+                 . ,(string-append %mktxp-credentials-path ":ro"))))
+             (command (list "mktxp" "--cfg-dir" %mktxp-config-path
+                            "export"))
+             (extra-arguments (list "--memory" memory))))))))
+
+(define (mktxp-activation config)
+  (match-record config <mktxp-configuration> (credentials-file uid)
+    (secret-file-check credentials-file uid)))
+
+(define (mktxp-prometheus-extension config)
+  (match-record config <mktxp-configuration> (listen-address scrape-interval)
+    (prometheus-extension
+     (scrape-jobs
+      (list (prometheus-scrape-job
+             (name "mktxp")
+             (targets (list listen-address))
+             (interval scrape-interval)
+             (timeout "30s")))))))
+
+(define mktxp-service-type
+  (service-type
+   (name 'mktxp)
+   (extensions
+    (list (service-extension oci-service-type mktxp-oci-extension)
+          (service-extension activation-service-type mktxp-activation)
+          (service-extension prometheus-service-type
+                             mktxp-prometheus-extension)))
+   (description "Run mktxp in a container, exporting the interfaces, routes
+and resources of MikroTik RouterOS devices through their API.")))
+
+
+;;;
+;;; Loki.
+;;;
+
+(define %loki-image
+  "docker.io/grafana/loki:3.7.9@sha256:0db216b630ae1f348a1584c67f3cead8b4c1fc839169a39501db664744158e28")
+
+(define-record-type* <loki-configuration>
+  loki-configuration
+  make-loki-configuration
+  loki-configuration?
+  (image              loki-configuration-image
+                      (default %loki-image))
+  (uid                loki-configuration-uid
+                      (default 10001))
+  (gid                loki-configuration-gid
+                      (default 10001))
+  (listen-address     loki-configuration-listen-address ;host only
+                      (default "127.0.0.1"))
+  (http-port          loki-configuration-http-port
+                      (default 3100))
+  (grpc-port          loki-configuration-grpc-port
+                      (default 9095))
+  (data-directory     loki-configuration-data-directory
+                      (default "/var/lib/loki"))
+  ;; A multiple of 24h, the period of the index.
+  (retention          loki-configuration-retention
+                      (default "720h")
+                      (sanitize (sanitize-duration "retention")))
+  ;; The first read of existing logs comes as a burst.
+  (ingestion-rate-mb  loki-configuration-ingestion-rate-mb
+                      (default 8))
+  ;; Groups of LogQL alert rules for the ruler.
+  (rule-groups        loki-configuration-rule-groups
+                      (default '()))
+  (alertmanager-url   loki-configuration-alertmanager-url
+                      (default "http://127.0.0.1:9093"))
+  (memory             loki-configuration-memory
+                      (default "1g")))
+
+(define %loki-config-path "/etc/loki/loki.yml")
+;; With authentication off, everything belongs to the tenant "fake".
+(define %loki-rules-path "/etc/loki/rules/fake/rules.yml")
+
+(define (loki-config-file config)
+  (match-record config <loki-configuration>
+    (listen-address http-port grpc-port retention ingestion-rate-mb
+                    alertmanager-url)
+    (json-file
+     "loki.yml"
+     `(("auth_enabled" . #f)
+       ("server"
+        ("http_listen_address" . ,listen-address)
+        ("http_listen_port" . ,http-port)
+        ("grpc_listen_address" . ,listen-address)
+        ("grpc_listen_port" . ,grpc-port)
+        ("log_level" . "warn"))
+       ;; A single instance: rings in memory, no memberlist port.
+       ("common"
+        ("instance_addr" . ,listen-address)
+        ("path_prefix" . "/loki")
+        ("replication_factor" . 1)
+        ("ring" ("kvstore" ("store" . "inmemory")))
+        ("storage"
+         ("filesystem"
+          ("chunks_directory" . "/loki/chunks")
+          ("rules_directory" . "/loki/rules"))))
+       ("schema_config"
+        ("configs"
+         . #((("from" . "2026-01-01")
+              ("store" . "tsdb")
+              ("object_store" . "filesystem")
+              ("schema" . "v13")
+              ("index" ("prefix" . "index_") ("period" . "24h"))))))
+       ;; Retention is the compactor's job; without it nothing is deleted.
+       ("compactor"
+        ("working_directory" . "/loki/compactor")
+        ("retention_enabled" . #t)
+        ("delete_request_store" . "filesystem"))
+       ("limits_config"
+        ("retention_period" . ,retention)
+        ("ingestion_rate_mb" . ,ingestion-rate-mb)
+        ("ingestion_burst_size_mb" . ,(* 2 ingestion-rate-mb))
+        ("reject_old_samples" . #t)
+        ("reject_old_samples_max_age" . "168h"))
+       ("ruler"
+        ("storage" ("type" . "local")
+         ("local" ("directory" . ,(dirname (dirname %loki-rules-path)))))
+        ("rule_path" . "/loki/ruler")
+        ("alertmanager_url" . ,alertmanager-url)
+        ("ring" ("kvstore" ("store" . "inmemory")))
+        ("enable_api" . #t))
+       ("analytics" ("reporting_enabled" . #f))))))
+
+(define (loki-oci-extension config)
+  (match-record config <loki-configuration>
+    (image uid gid data-directory rule-groups memory)
+    (oci-extension
+     (containers
+      (list (oci-container-configuration
+             (provision "loki")
+             (user "root")
+             (group "root")
+             (image image)
+             (network "host")
+             (container-user (container-user uid gid))
+             (respawn? #t)
+             (log-file "/var/log/loki.log")
+             (volumes
+              `((,(loki-config-file config)
+                 . ,(string-append %loki-config-path ":ro"))
+                (,(alert-rule-groups-file "loki-rules.yml" rule-groups)
+                 . ,(string-append %loki-rules-path ":ro"))
+                (,data-directory . "/loki")))
+             (command (list (string-append "-config.file="
+                                           %loki-config-path)))
+             (extra-arguments (list "--memory" memory))))))))
+
+(define (loki-activation config)
+  (match-record config <loki-configuration> (data-directory uid gid)
+    (data-directory-activation data-directory uid gid)))
+
+(define (loki-prometheus-extension config)
+  (match-record config <loki-configuration> (listen-address http-port)
+    (prometheus-extension
+     (scrape-jobs
+      (list (prometheus-scrape-job
+             (name "loki")
+             (targets (list (string-append listen-address ":"
+                                           (number->string http-port))))))))))
+
+(define loki-service-type
+  (service-type
+   (name 'loki)
+   (extensions
+    (list (service-extension oci-service-type loki-oci-extension)
+          (service-extension activation-service-type loki-activation)
+          (service-extension prometheus-service-type
+                             loki-prometheus-extension)))
+   (default-value (loki-configuration))
+   (description "Run Loki in a container, as a single instance keeping logs
+on the local file system, with a ruler sending LogQL alerts to
+Alertmanager.")))
+
+
+;;;
+;;; Grafana Alloy, shipping log files to Loki.
+;;;
+
+(define %alloy-image
+  "docker.io/grafana/alloy:v1.21.2@sha256:2fc2ae17ed3b712e37047724efd1cdf7a4124016c0b7522ac469dab0ddf8a8d7")
+
+;; Log files matching PATH, a glob, get the label job=JOB.  Lines matching
+;; one of the DROP regexps (RE2 syntax) are not shipped.
+(define-record-type* <log-source>
+  log-source
+  make-log-source
+  log-source?
+  (path  log-source-path)                          ;string
+  (job   log-source-job)                           ;string
+  (drop  log-source-drop                           ;list of strings
+         (default '())))
+
+(define-record-type* <alloy-configuration>
+  alloy-configuration
+  make-alloy-configuration
+  alloy-configuration?
+  (image           alloy-configuration-image
+                   (default %alloy-image))
+  (listen-address  alloy-configuration-listen-address
+                   (default "127.0.0.1:12345"))
+  (data-directory  alloy-configuration-data-directory
+                   (default "/var/lib/alloy"))
+  (loki-url        alloy-configuration-loki-url
+                   (default "http://127.0.0.1:3100/loki/api/v1/push"))
+  ;; Read-only mounted into the container at the same path.
+  (log-directory   alloy-configuration-log-directory
+                   (default "/var/log"))
+  (log-sources     alloy-configuration-log-sources) ;list of <log-source>
+  ;; Lines starting with a "YYYY-MM-DD hh:mm:ss" time, as the system log and
+  ;; the shepherd service logs write it, keep that time in this time zone.
+  ;; Otherwise they would get the time they are read at, and a first read
+  ;; of old logs would look like a burst of fresh events to the alerts.
+  (timezone        alloy-configuration-timezone
+                   (default "UTC"))
+  (memory          alloy-configuration-memory
+                   (default "512m")))
+
+(define %alloy-config-path "/etc/alloy/config.alloy")
+
+(define (alloy-string str)
+  ;; Alloy strings take the escapes of JSON strings.
+  (scm->json-string str))
+
+(define (alloy-config-file config)
+  (match-record config <alloy-configuration> (loki-url log-sources timezone)
+    (plain-file
+     "config.alloy"
+     (string-append
+      "local.file_match \"logs\" {\n"
+      "  path_targets = [\n"
+      (string-concatenate
+       (map (lambda (source)
+              (string-append
+               "    {\"__path__\" = " (alloy-string (log-source-path source))
+               ", \"job\" = " (alloy-string (log-source-job source)) "},\n"))
+            log-sources))
+      "  ]\n"
+      "}\n\n"
+      "loki.source.file \"logs\" {\n"
+      "  targets    = local.file_match.logs.targets\n"
+      "  forward_to = [loki.process.logs.receiver]\n"
+      "}\n\n"
+      "loki.process \"logs\" {\n"
+      "  stage.regex {\n"
+      "    expression = "
+      (alloy-string "^(?P<time>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}) ")
+      "\n"
+      "  }\n"
+      "  stage.timestamp {\n"
+      "    source   = \"time\"\n"
+      "    format   = \"2006-01-02 15:04:05\"\n"
+      "    location = " (alloy-string timezone) "\n"
+      "  }\n"
+      (string-concatenate
+       (map (lambda (source)
+              (if (null? (log-source-drop source))
+                  ""
+                  (string-append
+                   "  stage.match {\n"
+                   "    selector = "
+                   (alloy-string (string-append
+                                  "{job=\"" (log-source-job source) "\"}"))
+                   "\n"
+                   (string-concatenate
+                    (map (lambda (regexp)
+                           (string-append
+                            "    stage.drop {\n"
+                            "      expression = " (alloy-string regexp) "\n"
+                            "    }\n"))
+                         (log-source-drop source)))
+                   "  }\n")))
+            log-sources))
+      "  forward_to = [loki.write.local.receiver]\n"
+      "}\n\n"
+      "loki.write \"local\" {\n"
+      "  endpoint {\n"
+      "    url = " (alloy-string loki-url) "\n"
+      "  }\n"
+      "}\n"))))
+
+(define (alloy-oci-extension config)
+  (match-record config <alloy-configuration>
+    (image listen-address data-directory log-directory memory)
+    (oci-extension
+     (containers
+      (list (oci-container-configuration
+             (provision "alloy")
+             (user "root")
+             (group "root")
+             (image image)
+             (network "host")
+             ;; Root, without capabilities: the owner of the log files.
+             (container-user "0:0")
+             (respawn? #t)
+             (log-file "/var/log/alloy.log")
+             (volumes
+              `((,(alloy-config-file config)
+                 . ,(string-append %alloy-config-path ":ro"))
+                (,log-directory . ,(string-append log-directory ":ro"))
+                (,data-directory . "/var/lib/alloy")))
+             (command
+              (list "run" %alloy-config-path
+                    "--storage.path=/var/lib/alloy/data"
+                    (string-append "--server.http.listen-addr="
+                                   listen-address)
+                    "--disable-reporting"))
+             (extra-arguments
+              (list "--cap-drop" "ALL" "--memory" memory))))))))
+
+(define (alloy-activation config)
+  (data-directory-activation (alloy-configuration-data-directory config)
+                             0 0))
+
+(define (alloy-prometheus-extension config)
+  (prometheus-extension
+   (scrape-jobs
+    (list (prometheus-scrape-job
+           (name "alloy")
+           (targets (list (alloy-configuration-listen-address config))))))))
+
+(define alloy-service-type
+  (service-type
+   (name 'alloy)
+   (extensions
+    (list (service-extension oci-service-type alloy-oci-extension)
+          (service-extension activation-service-type alloy-activation)
+          (service-extension prometheus-service-type
+                             alloy-prometheus-extension)))
+   (description "Run Grafana Alloy in a container, shipping log files of the
+host to Loki.  Its log of the last read positions survives restarts.")))
 
 
 ;;;
@@ -1255,3 +1879,134 @@ or prometheus_notifications_alertmanagers_discovered < 1")
               (number->config-string (* 0.9 prometheus-retention-bytes))))
        (category "monitoring")
        (summary "Prometheus storage fails or nears its size limit")))))))
+
+(define* (network-alert-rules #:key
+                              (uplinks '())
+                              (router-ports '())
+                              (latency-threshold 0.2)
+                              (router-cpu-load 90)
+                              (router-free-memory 10e6))
+  "Return alert groups for a MikroTik router and its uplinks, watched by
+mktxp and by blackbox ICMP probes labelled uplink=NAME.  UPLINKS is a list
+of (NAME INTERFACE) for the uplinks and their router interfaces: a probe
+alone cannot tell a dead uplink, as the router sends the probes of a dead
+one through the others.  ROUTER-PORTS is an alist of router interfaces to
+their expected rate in Mbit/s.  LATENCY-THRESHOLD is in seconds."
+  (let ((n number->config-string))
+    (list
+     (alert-rule-group
+      (name "network")
+      (rules
+       (append
+        (map (match-lambda
+               ((uplink interface)
+                (alert-rule
+                 (alert "UplinkDown")
+                 (expr (string-append
+                        "max(mktxp_interface_running{name=\"" interface
+                        "\"}) == 0 or max(probe_success{uplink=\"" uplink
+                        "\"}) == 0"))
+                 (for "3m")
+                 (category "network")
+                 (labels `(("uplink" . ,uplink)))
+                 (summary (string-append "Uplink " uplink " (" interface
+                                         ") is down")))))
+             uplinks)
+        (map (match-lambda
+               ((uplink interface)
+                (alert-rule
+                 (alert "UplinkLatencyHigh")
+                 (expr (string-append
+                        "quantile_over_time(0.5, probe_icmp_duration_seconds"
+                        "{uplink=\"" uplink "\",phase=\"rtt\"}[15m]) > "
+                        (n latency-threshold)))
+                 (for "5m")
+                 (category "network")
+                 (labels `(("uplink" . ,uplink)))
+                 (summary (string-append
+                           "Uplink " uplink ": median RTT {{ $value | "
+                           "humanizeDuration }}")))))
+             uplinks)
+        (if (null? uplinks)
+            '()
+            (list (alert-rule
+                   (alert "UplinksAllDown")
+                   (expr (string-append
+                          "count(ALERTS{alertname=\"UplinkDown\","
+                          "alertstate=\"firing\"}) >= "
+                          (n (length uplinks))))
+                   (severity 'critical)
+                   (category "network")
+                   (summary "All uplinks were down"))))
+        (map (match-lambda
+               ((interface . mbits)
+                (alert-rule
+                 (alert "RouterPortSlow")
+                 (expr (string-append
+                        "mktxp_interface_rate{name=\"" interface "\"} < "
+                        (n mbits)))
+                 (for "10m")
+                 (category "network")
+                 (summary (string-append
+                           interface " runs at {{ $value }} Mbit/s instead of "
+                           (n mbits))))))
+             router-ports)
+        (list
+         (alert-rule
+          (alert "RouterCpuHigh")
+          (expr (string-append "mktxp_system_cpu_load > "
+                               (n router-cpu-load)))
+          (for "10m")
+          (category "network")
+          (summary "Router {{ $labels.routerboard_name }}: CPU at \
+{{ $value }} %"))
+         (alert-rule
+          (alert "RouterMemoryLow")
+          (expr (string-append "mktxp_system_free_memory < "
+                               (n router-free-memory)))
+          (for "10m")
+          (category "network")
+          (summary "Router {{ $labels.routerboard_name }}: \
+{{ $value | humanize1024 }}B of memory free")))))))))
+
+(define* (log-alert-rules #:key (job "system") (kernel-tag "linux"))
+  "Return LogQL alert groups for the Loki ruler about the system log, whose
+lines have the label job=JOB; kernel messages are tagged KERNEL-TAG there."
+  (let ((kernel (string-append "{job=\"" job "\"} |= \" " kernel-tag ": \"")))
+    (list
+     (alert-rule-group
+      (name "logs")
+      (rules
+       (list
+        (alert-rule
+         (alert "KernelHardwareError")
+         (expr (string-append
+                "sum(count_over_time(" kernel
+                " |~ `nvme[0-9]+.*(timeout|reset|error)|I/O error, dev"
+                "|mce: |Hardware Error|EXT4-fs error|BUG: |Oops`"
+                " [10m])) > 0"))
+         (severity 'critical)
+         (category "hardware")
+         (summary "The kernel reports hardware or file system errors: see \
+/var/log/messages"))
+        (alert-rule
+         (alert "OomKill")
+         (expr (string-append
+                "sum(count_over_time(" kernel
+                " |= `Out of memory: Killed process` [10m])) > 0"))
+         (category "resources")
+         (summary "The kernel OOM killer killed a process: earlyoom did not \
+prevent it"))
+        (alert-rule
+         (alert "ServiceDisabled")
+         ;; Transient services, such as the sshd of each connection, are
+         ;; disabled whenever they end.
+         (expr (string-append
+                "sum by (service) (count_over_time({job=\"" job "\"}"
+                " |~ `shepherd\\[1\\]: Service [^ ]+ has been disabled`"
+                " !~ `Service sshd-[0-9]+ `"
+                " | regexp `Service (?P<service>[^ ]+) has been disabled`"
+                " [10m])) > 0"))
+         (category "services")
+         (summary "Shepherd disabled {{ $labels.service }}, which kept \
+failing"))))))))

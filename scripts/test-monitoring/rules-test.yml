@@ -157,6 +157,40 @@ tests:
           - exp_labels: {severity: warning, category: hardware, instance: h, device: lan0}
             exp_annotations: {summary: "lan0 is down or slower than 1000 Mbit/s"}
 
+  # A dead uplink: its interface is down while its probes still succeed,
+  # routed through the other uplink.
+  - interval: 1m
+    input_series:
+      - series: 'mktxp_interface_running{name="pppoe-out1",routerboard_name="r"}'
+        values: '1 0x10'
+      - series: 'probe_success{instance="9.9.9.9",uplink="jet"}'
+        values: '1x10'
+      - series: 'mktxp_interface_running{name="ether2",routerboard_name="r"}'
+        values: '1x10'
+      - series: 'probe_success{instance="1.0.0.1",uplink="starlink"}'
+        values: '1x10'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: UplinkDown
+        exp_alerts:
+          - exp_labels: {severity: warning, category: network, uplink: jet}
+            exp_annotations: {summary: "Uplink jet (pppoe-out1) is down"}
+      - eval_time: 5m
+        alertname: UplinksAllDown
+        exp_alerts: []
+
+  # A port negotiated below its expected rate.
+  - interval: 1m
+    input_series:
+      - series: 'mktxp_interface_rate{name="ether2",routerboard_name="r"}'
+        values: '100x15'
+    alert_rule_test:
+      - eval_time: 11m
+        alertname: RouterPortSlow
+        exp_alerts:
+          - exp_labels: {severity: warning, category: network, name: ether2, routerboard_name: r}
+            exp_annotations: {summary: "ether2 runs at 100 Mbit/s instead of 1000"}
+
   # The Watchdog always fires.
   - interval: 1m
     input_series: []

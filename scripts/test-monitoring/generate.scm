@@ -26,7 +26,11 @@
                    (append (host-alert-rules
                             #:network-links '(("lan0" . 1000)))
                            (service-alert-rules)
-                           (stack-alert-rules)))))
+                           (stack-alert-rules)
+                           (network-alert-rules
+                            #:uplinks '(("jet" "pppoe-out1")
+                                        ("starlink" "ether2"))
+                            #:router-ports '(("ether2" . 1000)))))))
 
 (spit "shepherd.prom"
       (render-metrics
