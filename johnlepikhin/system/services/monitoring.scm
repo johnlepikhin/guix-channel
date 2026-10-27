@@ -776,8 +776,9 @@ alerts repeat more often than warnings.")))
                         (default '()))
   (dashboards           grafana-configuration-dashboards
                         (default (list %grafana-node-exporter-dashboard)))
+  ;; Grafana 13 settles at about 450 MB with a few dashboards.
   (memory               grafana-configuration-memory
-                        (default "512m")))
+                        (default "1g")))
 
 (define %grafana-admin-password-path "/run/secrets/admin-password")
 (define %grafana-provisioning-path "/etc/grafana/provisioning")
