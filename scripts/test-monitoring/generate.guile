@@ -1,3 +1,5 @@
+;;; Not a .scm file: guix pull compiles, and so runs, every .scm file of
+;;; the channel.
 ;;; Write the inputs of scripts/test-monitoring.sh into the directory given
 ;;; as the argument: the rule libraries with fixed parameters, and the
 ;;; metrics the textfile collectors produce from the recorded fixtures.

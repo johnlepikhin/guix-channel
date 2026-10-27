@@ -20,7 +20,7 @@ image=$(sed -n 's/^  "\(quay.io\/prometheus\/prometheus:[^"]*\)")$/\1/p' \
             "$channel_dir/johnlepikhin/system/services/monitoring.scm")
 [ -n "$image" ] || { echo "no Prometheus image found" >&2; exit 1; }
 
-guix repl -L "$channel_dir" -- "$tests/generate.scm" "$work"
+guix repl -L "$channel_dir" -- "$tests/generate.guile" "$work"
 cp "$tests/rules-test.yml" "$work/"
 
 # The checks, run in a directory holding the generated files.
