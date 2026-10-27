@@ -33,6 +33,7 @@
   #:use-module (gnu services networking)           ; ntp
   #:use-module (gnu services ssh)
   #:use-module (guix gexp)
+  #:use-module (json)
   #:use-module (johnlepikhin system services common)
   #:export (%server-substitute-urls
             make-server-services))
@@ -68,13 +69,16 @@
           (authorized-keys (list nonguix-signing-key bordeaux-signing-key))
           (substitute-urls %server-substitute-urls)
           (channels #f)
-          (guix-extra-options '()))
+          (guix-extra-options '())
+          (docker-daemon-settings '()))
   "Return the base services of a build server.  SSH-AUTHORIZED-KEYS is an
 alist of user names to lists of public key files, as in
 @code{openssh-configuration}; logins are by key only.  AUTHORIZED-KEYS and
 SUBSTITUTE-URLS configure substitutes.  CHANNELS, when true, is written to
 /etc/guix/channels.scm.  GUIX-EXTRA-OPTIONS are passed to guix-daemon, e.g.
-@code{\"--max-jobs=4\"}."
+@code{\"--max-jobs=4\"}.  DOCKER-DAEMON-SETTINGS, an alist, goes to dockerd's
+daemon.json, e.g. @code{'((\"live-restore\" . #t))}; dockerd reads it only
+when it starts."
   (cons*
    (service openssh-service-type
             (openssh-configuration
@@ -86,7 +90,13 @@ SUBSTITUTE-URLS configure substitutes.  CHANNELS, when true, is written to
    (service dbus-root-service-type)
    (service elogind-service-type)
    (service containerd-service-type)
-   (service docker-service-type)
+   (service docker-service-type
+            (if (null? docker-daemon-settings)
+                (docker-configuration)
+                (docker-configuration
+                 (config-file
+                  (plain-file "daemon.json"
+                              (scm->json-string docker-daemon-settings))))))
 
    ;; Announces guix publish on the local network.
    (service avahi-service-type)
