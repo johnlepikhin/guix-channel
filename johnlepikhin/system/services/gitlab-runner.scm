@@ -91,6 +91,11 @@
                     (default 4))
   (check-interval   gitlab-runner-configuration-check-interval
                     (default 3))
+  ;; Address of the Prometheus metrics endpoint, e.g. "127.0.0.1:9252";
+  ;; #f disables it.  The endpoint also serves debug data, so keep it off
+  ;; public interfaces.
+  (listen-address   gitlab-runner-configuration-listen-address
+                    (default #f))
   ;; Seconds to wait for running jobs when the service stops.  The runner is
   ;; sent SIGQUIT, on which it takes no new jobs and lets the running ones
   ;; finish; jobs still running after this are killed.
@@ -163,7 +168,10 @@
       (toml-pairs
        `(("concurrent" . ,(gitlab-runner-configuration-concurrent config))
          ("check_interval"
-          . ,(gitlab-runner-configuration-check-interval config))))
+          . ,(gitlab-runner-configuration-check-interval config))
+         ,@(match (gitlab-runner-configuration-listen-address config)
+             (#f '())
+             (address `(("listen_address" . ,address))))))
       (string-concatenate
        (map serialize-runner runners (iota (length runners))))))))
 
