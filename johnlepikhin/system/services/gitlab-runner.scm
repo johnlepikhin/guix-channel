@@ -28,13 +28,16 @@
 (define-module (johnlepikhin system services gitlab-runner)
   #:use-module (gnu packages admin)                ; shadow
   #:use-module (gnu services)
+  #:use-module (gnu services mcron)
   #:use-module (gnu services shepherd)
   #:use-module (gnu system shadow)
   #:use-module (guix gexp)
   #:use-module (guix records)
   #:use-module (ice-9 match)
   #:use-module (johnlepikhin packages gitlab-runner)
-  #:export (gitlab-runner-docker-configuration
+  #:export (gitlab-runner-cache-janitor
+            gitlab-runner-cache-janitor?
+            gitlab-runner-docker-configuration
             gitlab-runner-docker-configuration?
             gitlab-runner-instance
             gitlab-runner-instance?
@@ -80,8 +83,27 @@
   ;; upstream's default of 1 a burst of jobs starts one poll at a time.
   (request-concurrency gitlab-runner-instance-request-concurrency
                        (default 3))
+  ;; "NAME=VALUE" strings set in every job, below the job's own variables.
+  (environment gitlab-runner-instance-environment
+               (default '()))
   (docker      gitlab-runner-instance-docker
                (default (gitlab-runner-docker-configuration))))
+
+;; Cleanup of a host directory that jobs fill, such as one mounted as their
+;; /cache: files unread for MAX-AGE-DAYS go, then the least recently read
+;; ones until the directory fits in QUOTA-GB.  Read times come from atime,
+;; which relatime updates at least daily.
+(define-record-type* <gitlab-runner-cache-janitor>
+  gitlab-runner-cache-janitor
+  make-gitlab-runner-cache-janitor
+  gitlab-runner-cache-janitor?
+  (directory     gitlab-runner-cache-janitor-directory)   ;string
+  (max-age-days  gitlab-runner-cache-janitor-max-age-days
+                 (default 14))
+  (quota-gb      gitlab-runner-cache-janitor-quota-gb
+                 (default 50))
+  (schedule      gitlab-runner-cache-janitor-schedule
+                 (default "30 4 * * *")))
 
 (define-record-type* <gitlab-runner-configuration>
   gitlab-runner-configuration
@@ -108,6 +130,10 @@
   (stop-timeout     gitlab-runner-configuration-stop-timeout
                     (default 600))
   (runners          gitlab-runner-configuration-runners  ;list of instances
+                    (default '()))
+  ;; Cleanup of host directories mounted into jobs; see
+  ;; <gitlab-runner-cache-janitor>.
+  (cache-janitors   gitlab-runner-configuration-cache-janitors
                     (default '())))
 
 
@@ -156,7 +182,10 @@
         ("executor" . "docker")
         ("limit" . ,(gitlab-runner-instance-limit runner))
         ("request_concurrency"
-         . ,(gitlab-runner-instance-request-concurrency runner))))
+         . ,(gitlab-runner-instance-request-concurrency runner))
+        ,@(match (gitlab-runner-instance-environment runner)
+            (() '())
+            (environment `(("environment" . ,environment))))))
      "\n[runners.docker]\n"
      (toml-pairs
       `(("image" . ,(gitlab-runner-docker-configuration-image docker))
@@ -253,7 +282,10 @@
             (user (getpwnam #$(gitlab-runner-configuration-user config))))
         (mkdir-p directory)
         (chown directory (passwd:uid user) (passwd:gid user))
-        (chmod directory #o700))))
+        (chmod directory #o700))
+      (for-each mkdir-p
+                '#$(map gitlab-runner-cache-janitor-directory
+                        (gitlab-runner-configuration-cache-janitors config)))))
 
 (define (gitlab-runner-shepherd-service config)
   (let ((user (gitlab-runner-configuration-user config))
@@ -286,6 +318,69 @@
                     #:grace-period
                     #$(gitlab-runner-configuration-stop-timeout config)))))))
 
+;;;
+;;; Cache cleanup.
+;;;
+
+(define (cache-janitor-program janitor)
+  (match-record janitor <gitlab-runner-cache-janitor>
+    (directory max-age-days quota-gb)
+    (program-file
+     "gitlab-runner-cache-janitor"
+     (with-imported-modules '((guix build utils))
+       #~(begin
+           (use-modules (guix build utils)
+                        (srfi srfi-1)
+                        (srfi srfi-11))
+           (define root #$directory)
+           (define deadline (- (current-time) (* #$max-age-days 86400)))
+           (define quota (* #$quota-gb 1024 1024 1024))
+           (define (entry file)
+             (let ((st (lstat file)))
+               (list file (stat:atime st) (stat:size st))))
+           (define (remove! entries)
+             (for-each (lambda (e) (false-if-exception (delete-file (car e))))
+                       entries))
+           (define (sum entries) (reduce + 0 (map third entries)))
+           (when (file-exists? root)
+             (let*-values (((files) (map entry (find-files root)))
+                           ((stale fresh)
+                            (partition (lambda (e) (< (second e) deadline))
+                                       files)))
+               (remove! stale)
+               ;; Least recently read first, until the rest fits.
+               (let loop ((entries (sort fresh (lambda (a b)
+                                                 (< (second a) (second b)))))
+                          (total (sum fresh))
+                          (evicted 0))
+                 (if (and (pair? entries) (> total quota))
+                     (begin
+                       (remove! (list (car entries)))
+                       (loop (cdr entries) (- total (third (car entries)))
+                             (+ evicted 1)))
+                     (format #t "~a: removed ~a stale and ~a files over the \
+quota; ~,1f GiB left~%"
+                             root (length stale) evicted
+                             (/ total 1024. 1024. 1024.))))
+               ;; Empty directories, deepest first; the root stays.
+               (for-each (lambda (dir)
+                           (false-if-exception (rmdir dir)))
+                         (sort (find-files root
+                                           (lambda (file stat)
+                                             (and (eq? 'directory
+                                                       (stat:type stat))
+                                                  (not (string=? file root))))
+                                           #:directories? #t)
+                               (lambda (a b)
+                                 (> (string-length a)
+                                    (string-length b))))))))))))
+
+(define (gitlab-runner-mcron-jobs config)
+  (map (lambda (janitor)
+         #~(job #$(gitlab-runner-cache-janitor-schedule janitor)
+                #$(cache-janitor-program janitor)))
+       (gitlab-runner-configuration-cache-janitors config)))
+
 (define gitlab-runner-service-type
   (service-type
    (name 'gitlab-runner)
@@ -296,6 +391,8 @@
                              gitlab-runner-activation)
           (service-extension shepherd-root-service-type
                              gitlab-runner-shepherd-service)
+          (service-extension mcron-service-type
+                             gitlab-runner-mcron-jobs)
           (service-extension profile-service-type
                              (compose list
                                       gitlab-runner-configuration-package))))
