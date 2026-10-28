@@ -51,6 +51,12 @@
                 (default "alpine:latest"))
   (privileged?  gitlab-runner-docker-configuration-privileged?
                 (default #f))
+  ;; Run only the services whose images match these wildcards, such as
+  ;; "docker:*-dind", privileged, leaving the job containers unprivileged.
+  ;; A job can still reach the host through such a service, so this trusts
+  ;; everyone who can run pipelines on the runner.
+  (privileged-services  gitlab-runner-docker-configuration-privileged-services
+                        (default '()))
   (volumes      gitlab-runner-docker-configuration-volumes
                 (default '("/cache")))
   (pull-policy  gitlab-runner-docker-configuration-pull-policy
@@ -156,6 +162,11 @@
       `(("image" . ,(gitlab-runner-docker-configuration-image docker))
         ("privileged"
          . ,(gitlab-runner-docker-configuration-privileged? docker))
+        ,@(match (gitlab-runner-docker-configuration-privileged-services
+                  docker)
+            (() '())
+            (images `(("services_privileged" . #t)
+                      ("allowed_privileged_services" . ,images))))
         ("volumes" . ,(gitlab-runner-docker-configuration-volumes docker))
         ("pull_policy"
          . ,(gitlab-runner-docker-configuration-pull-policy docker)))))))
