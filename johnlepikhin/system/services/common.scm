@@ -25,6 +25,7 @@
   #:export (nonguix-signing-key
             bordeaux-signing-key
             make-guix-gc-job
+            make-system-generations-job
             guix-gc-job
             fstrim-job
             prefer-ipv4-service))
@@ -60,6 +61,16 @@ profile generations matching it."
                               ""))))
 
 (define guix-gc-job (make-guix-gc-job))
+
+(define* (make-system-generations-job #:key
+                                      (schedule "20 12,18 * * *")
+                                      (pattern "1m"))
+  "Return an mcron job deleting the system generations matching PATTERN,
+such as \"1m\", with `guix system delete-generations', which also drops
+them from the boot menu; `guix gc -d' alone would leave entries pointing
+at deleted generations."
+  #~(job #$schedule
+         #$(string-append "guix system delete-generations " pattern)))
 
 ;; trim free blocks on SSD.  mcron's PATH has no sbin directory.
 (define fstrim-job

@@ -165,7 +165,8 @@
 (define* (tuned-desktop-services #:key (authorized-keys '())
                                  (substitute-urls '())
                                  (dnsmasq-configuration-files '())
-                                 (sleep-hooks '()))
+                                 (sleep-hooks '())
+                                 (gc-keep-outputs? #t))
   (cons* (modify-services %desktop-services
            (gdm-service-type config =>
                              (gdm-configuration (inherit config)
@@ -179,8 +180,10 @@
                                                   (substitute-urls substitute-urls)
                                                   (discover? #t)
                                                   (extra-options
-                                                   (list "--gc-keep-derivations=yes"
-                                                         "--gc-keep-outputs=yes"))
+                                                   (if gc-keep-outputs?
+                                                       (list "--gc-keep-derivations=yes"
+                                                             "--gc-keep-outputs=yes")
+                                                       '()))
                                                   (authorized-keys (append
                                                                     authorized-keys
                                                                     %default-authorized-guix-keys))))
@@ -246,7 +249,15 @@
                                ;; Extra entries for NetworkManager's dnsmasq,
                                ;; as (NAME FILE-LIKE).
                                (dnsmasq-configuration-files '())
-                               (sleep-hooks '()))
+                               (sleep-hooks '())
+                               ;; Garbage collection: see `make-guix-gc-job'.
+                               (gc-job guix-gc-job)
+                               ;; Whether the store keeps the build-time
+                               ;; dependencies of what it holds.  A machine
+                               ;; with a substitute server nearby can let
+                               ;; them go and fetch them again when needed.
+                               (gc-keep-outputs? #t)
+                               (extra-mcron-jobs '()))
   (cons*
 
          (set-xorg-configuration
@@ -309,8 +320,9 @@
                                       "tlp" "start")))
                "\"\n")))
          (service mcron-service-type
-                  (mcron-configuration (jobs (list guix-pull-job guix-gc-job
-                                                   fstrim-job))))
+                  (mcron-configuration (jobs (cons* guix-pull-job gc-job
+                                                    fstrim-job
+                                                    extra-mcron-jobs))))
          (service cups-service-type
                   (cups-configuration (default-language "en")
                                       (web-interface? #t)
@@ -353,4 +365,5 @@
                                  #:substitute-urls substitute-urls
                                  #:dnsmasq-configuration-files
                                  dnsmasq-configuration-files
-                                 #:sleep-hooks sleep-hooks)))
+                                 #:sleep-hooks sleep-hooks
+                                 #:gc-keep-outputs? gc-keep-outputs?)))
