@@ -324,12 +324,19 @@ mode 0400~%" file #$uid)))))
   (sample-limit     prometheus-scrape-job-sample-limit
                     (default 20000))
   (relabel-configs  prometheus-scrape-job-relabel-configs ;alists
-                    (default '())))
+                    (default '()))
+  ;; Secret host file with a bearer token for the target, e.g. a Home
+  ;; Assistant long-lived access token; owned by the Prometheus user, 0400.
+  (credentials-file prometheus-scrape-job-credentials-file
+                    (default #f)))
+
+(define (scrape-job-credentials-path job)
+  (string-append "/run/secrets/scrape-" (prometheus-scrape-job-name job)))
 
 (define (scrape-job->json job)
   (match-record job <prometheus-scrape-job>
     (name targets metrics-path params interval timeout labels sample-limit
-          relabel-configs)
+          relabel-configs credentials-file)
     (let ((plain (filter string? targets))
           (labelled (filter pair? targets)))
       `(("job_name" . ,name)
@@ -359,7 +366,12 @@ mode 0400~%" file #$uid)))))
                    labelled))))
         ,@(if (null? relabel-configs)
               '()
-              `(("relabel_configs" . ,(list->vector relabel-configs))))))))
+              `(("relabel_configs" . ,(list->vector relabel-configs))))
+        ,@(if credentials-file
+              `(("authorization"
+                 ("type" . "Bearer")
+                 ("credentials_file" . ,(scrape-job-credentials-path job))))
+              '())))))
 
 (define* (blackbox-scrape-job name module targets
                               #:key (exporter "127.0.0.1:9115")
@@ -486,7 +498,15 @@ Each target becomes the instance label of its probe."
                  . ,(string-append %prometheus-config-path ":ro"))
                 (,(prometheus-rules-file config)
                  . ,(string-append %prometheus-rules-path ":ro"))
-                (,data-directory . "/prometheus")))
+                (,data-directory . "/prometheus")
+                ,@(filter-map
+                   (lambda (job)
+                     (let ((file (prometheus-scrape-job-credentials-file job)))
+                       (and file
+                            (cons file
+                                  (string-append
+                                   (scrape-job-credentials-path job) ":ro")))))
+                   (prometheus-configuration-scrape-jobs config))))
              (command
               (list (string-append "--config.file=" %prometheus-config-path)
                     "--storage.tsdb.path=/prometheus"
@@ -498,8 +518,15 @@ Each target becomes the instance label of its probe."
              (extra-arguments (list "--memory" memory))))))))
 
 (define (prometheus-activation config)
-  (match-record config <prometheus-configuration> (data-directory uid gid)
-    (data-directory-activation data-directory uid gid)))
+  (match-record config <prometheus-configuration>
+    (data-directory uid gid scrape-jobs)
+    #~(begin
+        #$(data-directory-activation data-directory uid gid)
+        #$@(filter-map (lambda (job)
+                         (let ((file (prometheus-scrape-job-credentials-file
+                                      job)))
+                           (and file (secret-file-check file uid))))
+                       scrape-jobs))))
 
 (define (prometheus-extend config extensions)
   (prometheus-configuration
