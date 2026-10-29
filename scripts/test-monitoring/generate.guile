@@ -6,6 +6,7 @@
 
 (use-modules (johnlepikhin system services monitoring)
              (johnlepikhin system services monitoring textfile)
+             (johnlepikhin system services restic maintenance)
              (guix gexp)
              (ice-9 textual-ports))
 
@@ -32,7 +33,10 @@
                            (network-alert-rules
                             #:uplinks '(("jet" "pppoe-out1")
                                         ("starlink" "ether2"))
-                            #:router-ports '(("ether2" . 1000)))))))
+                            #:router-ports '(("ether2" . 1000)))
+                           (backup-alert-rules
+                            #:repositories '(("laptop/home" . "2d"))
+                            #:storage-bytes 1e12)))))
 
 (spit "shepherd.prom"
       (render-metrics
@@ -42,3 +46,8 @@
 (spit "smart.prom"
       (render-metrics
        (smartctl-metrics "/dev/nvme0" (slurp "smartctl-nvme.json") 0)))
+
+(spit "restic-freshness.prom"
+      (render-metrics
+       (freshness-metrics '(("laptop/home" . 1793246400)
+                            ("windows/users" . #f)))))

@@ -20,7 +20,9 @@
   #:use-module (guix gexp)
   #:use-module (guix records)
   #:use-module (gnu services shepherd)
-  #:export (make-simple-shepherd-service))
+  #:export (make-simple-shepherd-service
+            data-directory-activation
+            secret-file-check))
 
 (define* (make-simple-shepherd-service
           #:key
@@ -55,3 +57,37 @@ Returns:
              (list #$(file-append package binary-path)
                    #$@arguments)))
    (stop #~(make-kill-destructor))))
+
+(define (owner-ids user group)
+  "A gexp evaluating to the pair of numeric ids of USER and GROUP, each a
+number or, for accounts created on the host, a name."
+  #~(cons (let ((user #$user))
+            (if (string? user) (passwd:uid (getpwnam user)) user))
+          (let ((group #$group))
+            (if (string? group) (group:gid (getgrnam group)) group))))
+
+(define (data-directory-activation directory user group)
+  "A gexp creating DIRECTORY owned by USER and GROUP, numbers or names, with
+mode 0700."
+  #~(begin
+      (use-modules (guix build utils))
+      (let ((ids #$(owner-ids user group)))
+        (mkdir-p #$directory)
+        (chown #$directory (car ids) (cdr ids))
+        (chmod #$directory #o700))))
+
+(define (secret-file-check file user)
+  "Warn when the secret FILE is missing, or readable by others than USER, a
+number or a name."
+  #~(let ((file #$file)
+          (uid (car #$(owner-ids user 0))))
+      (cond ((not (file-exists? file))
+             (format (current-error-port)
+                     "warning: secret file ~a is missing; its service will \
+not start~%" file))
+            ((let ((st (stat file)))
+               (or (not (= (stat:uid st) uid))
+                   (not (zero? (logand (stat:perms st) #o077)))))
+             (format (current-error-port)
+                     "warning: secret file ~a must belong to uid ~a and have \
+mode 0400~%" file uid)))))

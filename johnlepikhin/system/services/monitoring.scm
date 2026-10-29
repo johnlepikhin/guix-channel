@@ -56,6 +56,7 @@
   #:use-module (guix records)
   #:use-module (ice-9 match)
   #:use-module (ice-9 regex)
+  #:use-module (johnlepikhin system services utils)
   #:use-module (json)
   #:use-module (srfi srfi-1)
   #:export (alert-rule
@@ -90,6 +91,8 @@
 
             blackbox-exporter-configuration
             blackbox-exporter-configuration?
+            blackbox-http-module
+            blackbox-http-module?
             blackbox-exporter-service-type
 
             mktxp-router
@@ -117,7 +120,8 @@
             service-alert-rules
             stack-alert-rules
             network-alert-rules
-            log-alert-rules))
+            log-alert-rules
+            backup-alert-rules))
 
 
 ;;;
@@ -180,27 +184,6 @@ symlinks, so that it can be mounted into a container on its own."
                    (list #$@(map (match-lambda
                                    ((path . file) #~(cons #$path #$file)))
                                  files)))))))
-
-(define (data-directory-activation directory uid gid)
-  #~(begin
-      (use-modules (guix build utils))
-      (mkdir-p #$directory)
-      (chown #$directory #$uid #$gid)
-      (chmod #$directory #o700)))
-
-(define (secret-file-check file uid)
-  "Warn when the secret FILE is missing or readable by others than UID."
-  #~(let ((file #$file))
-      (cond ((not (file-exists? file))
-             (format (current-error-port)
-                     "warning: secret file ~a is missing; its service will \
-not start~%" file))
-            ((let ((st (stat file)))
-               (or (not (= (stat:uid st) #$uid))
-                   (not (zero? (logand (stat:perms st) #o077)))))
-             (format (current-error-port)
-                     "warning: secret file ~a must belong to uid ~a and have \
-mode 0400~%" file #$uid)))))
 
 (define (container-user uid gid)
   (string-append (number->string uid) ":" (number->string gid)))
@@ -328,15 +311,55 @@ mode 0400~%" file #$uid)))))
   ;; Secret host file with a bearer token for the target, e.g. a Home
   ;; Assistant long-lived access token; owned by the Prometheus user, 0400.
   (credentials-file prometheus-scrape-job-credentials-file
+                    (default #f))
+  ;; "https" for targets that serve TLS.
+  (scheme           prometheus-scrape-job-scheme
+                    (default #f))
+  ;; File-like CA certificate the targets' certificates are checked with.
+  (ca-file          prometheus-scrape-job-ca-file
+                    (default #f))
+  ;; #f, or a user name and a secret host file with its password, for
+  ;; basic authentication; the file is owned by the Prometheus user, 0400.
+  (basic-auth       prometheus-scrape-job-basic-auth
                     (default #f)))
 
 (define (scrape-job-credentials-path job)
   (string-append "/run/secrets/scrape-" (prometheus-scrape-job-name job)))
 
+(define (scrape-job-ca-path job)
+  (string-append "/run/secrets/scrape-" (prometheus-scrape-job-name job)
+                 "-ca.crt"))
+
+(define (scrape-job-password-path job)
+  (string-append "/run/secrets/scrape-" (prometheus-scrape-job-name job)
+                 "-password"))
+
+(define (scrape-job-secret-files job)
+  "The secret host files of JOB."
+  (filter identity
+          (list (prometheus-scrape-job-credentials-file job)
+                (match (prometheus-scrape-job-basic-auth job)
+                  ((_ . file) file)
+                  (#f #f)))))
+
+(define (scrape-job-volumes job)
+  "The host files of JOB and where its container sees them."
+  (filter-map
+   (match-lambda
+     ((#f . _) #f)
+     ((file . path) (cons file (string-append path ":ro"))))
+   `((,(prometheus-scrape-job-credentials-file job)
+      . ,(scrape-job-credentials-path job))
+     (,(prometheus-scrape-job-ca-file job) . ,(scrape-job-ca-path job))
+     (,(match (prometheus-scrape-job-basic-auth job)
+         ((_ . file) file)
+         (#f #f))
+      . ,(scrape-job-password-path job)))))
+
 (define (scrape-job->json job)
   (match-record job <prometheus-scrape-job>
     (name targets metrics-path params interval timeout labels sample-limit
-          relabel-configs credentials-file)
+          relabel-configs credentials-file scheme ca-file basic-auth)
     (let ((plain (filter string? targets))
           (labelled (filter pair? targets)))
       `(("job_name" . ,name)
@@ -371,7 +394,17 @@ mode 0400~%" file #$uid)))))
               `(("authorization"
                  ("type" . "Bearer")
                  ("credentials_file" . ,(scrape-job-credentials-path job))))
-              '())))))
+              '())
+        ,@(if scheme `(("scheme" . ,scheme)) '())
+        ,@(if ca-file
+              `(("tls_config" ("ca_file" . ,(scrape-job-ca-path job))))
+              '())
+        ,@(match basic-auth
+            (#f '())
+            ((user . _)
+             `(("basic_auth"
+                ("username" . ,user)
+                ("password_file" . ,(scrape-job-password-path job))))))))))
 
 (define* (blackbox-scrape-job name module targets
                               #:key (exporter "127.0.0.1:9115")
@@ -499,14 +532,9 @@ Each target becomes the instance label of its probe."
                 (,(prometheus-rules-file config)
                  . ,(string-append %prometheus-rules-path ":ro"))
                 (,data-directory . "/prometheus")
-                ,@(filter-map
-                   (lambda (job)
-                     (let ((file (prometheus-scrape-job-credentials-file job)))
-                       (and file
-                            (cons file
-                                  (string-append
-                                   (scrape-job-credentials-path job) ":ro")))))
-                   (prometheus-configuration-scrape-jobs config))))
+                ,@(append-map scrape-job-volumes
+                              (prometheus-configuration-scrape-jobs
+                               config))))
              (command
               (list (string-append "--config.file=" %prometheus-config-path)
                     "--storage.tsdb.path=/prometheus"
@@ -522,11 +550,8 @@ Each target becomes the instance label of its probe."
     (data-directory uid gid scrape-jobs)
     #~(begin
         #$(data-directory-activation data-directory uid gid)
-        #$@(filter-map (lambda (job)
-                         (let ((file (prometheus-scrape-job-credentials-file
-                                      job)))
-                           (and file (secret-file-check file uid))))
-                       scrape-jobs))))
+        #$@(map (lambda (file) (secret-file-check file uid))
+                (append-map scrape-job-secret-files scrape-jobs)))))
 
 (define (prometheus-extend config extensions)
   (prometheus-configuration
@@ -937,7 +962,28 @@ datasources and dashboards.  Its own alerting is off.")))
                    (default "5s")
                    (sanitize (sanitize-duration "timeout")))
   (memory          blackbox-exporter-configuration-memory
-                   (default "128m")))
+                   (default "128m"))
+  ;; More HTTP modules, as <blackbox-http-module> records.
+  (extra-modules   blackbox-exporter-configuration-extra-modules
+                   (default '())))
+
+;; An HTTP probe module, e.g. for a service with a self-signed certificate,
+;; whose expiry the probe then reports as probe_ssl_earliest_cert_expiry.
+(define-record-type* <blackbox-http-module>
+  blackbox-http-module
+  make-blackbox-http-module
+  blackbox-http-module?
+  (name                blackbox-http-module-name)     ;string
+  ;; File-like CA certificate the target's certificate is checked with.
+  (ca-file             blackbox-http-module-ca-file
+                       (default #f))
+  ;; Status codes taken as success; empty means any 2xx.
+  (valid-status-codes  blackbox-http-module-valid-status-codes
+                       (default '())))
+
+(define (blackbox-module-ca-path module)
+  (string-append "/etc/blackbox_exporter/ca-"
+                 (blackbox-http-module-name module) ".crt"))
 
 (define %blackbox-exporter-config-path "/etc/blackbox_exporter/config.yml")
 
@@ -959,7 +1005,25 @@ datasources and dashboards.  Its own alerting is off.")))
         ("icmp"
          ("prober" . "icmp")
          ("timeout" . ,timeout)
-         ("icmp" ("preferred_ip_protocol" . "ip4"))))))))
+         ("icmp" ("preferred_ip_protocol" . "ip4")))
+        ,@(map (lambda (module)
+                 (match-record module <blackbox-http-module>
+                   (name ca-file valid-status-codes)
+                   `(,name
+                     ("prober" . "http")
+                     ("timeout" . ,timeout)
+                     ("http"
+                      ("preferred_ip_protocol" . "ip4")
+                      ,@(if (null? valid-status-codes)
+                            '()
+                            `(("valid_status_codes"
+                               . ,(list->vector valid-status-codes))))
+                      ,@(if ca-file
+                            `(("tls_config"
+                               ("ca_file"
+                                . ,(blackbox-module-ca-path module))))
+                            '())))))
+               (blackbox-exporter-configuration-extra-modules config)))))))
 
 (define (blackbox-exporter-oci-extension config)
   (match-record config <blackbox-exporter-configuration>
@@ -976,7 +1040,14 @@ datasources and dashboards.  Its own alerting is off.")))
              (log-file "/var/log/blackbox-exporter.log")
              (volumes
               `((,(blackbox-exporter-config-file config)
-                 . ,(string-append %blackbox-exporter-config-path ":ro"))))
+                 . ,(string-append %blackbox-exporter-config-path ":ro"))
+                ,@(filter-map
+                   (lambda (module)
+                     (and (blackbox-http-module-ca-file module)
+                          (cons (blackbox-http-module-ca-file module)
+                                (string-append
+                                 (blackbox-module-ca-path module) ":ro"))))
+                   (blackbox-exporter-configuration-extra-modules config))))
              (command
               (list (string-append "--config.file="
                                    %blackbox-exporter-config-path)
@@ -1632,10 +1703,10 @@ host to Loki.  Its log of the last read positions survives restarts.")))
             '#$(node-textfile-collectors-configuration-smart-devices
                 config)))))))
 
-;; Collection intervals, in seconds; `service-alert-rules' takes a
-;; collector as stale after three of them.
+;; Collection interval of the shepherd collector, in seconds;
+;; `service-alert-rules' takes it as stale after three of them.  The others
+;; publish their own textfile_collector_max_age_seconds.
 (define %shepherd-collector-interval 60)
-(define %smart-collector-interval 300)
 
 (define (node-textfile-collectors-mcron-jobs config)
   (append
@@ -1846,15 +1917,21 @@ is down"))
        (summary "Service states are not collected: check mcron"))
       (alert-rule
        (alert "TextfileCollectorFailing")
-       (expr (string-append
-              "textfile_collector_success{collector!=\"shepherd\"} == 0"
-              " or time() - textfile_collector_last_run_timestamp_seconds"
-              "{collector!=\"shepherd\"} > "
-              (number->string (* 3 %smart-collector-interval))
-              " or node_textfile_scrape_error == 1"))
+       ;; Each collector publishes how old its output may get.
+       (expr "textfile_collector_success{collector!=\"shepherd\"} == 0 \
+or (time() - textfile_collector_last_run_timestamp_seconds\
+{collector!=\"shepherd\"}) > on (instance, collector) \
+textfile_collector_max_age_seconds or node_textfile_scrape_error == 1")
        (for "10m")
        (category "monitoring")
        (summary "Textfile collector {{ $labels.collector }} fails"))
+      (alert-rule
+       (alert "CertificateExpiring")
+       (expr "probe_ssl_earliest_cert_expiry - time() < 60 * 86400")
+       (for "1h")
+       (category "services")
+       (summary "Certificate of {{ $labels.instance }} expires in \
+{{ $value | humanizeDuration }}"))
       (alert-rule
        (alert "RunnerErrors")
        (expr (string-append
@@ -2038,3 +2115,78 @@ prevent it"))
          (category "services")
          (summary "Shepherd disabled {{ $labels.service }}, which kept \
 failing"))))))))
+
+(define* (backup-alert-rules #:key (repositories '()) (storage-bytes #f))
+  "Return alert groups for restic repositories kept by
+`restic-maintenance-service-type'.  REPOSITORIES is an alist of repository
+names, such as \"laptop/home\", to the age, a Prometheus duration such as
+\"2d\", after which their newest snapshot counts as stale.
+STORAGE-BYTES, when a number, bounds the size of all of them together."
+  (let ((n number->config-string))
+    (list
+     (alert-rule-group
+      (name "backups")
+      (rules
+       (append
+        (map (match-lambda
+               ((repository . age)
+                (let ((selector (string-append "{repository=\""
+                                               repository "\"}")))
+                  (alert-rule
+                   (alert "BackupStale")
+                   ;; absent() catches a repository that never got a
+                   ;; snapshot, or whose directory went away.
+                   (expr (string-append
+                          "time() - max("
+                          "restic_repository_snapshot_mtime_seconds"
+                          selector ") > " (n (duration->seconds age))
+                          " or absent(restic_repository_snapshot_mtime_seconds"
+                          selector ")"))
+                   (for "30m")
+                   (category "backups")
+                   (labels `(("repository" . ,repository)))
+                   (summary (string-append "No new backup in " repository
+                                           " for more than " age))))))
+             repositories)
+        (list
+         (alert-rule
+          (alert "BackupFutureSnapshots")
+          (expr "restic_repository_future_snapshots > 0")
+          (severity 'critical)
+          (category "backups")
+          (summary "{{ $labels.repository }} has {{ $value }} snapshots \
+dated in the future: forgetting is stopped; check the client's clock or a \
+compromised client"))
+         (alert-rule
+          (alert "BackupMaintenanceFailing")
+          (expr "restic_maintenance_success == 0")
+          (category "backups")
+          (summary "Backup maintenance of {{ $labels.repository }} fails at \
+{{ $labels.step }}: see /var/log/mcron.log")))
+        (if storage-bytes
+            (list (alert-rule
+                   (alert "BackupStorageLarge")
+                   (expr (string-append
+                          "sum(restic_repository_size_bytes) > "
+                          (n storage-bytes)))
+                   (category "backups")
+                   (summary "Backups take {{ $value | humanize1024 }}B")))
+            '())))))))
+
+(define (duration->seconds duration)
+  "Seconds in DURATION, a Prometheus duration such as \"2d\" or \"36h\"."
+  (let loop ((parts (map (lambda (m)
+                           (cons (string->number (match:substring m 1))
+                                 (match:substring m 2)))
+                         (list-matches "([0-9]+)(ms|s|m|h|d|w|y)" duration)))
+             (total 0))
+    (match parts
+      (() total)
+      (((count . unit) . rest)
+       (loop rest
+             (+ total
+                (* count
+                   (assoc-ref '(("ms" . 1/1000) ("s" . 1) ("m" . 60)
+                                ("h" . 3600) ("d" . 86400) ("w" . 604800)
+                                ("y" . 31536000))
+                              unit))))))))

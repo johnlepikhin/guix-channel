@@ -92,6 +92,18 @@
      . "Whether the last run of the textfile collector succeeded.")
     ("textfile_collector_last_run_timestamp_seconds"
      . "When the textfile collector last ran.")
+    ("textfile_collector_max_age_seconds"
+     . "How old the output of the collector may get.")
+    ("restic_repository_snapshot_mtime_seconds"
+     . "Newest file in the snapshots directory of the repository.")
+    ("restic_maintenance_success"
+     . "Whether the last run of a maintenance step succeeded.")
+    ("restic_repository_snapshots" . "Snapshots in the repository.")
+    ("restic_repository_future_snapshots"
+     . "Snapshots dated beyond the allowed clock skew.")
+    ("restic_repository_newest_snapshot_timestamp_seconds"
+     . "Time of the newest snapshot that is not in the future.")
+    ("restic_repository_size_bytes" . "Size of the repository data.")
     ("shepherd_service_running"
      . "Whether the shepherd service is running.")
     ("smart_device_info" . "Model and firmware of the drive.")
@@ -263,10 +275,13 @@ status and standard output."
                             #\newline))
       '()))
 
-(define* (run-collector name directory thunk #:key (kept-metrics '()))
+(define* (run-collector name directory thunk
+                        #:key (kept-metrics '()) (max-age 900))
   "Write the metrics returned by THUNK to DIRECTORY/NAME.prom.  If THUNK
 raises an error, keep the lines of KEPT-METRICS from the previous file and
-report the failure.  Another run still holding the lock makes this a no-op."
+report the failure.  MAX-AGE, in seconds, is how old the file may get before
+the collector counts as stalled.  Another run still holding the lock makes
+this a no-op."
   (let ((lock (open-file (string-append directory "/." name ".lock") "a"))
         (file (string-append directory "/" name ".prom"))
         (tmp (string-append directory "/" name ".prom.tmp")))
@@ -285,6 +300,8 @@ report the failure.  Another run still holding the lock makes this a no-op."
                             `(("collector" . ,name)))
                     (metric "textfile_collector_last_run_timestamp_seconds"
                             (current-time)
+                            `(("collector" . ,name)))
+                    (metric "textfile_collector_max_age_seconds" max-age
                             `(("collector" . ,name))))))
         (call-with-output-file tmp
           (lambda (port)
@@ -310,7 +327,8 @@ report the failure.  Another run still holding the lock makes this a no-op."
            (unless (and (zero? status) (pair? started))
              (error "herd status failed" status))
            (shepherd-metrics started watched)))))
-   #:kept-metrics '("shepherd_service_running")))
+   #:kept-metrics '("shepherd_service_running")
+   #:max-age 180))
 
 (define (collect-smart directory smartctl timeout devices)
   (run-collector

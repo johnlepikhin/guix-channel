@@ -191,6 +191,92 @@ tests:
           - exp_labels: {severity: warning, category: network, name: ether2, routerboard_name: r}
             exp_annotations: {summary: "ether2 runs at 100 Mbit/s instead of 1000"}
 
+  # A backup older than its allowed age, and a repository with none.
+  - interval: 1m
+    input_series:
+      - series: 'restic_repository_snapshot_mtime_seconds{instance="h",repository="laptop/home"}'
+        values: '0x3100'
+    alert_rule_test:
+      - eval_time: 47h
+        alertname: BackupStale
+        exp_alerts: []
+      - eval_time: 50h
+        alertname: BackupStale
+        exp_alerts:
+          - exp_labels: {severity: warning, category: backups, repository: laptop/home}
+            exp_annotations: {summary: "No new backup in laptop/home for more than 2d"}
+
+  - interval: 1h
+    input_series: []
+    alert_rule_test:
+      - eval_time: 1h
+        alertname: BackupStale
+        exp_alerts:
+          - exp_labels: {severity: warning, category: backups, repository: laptop/home}
+            exp_annotations: {summary: "No new backup in laptop/home for more than 2d"}
+
+  # Forged or misdated snapshots stop the forgetting.
+  - interval: 1m
+    input_series:
+      - series: 'restic_repository_future_snapshots{instance="h",repository="laptop/home"}'
+        values: '1x5'
+      - series: 'restic_maintenance_success{instance="h",repository="laptop/home",step="sanity"}'
+        values: '0x5'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: BackupFutureSnapshots
+        exp_alerts:
+          - exp_labels: {severity: critical, category: backups, instance: h, repository: laptop/home}
+            exp_annotations: {summary: "laptop/home has 1 snapshots dated in the future: forgetting is stopped; check the client's clock or a compromised client"}
+      - eval_time: 2m
+        alertname: BackupMaintenanceFailing
+        exp_alerts:
+          - exp_labels: {severity: warning, category: backups, instance: h, repository: laptop/home, step: sanity}
+            exp_annotations: {summary: "Backup maintenance of laptop/home fails at sanity: see /var/log/mcron.log"}
+
+  - interval: 1m
+    input_series:
+      - series: 'restic_repository_size_bytes{instance="h",repository="laptop/home"}'
+        values: '6e11x5'
+      - series: 'restic_repository_size_bytes{instance="h",repository="windows/users"}'
+        values: '5e11x5'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: BackupStorageLarge
+        exp_alerts:
+          - exp_labels: {severity: warning, category: backups}
+            exp_annotations: {summary: "Backups take 1TiB"}
+
+  - interval: 1m
+    input_series:
+      - series: 'probe_ssl_earliest_cert_expiry{instance="https://h:8000/",job="probe-backup"}'
+        values: '3000000x100'
+    alert_rule_test:
+      - eval_time: 90m
+        alertname: CertificateExpiring
+        exp_alerts:
+          - exp_labels: {severity: warning, category: services, instance: "https://h:8000/", job: probe-backup}
+            exp_annotations: {summary: "Certificate of https://h:8000/ expires in 34d 15h 50m 0s"}
+
+  # A daily collector is fine at 20 hours old, stalled beyond its max age.
+  - interval: 1m
+    input_series:
+      - series: 'textfile_collector_success{instance="h",collector="restic-maintenance"}'
+        values: '1x3100'
+      - series: 'textfile_collector_last_run_timestamp_seconds{instance="h",collector="restic-maintenance"}'
+        values: '0x3100'
+      - series: 'textfile_collector_max_age_seconds{instance="h",collector="restic-maintenance"}'
+        values: '172800x3100'
+    alert_rule_test:
+      - eval_time: 20h
+        alertname: TextfileCollectorFailing
+        exp_alerts: []
+      - eval_time: 50h
+        alertname: TextfileCollectorFailing
+        exp_alerts:
+          - exp_labels: {severity: warning, category: monitoring, instance: h, collector: restic-maintenance}
+            exp_annotations: {summary: "Textfile collector restic-maintenance fails"}
+
   # The Watchdog always fires.
   - interval: 1m
     input_series: []
