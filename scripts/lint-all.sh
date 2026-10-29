@@ -5,8 +5,8 @@
 # `guix lint: error:` (load/parse/unknown-package).  Plain warnings
 # show up in the log but do not fail the run.
 #
-# `--no-network` skips CVE / URL-reachability checks; those hang on
-# sandboxed CI runners without delivering CI-blocking signal.
+# `--no-network` skips CVE / URL-reachability checks, which are slow and
+# report on the outside world rather than on the channel.
 #
 # Override JOBS=1 for sequential logs when debugging locally.
 set -eu

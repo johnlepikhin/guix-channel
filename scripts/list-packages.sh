@@ -30,7 +30,7 @@ cat > "$SCRIPT" <<'SCHEME'
 
 ;; Modules that don't define end-user packages: crate-source databases
 ;; (rust-crates), build/version helpers (rust*, python-xyz).  Excluded
-;; from the list so CI doesn't waste time linting them.
+;; from the list so lint-all.sh doesn't waste time linting them.
 (define excluded-modules
   '((johnlepikhin packages rust-crates)
     (johnlepikhin packages rust)

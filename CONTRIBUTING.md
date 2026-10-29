@@ -22,8 +22,6 @@ johnlepikhin/
 
 scripts/           ← lint/build helpers, not part of the channel
                      surface.  See "Why scripts/ are tricky" below.
-
-.github/workflows/ ← CI
 ```
 
 ## Adding a new package
@@ -80,15 +78,19 @@ If you need a new helper that's actual Scheme, either:
   driver — but be aware that top-level forms in a `(define-module ...)`
   file still run when something `(use-modules ...)` it.
 
-## CI
+## Checks
 
-GitHub Actions (`.github/workflows/ci.yml`) installs Ubuntu's `guix`
-package and runs `scripts/lint-all.sh` in parallel on each push / PR.
-Real `guix build`s are *not* run in CI — heavyweights (`openvino`,
-`onnxruntime`, `intel-graphics-compiler`) need substitutes the CI can't
-provide.  The build matrix happens on the maintainer's laptop and is
-published via the channel's substitute server (see the OpenVINO plan
-in `~/.claude/plans/`).
+There is no CI.  The channel needs the current Guix and Nonguix, which
+hosted runners do not have: the Guix package of Ubuntu is years older
+and has no Nonguix, so every run there failed to load the modules.
+Checks run locally, against the channels of `guix describe`:
+
+* `scripts/lint-all.sh` — `guix lint` over every package, in parallel.
+* `scripts/test-monitoring.sh [SSH-HOST]` — the monitoring rule tests
+  and textfile collectors, with promtool in a container.
+
+Real `guix build`s of the heavyweights (`openvino`, `onnxruntime`,
+`intel-graphics-compiler`) happen on the maintainer's machines.
 
 ## Recurring patterns to know
 
