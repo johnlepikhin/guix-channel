@@ -1,0 +1,155 @@
+;;; Not a .scm file: guix pull compiles, and so runs, every .scm file of
+;;; the channel.
+;;;
+;;; Unit tests of the backup modules: the selection contract and the restic
+;;; wrapper of (johnlepikhin home restic selection), and the parsers of
+;;; (johnlepikhin system services restic maintenance).
+;;;
+;;; Usage: guix repl -L . -- scripts/test-backup.guile
+
+(use-modules (johnlepikhin home restic selection)
+             (johnlepikhin system services restic maintenance)
+             (johnlepikhin system services monitoring textfile)
+             (ice-9 ftw)
+             (ice-9 match)
+             (ice-9 textual-ports))
+
+(define failures 0)
+(define checks 0)
+
+(define-syntax-rule (check name expr)
+  (begin
+    (set! checks (+ checks 1))
+    (if (catch #t (lambda () expr) (lambda _ #f))
+        (format #t "  ok    ~a~%" name)
+        (begin
+          (set! failures (+ failures 1))
+          (format #t "  FAIL  ~a~%" name)))))
+
+(define (error-message thunk)
+  "The message of the error THUNK raises, or #f."
+  (catch 'misc-error
+    (lambda () (thunk) #f)
+    (lambda (key subr message args . rest)
+      (apply format #f message args))))
+
+(define work
+  (let ((dir (string-append (or (getenv "TMPDIR") "/tmp")
+                            "/test-backup-" (number->string (getpid)))))
+    (mkdir dir)
+    dir))
+
+(define (delete-recursively dir)
+  (nftw dir (lambda (file stat flag base level)
+              (if (memq flag '(directory directory-processed))
+                  (rmdir file)
+                  (delete-file file))
+              #t)
+        'depth 'physical))
+
+(define now 1793246400)
+
+(display "Selection\n")
+(let* ((root (string-append work "/selection"))
+       (gen (publish-selection root '("/home/user")
+                               '(".cache" "**/node_modules") "test" now))
+       (current (string-append root "/" (readlink (string-append root
+                                                                 "/current")))))
+  (check "current points at the new generation" (string=? current gen))
+  (check "include is NUL-separated"
+         (string=? (call-with-input-file (string-append gen "/include")
+                     get-string-all)
+                   "/home/user\0"))
+  (check "a fresh selection passes"
+         (string? (check-selection gen now)))
+  (check "a stale selection fails"
+         (string-contains (error-message
+                           (lambda ()
+                             (check-selection gen (+ now (* 3 86400)))))
+                          "stale"))
+  (call-with-output-file (string-append gen "/exclude")
+    (lambda (port) (display "tampered\n" port)))
+  (check "a changed exclude file fails"
+         (string-contains (error-message (lambda () (check-selection gen now)))
+                          "damaged"))
+  (let ((empty (publish-selection root '() '() "test" (+ now 1))))
+    (check "an empty selection fails"
+           (string-contains (error-message
+                             (lambda () (check-selection empty (+ now 1))))
+                            "nothing to back up")))
+  (let ((odd (publish-selection root '("/a") '() "test" (+ now 2))))
+    (call-with-output-file (string-append odd "/manifest")
+      (lambda (port) (display "format-version 2\n" port)))
+    (check "an unknown format version fails"
+           (string-contains (error-message
+                             (lambda () (check-selection odd (+ now 2))))
+                            "format version")))
+  (publish-selection root '("/a") '() "test" (+ now 3))
+  (check "only the three newest generations stay"
+         (= 3 (length (filter (lambda (name) (string-prefix? "gen-" name))
+                              (scandir root))))))
+
+(display "Wrapper arguments\n")
+(let ((args '("-r" "rest:https://host:8000/laptop/home/" "--one-file-system"
+              "--cacert=/ca.crt" "--retry-lock" "1h" "backup")))
+  (check "backup is found after options with values"
+         (= 6 (restic-action-index args)))
+  (check "the selection flags follow backup"
+         (equal? (backup-arguments args 6 "/s/gen-1" "abcdef0123456789")
+                 '("-r" "rest:https://host:8000/laptop/home/"
+                   "--one-file-system" "--cacert=/ca.crt" "--retry-lock" "1h"
+                   "backup"
+                   "--files-from-raw" "/s/gen-1/include"
+                   "--exclude-file" "/s/gen-1/exclude"
+                   "--tag" "selection:abcdef01"
+                   "--group-by" "host")))
+  (check "no command at all"
+         (not (restic-action-index '("-r" "repo" "--verbose")))))
+
+(display "Maintenance parsers\n")
+(check "restic times with an offset"
+       (= (restic-time->seconds "2026-10-29T10:00:00.123456789+06:00")
+          (restic-time->seconds "2026-10-29T04:00:00Z")))
+(check "a malformed time"
+       (not (restic-time->seconds "yesterday")))
+(let ((summary (snapshot-summary
+                (string-append
+                 "[{\"time\":\"2026-10-29T10:00:00+06:00\"},"
+                 "{\"time\":\"2026-10-28T10:00:00+06:00\"},"
+                 "{\"time\":\"2027-01-01T00:00:00Z\"}]")
+                now)))
+  (check "all snapshots are counted" (= 3 (assoc-ref summary 'count)))
+  (check "one lies in the future" (= 1 (assoc-ref summary 'future)))
+  (check "the newest is the newest of the past ones"
+         (= (assoc-ref summary 'newest)
+            (restic-time->seconds "2026-10-29T10:00:00+06:00"))))
+(check "no snapshots"
+       (equal? (snapshot-summary "[]" now)
+               '((count . 0) (future . 0) (newest . #f))))
+
+(display "Freshness collector\n")
+(let ((snapshots (string-append work "/repo/snapshots")))
+  (mkdir (string-append work "/repo"))
+  (mkdir snapshots)
+  (check "an empty snapshots directory" (not (newest-file-mtime snapshots)))
+  (call-with-output-file (string-append snapshots "/a") (const #t))
+  (utime (string-append snapshots "/a") 1000 1000)
+  (call-with-output-file (string-append snapshots "/b") (const #t))
+  (utime (string-append snapshots "/b") 2000 2000)
+  (check "the newest file wins" (= 2000 (newest-file-mtime snapshots)))
+  (check "a missing directory"
+         (not (newest-file-mtime (string-append work "/none"))))
+  (check "repositories without snapshots get no metric"
+         (equal? (render-metrics
+                  (freshness-metrics '(("laptop/home" . 2000)
+                                       ("windows/users" . #f))))
+                 (string-append
+                  "# HELP restic_repository_snapshot_mtime_seconds Newest \
+file in the snapshots directory of the repository.\n"
+                  "# TYPE restic_repository_snapshot_mtime_seconds gauge\n"
+                  "restic_repository_snapshot_mtime_seconds\
+{repository=\"laptop/home\"} 2000\n"))))
+
+(delete-recursively work)
+(format #t "~a checks, ~a failed~%" checks failures)
+(exit (zero? failures))
