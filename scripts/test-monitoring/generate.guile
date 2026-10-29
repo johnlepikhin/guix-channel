@@ -35,7 +35,13 @@
                                         ("starlink" "ether2"))
                             #:router-ports '(("ether2" . 1000)))
                            (backup-alert-rules
-                            #:repositories '(("laptop/home" . "2d"))
+                            #:repositories
+                            (list (backup-repository
+                                   (name "laptop/home")
+                                   (presence
+                                    "probe_success{presence=\"laptop\"}"))
+                                  (backup-repository
+                                   (name "server/data")))
                             #:storage-bytes 1e12)))))
 
 (spit "shepherd.prom"

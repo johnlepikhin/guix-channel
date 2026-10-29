@@ -121,6 +121,9 @@
             stack-alert-rules
             network-alert-rules
             log-alert-rules
+            backup-repository
+            backup-repository?
+            backup-repository-name
             backup-alert-rules))
 
 
@@ -1890,7 +1893,9 @@ textfile_collector_success{collector=\"shepherd\"} == 1")
        (summary "Service {{ $labels.service }} is not running"))
       (alert-rule
        (alert "ProbeFailed")
-       (expr "probe_success{uplink=\"\"} == 0")
+       ;; Uplink probes have their own rules; presence probes of machines
+       ;; that come and go are no failure.
+       (expr "probe_success{uplink=\"\",presence=\"\"} == 0")
        (for "3m")
        (severity 'critical)
        (category "services")
@@ -2116,38 +2121,72 @@ prevent it"))
          (summary "Shepherd disabled {{ $labels.service }}, which kept \
 failing"))))))))
 
+;; A repository kept by `restic-maintenance-service-type', for
+;; `backup-alert-rules'.
+(define-record-type* <backup-repository>
+  backup-repository
+  make-backup-repository
+  backup-repository?
+  (name          backup-repository-name)          ;"laptop/home"
+  ;; Its newest snapshot counts as stale after this long...
+  (max-age       backup-repository-max-age
+                 (default "2d")
+                 (sanitize (sanitize-duration "max-age")))
+  ;; ...but for a machine that is often away, only if this PromQL selector
+  ;; of a presence probe, such as probe_success{presence="laptop"}, saw it
+  ;; between MAX-AGE and half of it ago: back long enough to have made a
+  ;; backup.  #f for a machine that is always there.
+  (presence      backup-repository-presence
+                 (default #f))
+  ;; Stale regardless of presence.
+  (away-max-age  backup-repository-away-max-age
+                 (default "30d")
+                 (sanitize (sanitize-duration "away-max-age"))))
+
+(define (backup-stale-rule repository)
+  (match-record repository <backup-repository>
+    (name max-age presence away-max-age)
+    (let* ((n number->config-string)
+           (mtime (string-append
+                   "max(restic_repository_snapshot_mtime_seconds"
+                   "{repository=\"" name "\"})"))
+           (age (lambda (limit)
+                  (string-append "time() - " mtime " > "
+                                 (n (duration->seconds limit)))))
+           (half (n (quotient (duration->seconds max-age) 2))))
+      (alert-rule
+       (alert "BackupStale")
+       (expr
+        (string-append
+         (if presence
+             (string-append
+              "(" (age max-age) " and on () max_over_time("
+              presence "[" half "s] offset " half "s) > 0) or "
+              (age away-max-age))
+             (age max-age))
+         ;; absent() catches a repository that never got a snapshot, or
+         ;; whose directory went away.
+         " or absent(restic_repository_snapshot_mtime_seconds"
+         "{repository=\"" name "\"})"))
+       (for "30m")
+       (category "backups")
+       (labels `(("repository" . ,name)))
+       (summary (string-append "No new backup in " name
+                               " for {{ $value | humanizeDuration }}"))))))
+
 (define* (backup-alert-rules #:key (repositories '()) (storage-bytes #f))
   "Return alert groups for restic repositories kept by
-`restic-maintenance-service-type'.  REPOSITORIES is an alist of repository
-names, such as \"laptop/home\", to the age, a Prometheus duration such as
-\"2d\", after which their newest snapshot counts as stale.
-STORAGE-BYTES, when a number, bounds the size of all of them together."
-  (let ((n number->config-string))
+`restic-maintenance-service-type'.  REPOSITORIES is a list of
+<backup-repository> records.  STORAGE-BYTES, when a number, bounds the size
+of all of them together."
+  (let ((n number->config-string)
+        (stale-rules (map backup-stale-rule repositories)))
     (list
      (alert-rule-group
       (name "backups")
       (rules
        (append
-        (map (match-lambda
-               ((repository . age)
-                (let ((selector (string-append "{repository=\""
-                                               repository "\"}")))
-                  (alert-rule
-                   (alert "BackupStale")
-                   ;; absent() catches a repository that never got a
-                   ;; snapshot, or whose directory went away.
-                   (expr (string-append
-                          "time() - max("
-                          "restic_repository_snapshot_mtime_seconds"
-                          selector ") > " (n (duration->seconds age))
-                          " or absent(restic_repository_snapshot_mtime_seconds"
-                          selector ")"))
-                   (for "30m")
-                   (category "backups")
-                   (labels `(("repository" . ,repository)))
-                   (summary (string-append "No new backup in " repository
-                                           " for more than " age))))))
-             repositories)
+        stale-rules
         (list
          (alert-rule
           (alert "BackupFutureSnapshots")

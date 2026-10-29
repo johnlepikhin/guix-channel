@@ -191,11 +191,15 @@ tests:
           - exp_labels: {severity: warning, category: network, name: ether2, routerboard_name: r}
             exp_annotations: {summary: "ether2 runs at 100 Mbit/s instead of 1000"}
 
-  # A backup older than its allowed age, and a repository with none.
-  - interval: 1m
+  # A machine that was at home but made no backup for two days...
+  - interval: 5m
     input_series:
       - series: 'restic_repository_snapshot_mtime_seconds{instance="h",repository="laptop/home"}'
-        values: '0x3100'
+        values: '0x700'
+      - series: 'restic_repository_snapshot_mtime_seconds{instance="h",repository="server/data"}'
+        values: '0+300x700'
+      - series: 'probe_success{instance="192.168.88.92",job="probe-laptop",presence="laptop"}'
+        values: '1x700'
     alert_rule_test:
       - eval_time: 47h
         alertname: BackupStale
@@ -204,7 +208,43 @@ tests:
         alertname: BackupStale
         exp_alerts:
           - exp_labels: {severity: warning, category: backups, repository: laptop/home}
-            exp_annotations: {summary: "No new backup in laptop/home for more than 2d"}
+            exp_annotations: {summary: "No new backup in laptop/home for 2d 2h 0m 0s"}
+
+  # ...is fine while away, up to the ceiling of 30 days.
+  - interval: 5m
+    input_series:
+      - series: 'restic_repository_snapshot_mtime_seconds{instance="h",repository="laptop/home"}'
+        values: '0x9000'
+      - series: 'restic_repository_snapshot_mtime_seconds{instance="h",repository="server/data"}'
+        values: '0+300x9000'
+      - series: 'probe_success{instance="192.168.88.92",job="probe-laptop",presence="laptop"}'
+        values: '0x9000'
+    alert_rule_test:
+      - eval_time: 20d
+        alertname: BackupStale
+        exp_alerts: []
+      - eval_time: 30d1h
+        alertname: BackupStale
+        exp_alerts:
+          - exp_labels: {severity: warning, category: backups, repository: laptop/home}
+            exp_annotations: {summary: "No new backup in laptop/home for 30d 1h 0m 0s"}
+      - eval_time: 1h
+        alertname: ProbeFailed
+        exp_alerts: []
+
+  # A machine without a presence probe: two days, and a missing repository.
+  - interval: 5m
+    input_series:
+      - series: 'restic_repository_snapshot_mtime_seconds{instance="h",repository="server/data"}'
+        values: '0x700'
+      - series: 'restic_repository_snapshot_mtime_seconds{instance="h",repository="laptop/home"}'
+        values: '0+300x700'
+    alert_rule_test:
+      - eval_time: 50h
+        alertname: BackupStale
+        exp_alerts:
+          - exp_labels: {severity: warning, category: backups, repository: server/data}
+            exp_annotations: {summary: "No new backup in server/data for 2d 2h 0m 0s"}
 
   - interval: 1h
     input_series: []
@@ -213,7 +253,9 @@ tests:
         alertname: BackupStale
         exp_alerts:
           - exp_labels: {severity: warning, category: backups, repository: laptop/home}
-            exp_annotations: {summary: "No new backup in laptop/home for more than 2d"}
+            exp_annotations: {summary: "No new backup in laptop/home for 1s"}
+          - exp_labels: {severity: warning, category: backups, repository: server/data}
+            exp_annotations: {summary: "No new backup in server/data for 1s"}
 
   # Forged or misdated snapshots stop the forgetting.
   - interval: 1m
