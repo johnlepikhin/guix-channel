@@ -31,7 +31,10 @@
   #:use-module (johnlepikhin system services monitoring textfile)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-11)
-  #:use-module (srfi srfi-19)
+  ;; Not all of it: its current-time would shadow Guile's.
+  #:use-module ((srfi srfi-19)
+                #:select (make-date date->time-utc time-second
+                          time-utc->date date-day make-time time-utc))
   #:export (restic-time->seconds
             snapshot-summary
             newest-file-mtime
