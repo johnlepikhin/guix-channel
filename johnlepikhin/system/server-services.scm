@@ -35,6 +35,7 @@
   #:use-module (guix gexp)
   #:use-module (json)
   #:use-module (johnlepikhin system services common)
+  #:use-module (johnlepikhin system services restart-on-upgrade)
   #:export (%server-substitute-urls
             make-server-services))
 
@@ -106,6 +107,8 @@ when it starts."
    (service mcron-service-type
             (mcron-configuration
              (jobs (list %server-gc-job fstrim-job %docker-prune-job))))
+   ;; Otherwise jobs added by a deploy run only after mcron is restarted.
+   (service restart-on-upgrade-service-type)
 
    prefer-ipv4-service
 

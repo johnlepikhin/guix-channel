@@ -45,6 +45,7 @@
   #:use-module (johnlepikhin system services brightnessctl)
   #:use-module (johnlepikhin system services common)
   #:use-module (johnlepikhin system services polkit-network-manager)
+  #:use-module (johnlepikhin system services restart-on-upgrade)
   #:use-module (srfi srfi-1)
   #:export (%desktop-substitute-urls
             make-system-services)
@@ -323,6 +324,9 @@
                   (mcron-configuration (jobs (cons* guix-pull-job gc-job
                                                     fstrim-job
                                                     extra-mcron-jobs))))
+         ;; Otherwise jobs added by a reconfigure run only after mcron is
+         ;; restarted.
+         (service restart-on-upgrade-service-type)
          (service cups-service-type
                   (cups-configuration (default-language "en")
                                       (web-interface? #t)
