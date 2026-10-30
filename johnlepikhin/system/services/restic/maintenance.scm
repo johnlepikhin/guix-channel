@@ -37,6 +37,7 @@
                           time-utc->date date-day make-time time-utc))
   #:export (restic-time->seconds
             snapshot-summary
+            restore-summary-ok?
             newest-file-mtime
             freshness-metrics
             collect-restic-freshness
@@ -77,6 +78,24 @@ more than MAX-FUTURE seconds after NOW."
     `((count . ,(length times))
       (future . ,(length future))
       (newest . ,(if (null? past) #f (apply max past))))))
+
+(define (restore-summary-ok? text)
+  "Whether the output TEXT of `restic restore --json' ends with a summary
+of at least one restored file.  A pattern that matches nothing restores
+nothing and still succeeds."
+  (let ((summary
+         (fold (lambda (line found)
+                 (let ((message (false-if-exception (json-string->scm line))))
+                   (if (and (pair? message)
+                            (equal? (assoc-ref message "message_type")
+                                    "summary"))
+                       message
+                       found)))
+               #f
+               (string-split text #\newline))))
+    (and summary
+         (let ((restored (assoc-ref summary "files_restored")))
+           (and (number? restored) (> restored 0))))))
 
 
 ;;;
@@ -157,7 +176,7 @@ to ROOT, to the textfile DIRECTORY."
          (strftime "%F %T" (localtime (current-time))) args)
   (force-output))
 
-(define (maintain-repository job restic timeout user root cache now)
+(define (maintain-repository job restic timeout rm user root cache now)
   "Run the maintenance steps of JOB, an alist from the service, and return
 its metrics.  Every step is attempted unless an earlier one makes it
 unsafe; failures are reported, not raised."
@@ -213,6 +232,20 @@ unsafe; failures are reported, not raised."
                                                    (time-utc->date
                                                     (make-time time-utc 0
                                                                now))))))))
+                 (restore-ok?
+                  (and (assoc-ref job 'verify-include)
+                       (let ((target (string-append cache "/restore-verify")))
+                         (run-as user timeout "600" rm "-rf" "--" target)
+                         (let-values (((status output)
+                                       (restic* 3600 "restore" "latest"
+                                                "--retry-lock" "30m"
+                                                "--target" target
+                                                "--include"
+                                                (assoc-ref job 'verify-include)
+                                                "--verify" "--json")))
+                           (run-as user timeout "600" rm "-rf" "--" target)
+                           (and (zero? status)
+                                (restore-summary-ok? output))))))
                  (size
                   (call-with-values
                       (lambda ()
@@ -230,6 +263,8 @@ unsafe; failures are reported, not raised."
                    (step "forget" forget-ok?)
                    (step "prune" prune-ok?)
                    (step "check" check-ok?)
+                   (and (assoc-ref job 'verify-include)
+                        (step "restore" restore-ok?))
                    (and summary
                         (metric "restic_repository_snapshots"
                                 (assoc-ref summary 'count) labels))
@@ -244,17 +279,19 @@ unsafe; failures are reported, not raised."
                         (metric "restic_repository_size_bytes" size
                                 labels)))))))))
 
-(define (run-restic-maintenance directory restic timeout user root cache jobs)
+(define (run-restic-maintenance directory restic timeout rm user root cache
+                                jobs)
   "Maintain JOBS, alists, in the repositories under ROOT as USER with the
 restic cache in CACHE, and write the results to
-DIRECTORY/restic-maintenance.prom."
+DIRECTORY/restic-maintenance.prom.  TIMEOUT and RM are the programs of
+coreutils."
   (run-collector
    "restic-maintenance" directory
    (lambda ()
      (let ((now (current-time)))
        (append-map (lambda (job)
-                     (maintain-repository job restic timeout user root cache
-                                          now))
+                     (maintain-repository job restic timeout rm user root
+                                          cache now))
                    jobs)))
    ;; Daily; a missed day is reported by the backup rules.
    #:max-age (* 2 86400)))

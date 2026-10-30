@@ -42,7 +42,11 @@
                                     "probe_success{presence=\"laptop\"}"))
                                   (backup-repository
                                    (name "server/data")))
-                            #:storage-bytes 1e12)))))
+                            #:storage-bytes 1e12)
+                           (home-assistant-alert-rules
+                            #:device-entities "sensor\\..*_(battery|power)"
+                            #:outage "hass_input_boolean_state{entity=\"input_boolean.outage\"} == 1")
+                           (update-alert-rules)))))
 
 (spit "shepherd.prom"
       (render-metrics
@@ -57,3 +61,10 @@
       (render-metrics
        (freshness-metrics '(("laptop/home" . 1793246400)
                             ("windows/users" . #f)))))
+
+(spit "updates.prom"
+      (render-metrics
+       (update-metrics '(("ghcr.io/koenkk/zigbee2mqtt" "2.14.2"
+                          "2.14.2" "2.15.0")
+                         ("docker.io/grafana/loki" "3.7.9" . #f))
+                       1793246400)))

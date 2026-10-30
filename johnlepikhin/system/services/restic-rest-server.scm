@@ -200,7 +200,12 @@ append-only mode with a private set of repositories per user.")))
                        (default 500))
   ;; Repacking per run is bounded; the rest waits for the next day.
   (max-repack-size     restic-maintenance-job-max-repack-size
-                       (default "20G")))
+                       (default "20G"))
+  ;; #f, or an absolute path in the snapshots, preferably small, restored
+  ;; from the latest snapshot with --verify at every run.  What `check'
+  ;; cannot tell: that files really come back.
+  (verify-include      restic-maintenance-job-verify-include
+                       (default #f)))
 
 (define-record-type* <restic-maintenance-configuration>
   restic-maintenance-configuration
@@ -227,7 +232,8 @@ append-only mode with a private set of repositories per user.")))
 (define (job->alist job)
   (match-record job <restic-maintenance-job>
     (repository key-file keep-within keep-within-weekly keep-within-monthly
-                keep-within-yearly max-future max-snapshots max-repack-size)
+                keep-within-yearly max-future max-snapshots max-repack-size
+                verify-include)
     `((repository . ,repository)
       (key-file . ,key-file)
       (keep-flags . ("--keep-within" ,keep-within
@@ -236,7 +242,8 @@ append-only mode with a private set of repositories per user.")))
                      "--keep-within-yearly" ,keep-within-yearly))
       (max-future . ,max-future)
       (max-snapshots . ,max-snapshots)
-      (max-repack-size . ,max-repack-size))))
+      (max-repack-size . ,max-repack-size)
+      (verify-include . ,verify-include))))
 
 (define %maintenance-modules
   '((johnlepikhin system services restic maintenance)
@@ -254,6 +261,7 @@ append-only mode with a private set of repositories per user.")))
              (run-restic-maintenance #$textfile-directory
                                      #$(file-append restic "/bin/restic")
                                      #$(file-append coreutils "/bin/timeout")
+                                     #$(file-append coreutils "/bin/rm")
                                      #$user #$data-directory
                                      #$cache-directory
                                      '#$(map job->alist jobs))))))))

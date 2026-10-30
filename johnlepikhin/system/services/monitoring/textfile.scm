@@ -39,9 +39,13 @@
             herd-status-started
             shepherd-metrics
             smartctl-metrics
+            image-reference
+            newer-tag
+            update-metrics
             run-collector
             collect-shepherd
-            collect-smart))
+            collect-smart
+            collect-updates))
 
 
 ;;;
@@ -125,12 +129,27 @@
     ("smart_unsafe_shutdowns_total" . "Shutdowns without prior notice.")
     ("smart_power_on_seconds" . "Time the drive has been powered on.")
     ("smart_data_units_written_total"
-     . "Data written, in units of 512000 bytes.")))
+     . "Data written, in units of 512000 bytes.")
+    ("container_image_update_available"
+     . "Whether the registry has a newer release of the image.")
+    ("container_image_check_success"
+     . "Whether the tags of the image could be listed.")
+    ("guix_system_generation_timestamp_seconds"
+     . "When the current system generation was switched to.")))
+
+(define (group-samples samples)
+  "SAMPLES with those of each metric name together, in the order the names
+first appear: the text format wants the lines of a metric contiguous."
+  (let ((names (delete-duplicates (map car samples))))
+    (append-map (lambda (name)
+                  (filter (lambda (sample) (string=? (car sample) name))
+                          samples))
+                names)))
 
 (define (render-metrics samples)
   "Render SAMPLES in the Prometheus text format, each metric name declared
 once; names ending in _total are counters, the others gauges."
-  (let loop ((samples samples) (declared '()) (out '()))
+  (let loop ((samples (group-samples samples)) (declared '()) (out '()))
     (match samples
       (()
        (string-concatenate-reverse out))
@@ -247,6 +266,79 @@ device at all (bits 0 and 1 of the exit status)."
 
 
 ;;;
+;;; Updates.
+;;;
+
+(define (image-reference image)
+  "Split IMAGE, as \"registry/name:tag@sha256:...\" or without the digest,
+into the repository and the tag; #f when it has no tag."
+  (let* ((name (match (string-index image #\@)
+                 (#f image)
+                 (at (substring image 0 at))))
+         (colon (string-rindex name #\:))
+         (slash (string-rindex name #\/)))
+    (and colon (or (not slash) (> colon slash))
+         (cons (substring name 0 colon) (substring name (+ colon 1))))))
+
+(define (tag-version tag)
+  "The prefix and the numbers of a release TAG such as \"v3.15.1\" or
+\"2026.10.4\"; #f for anything else, such as \"v3.16.0-rc.0\" or
+\"latest\"."
+  (match (string-match "^([^0-9]*)([0-9]+(\\.[0-9]+)*)$" tag)
+    (#f #f)
+    (m (cons (match:substring m 1)
+             (map string->number
+                  (string-split (match:substring m 2) #\.))))))
+
+(define (version>? a b)
+  (match (list a b)
+    ((() ()) #f)
+    (((x . a*) (y . b*))
+     (or (> x y) (and (= x y) (version>? a* b*))))))
+
+(define (newer-tag current tags)
+  "The newest of TAGS that is a release of the same form as the CURRENT tag
+and newer than it, or #f."
+  (match (tag-version current)
+    (#f #f)
+    ((prefix . version)
+     (let loop ((tags tags) (best #f) (best-version version))
+       (match tags
+         (() best)
+         ((tag . rest)
+          (match (tag-version tag)
+            (((? (lambda (p) (string=? p prefix))) . candidate)
+             (if (and (= (length candidate) (length version))
+                      (version>? candidate best-version))
+                 (loop rest tag candidate)
+                 (loop rest best best-version)))
+            (_ (loop rest best best-version)))))))))
+
+(define (update-metrics checks generation-time)
+  "Metrics from CHECKS, a list of (IMAGE CURRENT-TAG . TAGS-OR-#F), #f when
+the tags could not be listed, and from GENERATION-TIME, #f when unknown."
+  (append
+   (append-map
+    (match-lambda
+      ((image current . tags)
+       (let ((labels `(("image" . ,image))))
+         (cons (metric "container_image_check_success" (and tags #t) labels)
+               (if tags
+                   (let ((latest (newer-tag current tags)))
+                     (list (metric "container_image_update_available"
+                                   (and latest #t)
+                                   `(,@labels
+                                     ("current" . ,current)
+                                     ("latest" . ,(or latest current))))))
+                   '())))))
+    checks)
+   (if generation-time
+       (list (metric "guix_system_generation_timestamp_seconds"
+                     generation-time))
+       '())))
+
+
+;;;
 ;;; Running collectors.
 ;;;
 
@@ -342,3 +434,32 @@ this a no-op."
           (lambda (status output)
             (smartctl-metrics device output status))))
       devices))))
+
+(define (collect-updates directory skopeo timeout images system-profile)
+  "Report whether the registries have newer releases of IMAGES, references
+with a tag, and when SYSTEM-PROFILE, the system profile link, last changed."
+  (run-collector
+   "updates" directory
+   (lambda ()
+     (update-metrics
+      (filter-map
+       (lambda (image)
+         (match (image-reference image)
+           (#f #f)
+           ((repository . tag)
+            (call-with-values
+                (lambda ()
+                  (command-output timeout 120 skopeo "list-tags"
+                                  (string-append "docker://" repository)))
+              (lambda (status output)
+                (cons* repository tag
+                       (and (zero? status)
+                            (false-if-exception
+                             (vector->list
+                              (assoc-ref (json-string->scm output)
+                                         "Tags"))))))))))
+       images)
+      (let ((st (false-if-exception (lstat system-profile))))
+        (and st (stat:mtime st)))))
+   ;; Daily.
+   #:max-age (* 2 86400)))

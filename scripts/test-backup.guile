@@ -3,7 +3,8 @@
 ;;;
 ;;; Unit tests of the backup modules: the selection contract and the restic
 ;;; wrapper of (johnlepikhin home restic selection), and the parsers of
-;;; (johnlepikhin system services restic maintenance).
+;;; (johnlepikhin system services restic maintenance); also of the update
+;;; checks of (johnlepikhin system services monitoring textfile).
 ;;;
 ;;; Usage: guix repl -L . -- scripts/test-backup.guile
 
@@ -127,6 +128,18 @@
        (equal? (snapshot-summary "[]" now)
                '((count . 0) (future . 0) (newest . #f))))
 
+;; Recorded from restic 0.19.1.
+(check "a restore of some files"
+       (restore-summary-ok?
+        (string-append
+         "{\"message_type\":\"verbose_status\",\"action\":\"restored\"}\n"
+         "{\"message_type\":\"summary\",\"total_files\":2,"
+         "\"files_restored\":3,\"total_bytes\":3,\"bytes_restored\":3}\n")))
+(check "a restore that matched nothing"
+       (not (restore-summary-ok? "{\"message_type\":\"summary\"}\n")))
+(check "no summary at all"
+       (not (restore-summary-ok? "Fatal: wrong password\n")))
+
 (display "Freshness collector\n")
 (let ((snapshots (string-append work "/repo/snapshots")))
   (mkdir (string-append work "/repo"))
@@ -149,6 +162,40 @@ file in the snapshots directory of the repository.\n"
                   "# TYPE restic_repository_snapshot_mtime_seconds gauge\n"
                   "restic_repository_snapshot_mtime_seconds\
 {repository=\"laptop/home\"} 2000\n"))))
+
+(display "Update checks\n")
+(check "an image reference with a digest"
+       (equal? (image-reference
+                "quay.io/prometheus/prometheus:v3.15.1@sha256:d445d1")
+               '("quay.io/prometheus/prometheus" . "v3.15.1")))
+(check "an image reference without a tag"
+       (not (image-reference "localhost:5000/name@sha256:d445d1")))
+(check "the newest release of the same form"
+       (equal? (newer-tag "v3.15.1" '("v3.9.1" "v3.16.0" "v3.15.2"
+                                      "v3.17.0-rc.0" "v3-distroless"
+                                      "latest" "4.0.0"))
+               "v3.16.0"))
+(check "calendar versions"
+       (equal? (newer-tag "2026.10.4" '("2026.9.3" "2026.11.1" "2026.10.5"
+                                        "2026.11.0b3" "stable"))
+               "2026.11.1"))
+(check "nothing newer"
+       (not (newer-tag "2.14.2" '("2.14.2" "2.14.1" "2.14" "latest"))))
+(check "update metrics, a failed listing included"
+       (equal? (update-metrics '(("ghcr.io/koenkk/zigbee2mqtt" "2.14.2"
+                                  "2.14.2" "2.15.0")
+                                 ("docker.io/grafana/loki" "3.7.9" . #f))
+                               1793246400)
+               (list (metric "container_image_check_success" #t
+                             '(("image" . "ghcr.io/koenkk/zigbee2mqtt")))
+                     (metric "container_image_update_available" #t
+                             '(("image" . "ghcr.io/koenkk/zigbee2mqtt")
+                               ("current" . "2.14.2")
+                               ("latest" . "2.15.0")))
+                     (metric "container_image_check_success" #f
+                             '(("image" . "docker.io/grafana/loki")))
+                     (metric "guix_system_generation_timestamp_seconds"
+                             1793246400))))
 
 (delete-recursively work)
 (format #t "~a checks, ~a failed~%" checks failures)

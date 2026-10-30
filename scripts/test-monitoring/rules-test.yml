@@ -328,3 +328,65 @@ tests:
         exp_alerts:
           - exp_labels: {severity: info}
             exp_annotations: {summary: "The alerting pipeline works"}
+
+  # Devices: a low battery, and a device gone except during a power cut.
+  - interval: 1m
+    input_series:
+      - series: 'hass_sensor_battery_percent{instance="h",entity="sensor.spalnia_okno_battery",friendly_name="Okno"}'
+        values: '15x120'
+      - series: 'hass_entity_available{instance="h",entity="sensor.spalnia_okno_battery"}'
+        values: '0x120'
+      - series: 'hass_entity_available{instance="h",entity="sensor.kladovka_server_power"}'
+        values: '0x120'
+      - series: 'hass_entity_available{instance="h",entity="sensor.server_cost"}'
+        values: '0x120'
+      - series: 'hass_input_boolean_state{instance="h",entity="input_boolean.outage"}'
+        values: '0x90 1x30'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: DeviceBatteryLow
+        exp_alerts: []
+      - eval_time: 61m
+        alertname: DeviceBatteryLow
+        exp_alerts:
+          - exp_labels: {severity: warning, category: devices, instance: h, entity: sensor.spalnia_okno_battery, friendly_name: Okno}
+            exp_annotations: {summary: "Battery of Okno (sensor.spalnia_okno_battery) is at 15%"}
+      - eval_time: 61m
+        alertname: DeviceUnavailable
+        exp_alerts:
+          - exp_labels: {severity: warning, category: devices, instance: h, entity: sensor.spalnia_okno_battery}
+            exp_annotations: {summary: "sensor.spalnia_okno_battery has been unavailable for a while: the device is off, out of range or out of battery"}
+          - exp_labels: {severity: warning, category: devices, instance: h, entity: sensor.kladovka_server_power}
+            exp_annotations: {summary: "sensor.kladovka_server_power has been unavailable for a while: the device is off, out of range or out of battery"}
+      - eval_time: 119m
+        alertname: DeviceUnavailable
+        exp_alerts: []
+
+  # Updates: a newer image, an old system and a failing check.
+  - interval: 1m
+    input_series:
+      - series: 'container_image_update_available{instance="h",image="ghcr.io/koenkk/zigbee2mqtt",current="2.14.2",latest="2.15.0"}'
+        values: '1x3100'
+      - series: 'container_image_update_available{instance="h",image="docker.io/grafana/loki",current="3.7.9",latest="3.7.9"}'
+        values: '0x3100'
+      - series: 'container_image_check_success{instance="h",image="docker.io/grafana/alloy"}'
+        values: '0x3100'
+      - series: 'guix_system_generation_timestamp_seconds{instance="h"}'
+        values: '0x3100'
+    alert_rule_test:
+      - eval_time: 2h
+        alertname: ContainerImageUpdateAvailable
+        exp_alerts:
+          - exp_labels: {severity: info, notify: weekly, instance: h, image: ghcr.io/koenkk/zigbee2mqtt, current: 2.14.2, latest: 2.15.0}
+            exp_annotations: {summary: "ghcr.io/koenkk/zigbee2mqtt: 2.15.0 is out, 2.14.2 runs"}
+      - eval_time: 2h
+        alertname: SystemOutdated
+        exp_alerts: []
+      - eval_time: 2h
+        alertname: UpdateCheckFailing
+        exp_alerts: []
+      - eval_time: 50h
+        alertname: UpdateCheckFailing
+        exp_alerts:
+          - exp_labels: {severity: info, notify: weekly, instance: h, image: docker.io/grafana/alloy}
+            exp_annotations: {summary: "Tags of docker.io/grafana/alloy cannot be listed"}

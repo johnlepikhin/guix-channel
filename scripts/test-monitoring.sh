@@ -33,7 +33,7 @@ promtool() {
 }
 promtool check rules rules.yml
 promtool test rules rules-test.yml
-for metrics in shepherd.prom smart.prom restic-freshness.prom; do
+for metrics in shepherd.prom smart.prom restic-freshness.prom updates.prom; do
     echo "Checking $metrics"
     promtool check metrics < "$metrics"
 done'

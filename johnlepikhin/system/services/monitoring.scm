@@ -44,6 +44,7 @@
 (define-module (johnlepikhin system services monitoring)
   #:use-module (gnu packages admin)                ; smartmontools
   #:use-module (gnu packages base)                 ; coreutils
+  #:use-module (gnu packages containers)           ; skopeo
   #:use-module (gnu packages guile)                ; guile-json-4
   #:use-module (gnu services)
   #:use-module (gnu services containers)
@@ -75,6 +76,8 @@
             prometheus-configuration?
             prometheus-service-type
 
+            alertmanager-route
+            alertmanager-route?
             alertmanager-configuration
             alertmanager-configuration?
             alertmanager-service-type
@@ -111,6 +114,7 @@
             alloy-configuration?
             alloy-service-type
 
+            %monitoring-images
             %node-textfile-directory
             node-textfile-collectors-configuration
             node-textfile-collectors-configuration?
@@ -124,7 +128,9 @@
             backup-repository
             backup-repository?
             backup-repository-name
-            backup-alert-rules))
+            backup-alert-rules
+            home-assistant-alert-rules
+            update-alert-rules))
 
 
 ;;;
@@ -635,8 +641,32 @@ services add their scrape jobs, rules and Alertmanagers by extending it.")))
                               (sanitize-duration "repeat-interval-info")))
   (inhibit-rules             alertmanager-configuration-inhibit-rules
                              (default '()))
+  ;; <alertmanager-route> records, tried before the routes by severity.
+  (extra-routes              alertmanager-configuration-extra-routes
+                             (default '()))
   (memory                    alertmanager-configuration-memory
                              (default "256m")))
+
+(define-record-type* <alertmanager-route>
+  alertmanager-route
+  make-alertmanager-route
+  alertmanager-route?
+  (matchers         alertmanager-route-matchers)    ;list of strings
+  (repeat-interval  alertmanager-route-repeat-interval
+                    (sanitize (sanitize-duration "repeat-interval")))
+  ;; #f to inherit the grouping of the root route, or a list of label
+  ;; names: '() puts all the matching alerts in one notification.
+  (group-by         alertmanager-route-group-by
+                    (default #f)))
+
+(define (alertmanager-route->json route)
+  (match-record route <alertmanager-route>
+    (matchers repeat-interval group-by)
+    `(("matchers" . ,(list->vector matchers))
+      ("repeat_interval" . ,repeat-interval)
+      ,@(if group-by
+            `(("group_by" . ,(list->vector group-by)))
+            '()))))
 
 (define %alertmanager-config-path "/etc/alertmanager/alertmanager.yml")
 (define %alertmanager-webhook-url-path "/run/secrets/webhook-url")
@@ -644,7 +674,8 @@ services add their scrape jobs, rules and Alertmanagers by extending it.")))
 (define (alertmanager-config-file config)
   (match-record config <alertmanager-configuration>
     (group-by group-wait group-interval repeat-interval-critical
-              repeat-interval-warning repeat-interval-info inhibit-rules)
+              repeat-interval-warning repeat-interval-info inhibit-rules
+              extra-routes)
     (json-file
      "alertmanager.yml"
      `(("route"
@@ -654,12 +685,15 @@ services add their scrape jobs, rules and Alertmanagers by extending it.")))
         ("group_interval" . ,group-interval)
         ("repeat_interval" . ,repeat-interval-warning)
         ("routes"
-         . #((("matchers" . #("severity=\"info\""))
-              ("group_wait" . "0s")
-              ("repeat_interval" . ,repeat-interval-info))
-             (("matchers" . #("severity=\"critical\""))
-              ("group_wait" . "10s")
-              ("repeat_interval" . ,repeat-interval-critical)))))
+         . ,(list->vector
+             (append
+              (map alertmanager-route->json extra-routes)
+              `((("matchers" . #("severity=\"info\""))
+                 ("group_wait" . "0s")
+                 ("repeat_interval" . ,repeat-interval-info))
+                (("matchers" . #("severity=\"critical\""))
+                 ("group_wait" . "10s")
+                 ("repeat_interval" . ,repeat-interval-critical)))))))
        ("receivers"
         . #((("name" . "webhook")
              ("webhook_configs"
@@ -1660,6 +1694,12 @@ host to Loki.  Its log of the last read positions survives restarts.")))
 ;; data directory of Prometheus.
 (define %node-textfile-directory "/var/lib/node-exporter/textfile")
 
+;; The default images of this module, for the update checks of
+;; `node-textfile-collectors-service-type'.
+(define %monitoring-images
+  (list %prometheus-image %alertmanager-image %grafana-image
+        %blackbox-exporter-image %mktxp-image %loki-image %alloy-image))
+
 (define-record-type* <node-textfile-collectors-configuration>
   node-textfile-collectors-configuration
   make-node-textfile-collectors-configuration
@@ -1671,6 +1711,11 @@ host to Loki.  Its log of the last read positions survives restarts.")))
                      (default '()))
   ;; Shepherd services reported as shepherd_service_running.
   (watched-services  node-textfile-collectors-configuration-watched-services
+                     (default '()))
+  ;; Container images, "name:tag" with or without a digest, checked daily
+  ;; for newer releases, e.g. %monitoring-images.  When there are any, the
+  ;; age of the system generation is reported too.
+  (update-images     node-textfile-collectors-configuration-update-images
                      (default '())))
 
 (define %textfile-module '(johnlepikhin system services monitoring textfile))
@@ -1706,6 +1751,20 @@ host to Loki.  Its log of the last read positions survives restarts.")))
             '#$(node-textfile-collectors-configuration-smart-devices
                 config)))))))
 
+(define (updates-collector-program config)
+  (program-file
+   "updates-textfile-collector"
+   (with-extensions (list guile-json-4)
+     (with-imported-modules (list %textfile-module)
+       #~(begin
+           (use-modules #$%textfile-module)
+           (collect-updates
+            #$(node-textfile-collectors-configuration-directory config)
+            #$(file-append skopeo "/bin/skopeo")
+            #$(file-append coreutils "/bin/timeout")
+            '#$(node-textfile-collectors-configuration-update-images config)
+            "/var/guix/profiles/system"))))))
+
 ;; Collection interval of the shepherd collector, in seconds;
 ;; `service-alert-rules' takes it as stale after three of them.  The others
 ;; publish their own textfile_collector_max_age_seconds.
@@ -1719,7 +1778,10 @@ host to Loki.  Its log of the last read positions survives restarts.")))
        (list #~(job "* * * * *" #$(shepherd-collector-program config))))
    (if (null? (node-textfile-collectors-configuration-smart-devices config))
        '()
-       (list #~(job "*/5 * * * *" #$(smart-collector-program config))))))
+       (list #~(job "*/5 * * * *" #$(smart-collector-program config))))
+   (if (null? (node-textfile-collectors-configuration-update-images config))
+       '()
+       (list #~(job "0 9 * * *" #$(updates-collector-program config))))))
 
 (define (node-textfile-collectors-activation config)
   #~(begin
@@ -1735,8 +1797,9 @@ host to Loki.  Its log of the last read positions survives restarts.")))
           (service-extension activation-service-type
                              node-textfile-collectors-activation)))
    (default-value (node-textfile-collectors-configuration))
-   (description "Write the state of shepherd services and the SMART health
-of NVMe drives to the textfile directory of the Prometheus node exporter.")))
+   (description "Write the state of shepherd services, the SMART health of
+NVMe drives and the available updates of container images to the textfile
+directory of the Prometheus node exporter.")))
 
 
 ;;;
@@ -2229,3 +2292,78 @@ compromised client"))
                                 ("h" . 3600) ("d" . 86400) ("w" . 604800)
                                 ("y" . 31536000))
                               unit))))))))
+
+(define* (home-assistant-alert-rules #:key
+                                     (battery-percent 20)
+                                     (device-entities ".*")
+                                     (unavailable-for "1h")
+                                     (outage #f))
+  "Return alert groups for the devices of Home Assistant, from the metrics of
+its prometheus integration.  DEVICE-ENTITIES is a regular expression of the
+entities, one per device, whose unavailability means the device is gone,
+e.g. its battery or power sensor.  OUTAGE, when a PromQL expression, is true
+during a power cut, which takes mains devices away as expected."
+  (let ((n number->config-string))
+    (list
+     (alert-rule-group
+      (name "home-assistant")
+      (rules
+       (list
+        (alert-rule
+         (alert "DeviceBatteryLow")
+         (expr (string-append "hass_sensor_battery_percent < "
+                              (n battery-percent)))
+         (for "1h")
+         (category "devices")
+         (summary "Battery of {{ $labels.friendly_name }} \
+({{ $labels.entity }}) is at {{ $value }}%"))
+        (alert-rule
+         (alert "DeviceUnavailable")
+         (expr (string-append
+                ;; A raw string: the regular expression goes as it is.
+                "hass_entity_available{entity=~`" device-entities "`} == 0"
+                (if outage
+                    (string-append " unless on () (" outage ")")
+                    "")))
+         (for unavailable-for)
+         (category "devices")
+         (summary "{{ $labels.entity }} has been unavailable for a while: \
+the device is off, out of range or out of battery"))))))))
+
+(define* (update-alert-rules #:key (system-max-age "30d"))
+  "Return alert groups for the update checks of the textfile collectors.
+The alerts carry notify=\"weekly\", for an Alertmanager route that repeats
+them rarely and in one notification.  SYSTEM-MAX-AGE is how long a system
+generation may stay before it counts as outdated."
+  (let ((n number->config-string)
+        (weekly '(("notify" . "weekly"))))
+    (list
+     (alert-rule-group
+      (name "updates")
+      (rules
+       (list
+        (alert-rule
+         (alert "ContainerImageUpdateAvailable")
+         (expr "container_image_update_available == 1")
+         (for "1h")
+         (severity 'info)
+         (labels weekly)
+         (summary "{{ $labels.image }}: {{ $labels.latest }} is out, \
+{{ $labels.current }} runs"))
+        (alert-rule
+         (alert "SystemOutdated")
+         (expr (string-append
+                "time() - guix_system_generation_timestamp_seconds > "
+                (n (duration->seconds system-max-age))))
+         (for "1h")
+         (severity 'info)
+         (labels weekly)
+         (summary "The system was last deployed \
+{{ $value | humanizeDuration }} ago"))
+        (alert-rule
+         (alert "UpdateCheckFailing")
+         (expr "container_image_check_success == 0")
+         (for "2d")
+         (severity 'info)
+         (labels weekly)
+         (summary "Tags of {{ $labels.image }} cannot be listed"))))))))
