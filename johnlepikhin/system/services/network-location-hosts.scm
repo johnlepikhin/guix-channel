@@ -44,6 +44,7 @@
             network-location?
             network-location-hosts-configuration
             network-location-hosts-configuration?
+            network-location-hosts-configuration-hosts-file
             network-location-hosts-dnsmasq-configuration
             network-location-hosts-service-type))
 
