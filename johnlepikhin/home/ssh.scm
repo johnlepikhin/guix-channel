@@ -23,6 +23,7 @@
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
   #:use-module (guix gexp)
+  #:use-module (ice-9 match)
   #:export (home-ssh-host-configuration
             home-ssh-configuration
             home-ssh-service-type))
@@ -31,6 +32,11 @@
   home-ssh-host-configuration make-home-ssh-host-configuration
   home-ssh-host-configuration?
   (host-mask home-ssh-host-configuration-host-mask)
+  ;; #f, or more criteria of ssh_config's Match, such as
+  ;; "!exec \"test -e /some/file\"": the block then reads
+  ;; "Match originalhost HOST-MASK CRITERIA".  Placed before the plain block
+  ;; of the same host, it overrides that block when the criteria hold.
+  (match-criteria home-ssh-host-configuration-match-criteria (default #f))
   (hostname home-ssh-host-configuration-hostname (default #f))
   (port home-ssh-host-configuration-port (default #f))
   (user home-ssh-host-configuration-user (default #f))
@@ -40,6 +46,7 @@
   (control-master home-ssh-host-configuration-control-master (default #f))
   (control-persist home-ssh-host-configuration-control-persist (default #f))
   (proxy-jump home-ssh-host-configuration-proxy-jump (default #f))
+  (host-key-alias home-ssh-host-configuration-host-key-alias (default #f))
   (pubkey-accepted-key-types home-ssh-host-configuration-pubkey-accepted-key-types (default #f))
   (host-key-algorithms home-ssh-host-configuration-host-key-algorithms (default #f))
   (comment home-ssh-host-configuration-comment (default #f))
@@ -52,7 +59,10 @@
   (string-append
    (if (home-ssh-host-configuration-comment val)
        (format #f "# ~a\n" (home-ssh-host-configuration-comment val)) "")
-   (format #f "Host ~a\n" (home-ssh-host-configuration-host-mask val))
+   (match (home-ssh-host-configuration-match-criteria val)
+     (#f (format #f "Host ~a\n" (home-ssh-host-configuration-host-mask val)))
+     (criteria (format #f "Match originalhost ~a ~a\n"
+                       (home-ssh-host-configuration-host-mask val) criteria)))
    (if (home-ssh-host-configuration-hostname val)
        (format #f "  Hostname ~a\n" (home-ssh-host-configuration-hostname val)) "")
    (if (home-ssh-host-configuration-port val)
@@ -71,6 +81,8 @@
        (format #f "  ControlPersist yes\n") "")
    (if (home-ssh-host-configuration-proxy-jump val)
        (format #f "  ProxyJump ~a\n" (home-ssh-host-configuration-proxy-jump val)) "")
+   (if (home-ssh-host-configuration-host-key-alias val)
+       (format #f "  HostKeyAlias ~a\n" (home-ssh-host-configuration-host-key-alias val)) "")
    (if (home-ssh-host-configuration-pubkey-accepted-key-types val)
        (format #f "  PubkeyAcceptedKeyTypes ~a\n" (home-ssh-host-configuration-pubkey-accepted-key-types val)) "")
    (if (home-ssh-host-configuration-host-key-algorithms val)
