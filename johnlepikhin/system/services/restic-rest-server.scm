@@ -247,6 +247,7 @@ append-only mode with a private set of repositories per user.")))
 
 (define %maintenance-modules
   '((johnlepikhin system services restic maintenance)
+    (johnlepikhin system services host-process)
     (johnlepikhin system services monitoring textfile)))
 
 (define (maintenance-program config)

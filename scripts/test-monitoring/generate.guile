@@ -7,6 +7,7 @@
 (use-modules (johnlepikhin system services monitoring)
              (johnlepikhin system services monitoring textfile)
              (johnlepikhin system services restic maintenance)
+             (johnlepikhin system services guix-prebuild run)
              (guix gexp)
              (ice-9 textual-ports))
 
@@ -46,7 +47,9 @@
                            (home-assistant-alert-rules
                             #:device-entities "sensor\\..*_(battery|power)"
                             #:outage "hass_input_boolean_state{entity=\"input_boolean.outage\"} == 1")
-                           (update-alert-rules)))))
+                           (update-alert-rules)
+                           (prebuild-alert-rules
+                            #:publish-cache-bytes 1e11)))))
 
 (spit "shepherd.prom"
       (render-metrics
@@ -68,3 +71,12 @@
                           "2.14.2" "2.15.0")
                          ("docker.io/grafana/loki" "3.7.9" . #f))
                        1793246400)))
+
+(spit "prebuild.prom"
+      (render-metrics
+       (prebuild-metrics #:steps '(("fetch" . #t) ("warm" . #f))
+                         #:targets '(("channels" . #t) ("laptop-home" . #f))
+                         #:durations '(("channels" . 120))
+                         #:warm-missing 3
+                         #:last-success 1793246400
+                         #:cache-bytes 5e10)))

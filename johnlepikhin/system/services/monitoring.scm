@@ -130,7 +130,8 @@
             backup-repository-name
             backup-alert-rules
             home-assistant-alert-rules
-            update-alert-rules))
+            update-alert-rules
+            prebuild-alert-rules))
 
 
 ;;;
@@ -2367,3 +2368,49 @@ generation may stay before it counts as outdated."
          (severity 'info)
          (labels weekly)
          (summary "Tags of {{ $labels.image }} cannot be listed"))))))))
+
+(define* (prebuild-alert-rules #:key (max-age "2d") (publish-cache-bytes #f))
+  "Return alert groups for `guix-prebuild-service-type'.  MAX-AGE is how
+long the newest published run may get; PUBLISH-CACHE-BYTES, when a number,
+bounds the guix publish cache."
+  (let ((n number->config-string))
+    (list
+     (alert-rule-group
+      (name "prebuild")
+      (rules
+       (append
+        (list
+         (alert-rule
+          (alert "PrebuildFailing")
+          (expr (string-append "guix_prebuild_step_success == 0 or "
+                               "guix_prebuild_target_success == 0"))
+          (category "builds")
+          (summary "Prebuild fails at {{ $labels.step }}{{ $labels.target }}: \
+see /var/log/guix-prebuild"))
+         (alert-rule
+          (alert "PrebuildStale")
+          ;; absent() also covers a host where no run was ever published.
+          (expr (string-append
+                 "time() - guix_prebuild_last_success_timestamp_seconds > "
+                 (n (duration->seconds max-age))
+                 " or absent(guix_prebuild_last_success_timestamp_seconds)"))
+          (for "1h")
+          (category "builds")
+          (summary "No prebuild was published for {{ $value | \
+humanizeDuration }}: updates fetch from the internet"))
+         (alert-rule
+          (alert "PrebuildCacheCold")
+          (expr "guix_prebuild_warm_missing > 0")
+          (for "1h")
+          (category "builds")
+          (summary "{{ $value }} items of the prebuild are not in the publish \
+cache yet")))
+        (if publish-cache-bytes
+            (list (alert-rule
+                   (alert "PublishCacheLarge")
+                   (expr (string-append "guix_publish_cache_bytes > "
+                                        (n publish-cache-bytes)))
+                   (category "builds")
+                   (summary "The guix publish cache takes \
+{{ $value | humanize1024 }}B")))
+            '())))))))

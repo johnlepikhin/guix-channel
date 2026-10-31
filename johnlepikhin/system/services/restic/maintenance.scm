@@ -28,6 +28,7 @@
   #:use-module (ice-9 regex)
   #:use-module (ice-9 textual-ports)
   #:use-module (json)
+  #:use-module (johnlepikhin system services host-process)
   #:use-module (johnlepikhin system services monitoring textfile)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-11)
@@ -149,28 +150,6 @@ to ROOT, to the textfile DIRECTORY."
 ;;; Maintenance.
 ;;;
 
-(define (run-as user program . args)
-  "Run PROGRAM with ARGS as USER; return its exit status and output."
-  (let* ((pw (getpwnam user))
-         (pipe (pipe))
-         (pid (primitive-fork)))
-    (if (zero? pid)
-        (catch #t
-          (lambda ()
-            (close-port (car pipe))
-            (dup2 (fileno (cdr pipe)) 1)
-            (setgroups #())
-            (setgid (passwd:gid pw))
-            (setuid (passwd:uid pw))
-            (setenv "HOME" (passwd:dir pw))
-            (apply execl program program args))
-          (lambda _ (primitive-exit 127)))
-        (begin
-          (close-port (cdr pipe))
-          (let ((output (get-string-all (car pipe))))
-            (close-port (car pipe))
-            (values (status:exit-val (cdr (waitpid pid))) output))))))
-
 (define (log fmt . args)
   (apply format #t (string-append "~a " fmt "~%")
          (strftime "%F %T" (localtime (current-time))) args)
@@ -184,10 +163,12 @@ unsafe; failures are reported, not raised."
          (repo (string-append root "/" name))
          (labels `(("repository" . ,name)))
          (restic* (lambda (seconds . args)
-                    (apply run-as user timeout (number->string seconds)
-                           restic "--cache-dir" cache "--quiet" "-r" repo
-                           "--password-file" (assoc-ref job 'key-file)
-                           args)))
+                    (run-as user timeout
+                            (cons* (number->string seconds)
+                                   restic "--cache-dir" cache "--quiet"
+                                   "-r" repo
+                                   "--password-file" (assoc-ref job 'key-file)
+                                   args))))
          (step (lambda (step-name ok?)
                  (log "~a: ~a ~a" name step-name (if ok? "ok" "FAILED"))
                  (metric "restic_maintenance_success" ok?
@@ -235,7 +216,8 @@ unsafe; failures are reported, not raised."
                  (restore-ok?
                   (and (assoc-ref job 'verify-include)
                        (let ((target (string-append cache "/restore-verify")))
-                         (run-as user timeout "600" rm "-rf" "--" target)
+                         (run-as user timeout
+                                 (list "600" rm "-rf" "--" target))
                          (let-values (((status output)
                                        (restic* 3600 "restore" "latest"
                                                 "--retry-lock" "30m"
@@ -243,7 +225,8 @@ unsafe; failures are reported, not raised."
                                                 "--include"
                                                 (assoc-ref job 'verify-include)
                                                 "--verify" "--json")))
-                           (run-as user timeout "600" rm "-rf" "--" target)
+                           (run-as user timeout
+                                   (list "600" rm "-rf" "--" target))
                            (and (zero? status)
                                 (restore-summary-ok? output))))))
                  (size

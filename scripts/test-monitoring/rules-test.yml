@@ -390,3 +390,51 @@ tests:
         exp_alerts:
           - exp_labels: {severity: info, notify: weekly, instance: h, image: docker.io/grafana/alloy}
             exp_annotations: {summary: "Tags of docker.io/grafana/alloy cannot be listed"}
+
+  # Prebuild: a failing step, an old run, a cold cache, a large cache.
+  - interval: 1m
+    input_series:
+      - series: 'guix_prebuild_step_success{instance="h",step="warm"}'
+        values: '0x3000'
+      - series: 'guix_prebuild_target_success{instance="h",target="laptop-home"}'
+        values: '1x3000'
+      - series: 'guix_prebuild_last_success_timestamp_seconds{instance="h"}'
+        values: '0x3000'
+      - series: 'guix_prebuild_warm_missing{instance="h"}'
+        values: '3x3000'
+      - series: 'guix_publish_cache_bytes{instance="h"}'
+        values: '2e11x3000'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: PrebuildFailing
+        exp_alerts:
+          - exp_labels: {severity: warning, category: builds, instance: h, step: warm}
+            exp_annotations: {summary: "Prebuild fails at warm: see /var/log/guix-prebuild"}
+      - eval_time: 2h
+        alertname: PrebuildStale
+        exp_alerts: []
+      - eval_time: 50h
+        alertname: PrebuildStale
+        exp_alerts:
+          - exp_labels: {severity: warning, category: builds, instance: h}
+            exp_annotations: {summary: "No prebuild was published for 2d 2h 0m 0s: updates fetch from the internet"}
+      - eval_time: 2h
+        alertname: PrebuildCacheCold
+        exp_alerts:
+          - exp_labels: {severity: warning, category: builds, instance: h}
+            exp_annotations: {summary: "3 items of the prebuild are not in the publish cache yet"}
+      - eval_time: 1m
+        alertname: PublishCacheLarge
+        exp_alerts:
+          - exp_labels: {severity: warning, category: builds, instance: h}
+            exp_annotations: {summary: "The guix publish cache takes 186.3GiB"}
+
+  # A host where no prebuild was ever published.
+  - interval: 1m
+    input_series: []
+    alert_rule_test:
+      - eval_time: 90m
+        alertname: PrebuildStale
+        exp_alerts:
+          - exp_labels: {severity: warning, category: builds}
+            exp_annotations: {summary: "No prebuild was published for 1s: updates fetch from the internet"}

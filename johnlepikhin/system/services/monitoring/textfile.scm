@@ -42,6 +42,7 @@
             image-reference
             newer-tag
             update-metrics
+            command-output
             run-collector
             collect-shepherd
             collect-smart
@@ -135,7 +136,18 @@
     ("container_image_check_success"
      . "Whether the tags of the image could be listed.")
     ("guix_system_generation_timestamp_seconds"
-     . "When the current system generation was switched to.")))
+     . "When the current system generation was switched to.")
+    ("guix_prebuild_step_success"
+     . "Whether the step of the last prebuild run succeeded.")
+    ("guix_prebuild_target_success"
+     . "Whether the target was built in the last prebuild run.")
+    ("guix_prebuild_duration_seconds"
+     . "How long building the target took in the last prebuild run.")
+    ("guix_prebuild_warm_missing"
+     . "Items the publish cache did not serve yet after warming.")
+    ("guix_prebuild_last_success_timestamp_seconds"
+     . "When a prebuild run was last published.")
+    ("guix_publish_cache_bytes" . "Size of the guix publish cache.")))
 
 (define (group-samples samples)
   "SAMPLES with those of each metric name together, in the order the names

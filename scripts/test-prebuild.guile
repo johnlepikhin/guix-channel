@@ -1,0 +1,152 @@
+;;; Not a .scm file: guix pull compiles, and so runs, every .scm file of
+;;; the channel.
+;;;
+;;; Unit tests of (johnlepikhin system services guix-prebuild run) and of
+;;; (johnlepikhin system services host-process).
+;;;
+;;; Usage: guix repl -L . -- scripts/test-prebuild.guile
+
+(use-modules (johnlepikhin system services guix-prebuild run)
+             (johnlepikhin system services host-process)
+             (johnlepikhin system services monitoring textfile)
+             (ice-9 match)
+             (srfi srfi-11))
+
+(define failures 0)
+(define checks 0)
+
+(define-syntax-rule (check name expr)
+  (begin
+    (set! checks (+ checks 1))
+    (if (catch #t (lambda () expr) (lambda _ #f))
+        (format #t "  ok    ~a~%" name)
+        (begin
+          (set! failures (+ failures 1))
+          (format #t "  FAIL  ~a~%" name)))))
+
+(define (raises? thunk)
+  (catch #t (lambda () (thunk) #f) (const #t)))
+
+(define guix-commit "eaf9e998a35b0ebe657cbb7da902a928daf60c90")
+(define channel-commit "6a0e4eacdb0a9b5f4b09987f9bb985ee00af3603")
+
+;; As `guix describe -f channels' prints it.
+(define described
+  (string-append "(list (channel
+        (name 'guix)
+        (url \"https://codeberg.org/guix/guix-mirror.git\")
+        (branch \"master\")
+        (commit
+          \"" guix-commit "\")
+        (introduction
+          (make-channel-introduction
+            \"9edb3f66fd807b096b48283debdcddccfea34bad\"
+            (openpgp-fingerprint
+              \"BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA\"))))
+      (channel
+        (name 'johnlepikhin)
+        (url \"https://github.com/johnlepikhin/guix-channel\")
+        (branch \"master\")
+        (commit
+          \"" channel-commit "\")))
+"))
+
+(display "Channels\n")
+(check "commits of described channels"
+       (equal? (channel-commits described)
+               `((guix ,guix-commit) (johnlepikhin ,channel-commit))))
+(check "a channel without a commit is refused"
+       (raises? (lambda ()
+                  (channel-commits
+                   "(list (channel (name 'guix) (url \"x\")))"))))
+(check "a short commit is refused"
+       (raises? (lambda ()
+                  (channel-commits
+                   "(list (channel (name 'guix) (commit \"abc\")))"))))
+(check "anything but a channel list is refused"
+       (raises? (lambda () (channel-commits "(system \"rm -rf /\")"))))
+
+(display "Store paths\n")
+(define item "/gnu/store/rqzf25mlpyx7lrspcwsbyjxic0b7xy5d-system")
+(check "a store item" (store-path? item))
+(check "a file inside an item is not one"
+       (not (store-path? (string-append item "/etc"))))
+(check "a path outside the store is not one"
+       (not (store-path? "/etc/rqzf25mlpyx7lrspcwsbyjxic0b7xy5d-system")))
+(check "letters outside nix base32 are refused"
+       (not (store-path? "/gnu/store/eqzf25mlpyx7lrspcwsbyjxic0b7xy5d-x")))
+(check "the hash of an item"
+       (string=? (store-path-hash item) "rqzf25mlpyx7lrspcwsbyjxic0b7xy5d"))
+(check "the output of guix system build"
+       (equal? (last-store-path
+                (string-append "substitute: looking for substitutes\n"
+                               "building /gnu/store/abc.drv...\n"
+                               item "\n"))
+               item))
+(check "no store path in the output"
+       (not (last-store-path "guix system: error: failed\n")))
+
+(display "Generations\n")
+(check "publishable when every target is built and rooted"
+       (publishable? `(("channels" ,item #t) ("system" ,item #t))))
+(check "not publishable with a failed target"
+       (not (publishable? `(("channels" ,item #t) ("home" #f #f)))))
+(check "not publishable with a missing root"
+       (not (publishable? `(("channels" ,item #f)))))
+(check "not publishable without targets" (not (publishable? '())))
+(check "stale: all but the newest published and the current"
+       (equal? (stale-generations '(1 2 3 4 5 6) '(1 2 4) 6 2)
+               '(1 3 5)))
+(check "stale: nothing published yet"
+       (equal? (stale-generations '(1 2) '() 2 2) '(1)))
+(check "info.scm"
+       (equal? (info->sexp 3 1793400000 "c0ffee"
+                           `(("laptop-system" ,item "/gnu/store/x.drv")))
+               `(guix-prebuild (version 1) (generation 3)
+                               (timestamp 1793400000)
+                               (configs-commit "c0ffee")
+                               (targets (((name "laptop-system") (out ,item)
+                                          (drv "/gnu/store/x.drv")))))))
+
+(display "Metrics\n")
+(check "metrics of a run"
+       (equal? (prebuild-metrics #:steps '(("fetch" . #t))
+                                 #:targets '(("home" . #f))
+                                 #:durations '(("home" . 30))
+                                 #:warm-missing 0
+                                 #:last-success #f
+                                 #:cache-bytes 100)
+               (list (metric "guix_prebuild_step_success" #t
+                             '(("step" . "fetch")))
+                     (metric "guix_prebuild_target_success" #f
+                             '(("target" . "home")))
+                     (metric "guix_prebuild_duration_seconds" 30
+                             '(("target" . "home")))
+                     (metric "guix_prebuild_warm_missing" 0)
+                     (metric "guix_publish_cache_bytes" 100))))
+
+(display "Running as a user\n")
+(define me (passwd:name (getpwuid (getuid))))
+(check "a fixed environment replaces the inherited one"
+       (equal? (run-as-environment "/home/u" '(("PATH" . "/bin")
+                                               ("HOME" . "/elsewhere")))
+               '("HOME=/home/u" "PATH=/bin")))
+(check "an inherited environment gets the user's HOME"
+       (let ((env (run-as-environment "/home/u")))
+         (and (member "HOME=/home/u" env)
+              (= 1 (length (filter (lambda (e) (string-prefix? "HOME=" e))
+                                   env))))))
+(let-values (((status output)
+              (run-as me "/bin/sh" '("-c" "echo $HOME $FOO; exit 3")
+                      #:environment '(("FOO" . "bar")))))
+  (check "the exit status of the child" (= status 3))
+  (check "the child sees the given environment"
+         (string=? output (string-append (passwd:dir (getpwuid (getuid)))
+                                         " bar\n"))))
+(check "call-as reports a thunk that fails"
+       (not (call-as me (lambda () (error "boom")))))
+(check "call-as reports a thunk that returns"
+       (call-as me (lambda () #t)))
+
+(format #t "~a checks, ~a failed~%" checks failures)
+(exit (zero? failures))

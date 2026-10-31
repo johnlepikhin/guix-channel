@@ -258,6 +258,13 @@
                                ;; with a substitute server nearby can let
                                ;; them go and fetch them again when needed.
                                (gc-keep-outputs? #t)
+                               ;; #f for none, e.g. on a machine updated
+                               ;; from prebuilt pinned channels.
+                               (pull-job guix-pull-job)
+                               ;; An unattended-upgrade-configuration, or #f.
+                               (unattended-upgrade
+                                (unattended-upgrade-configuration
+                                 (schedule "30 02  */3 * *")))
                                (extra-mcron-jobs '()))
   (cons*
 
@@ -273,8 +280,6 @@
                                            (fast-connectable? #t)))
          (simple-service 'dbus-extras dbus-root-service-type
                          (list blueman))
-         (service unattended-upgrade-service-type (unattended-upgrade-configuration
-                   (schedule "30 02  */3 * *")))
          (service public-backlight-brightness-service-type
                   '())
          (service hostapd-service-type
@@ -321,9 +326,10 @@
                                       "tlp" "start")))
                "\"\n")))
          (service mcron-service-type
-                  (mcron-configuration (jobs (cons* guix-pull-job gc-job
-                                                    fstrim-job
-                                                    extra-mcron-jobs))))
+                  (mcron-configuration (jobs (filter identity
+                                                     (cons* pull-job gc-job
+                                                            fstrim-job
+                                                            extra-mcron-jobs)))))
          ;; Otherwise jobs added by a reconfigure run only after mcron is
          ;; restarted.
          (service restart-on-upgrade-service-type)
@@ -365,9 +371,14 @@
          unbound-recursive-service
          unbound-flush-dispatcher-service
 
-         (tuned-desktop-services #:authorized-keys authorized-keys
-                                 #:substitute-urls substitute-urls
-                                 #:dnsmasq-configuration-files
-                                 dnsmasq-configuration-files
-                                 #:sleep-hooks sleep-hooks
-                                 #:gc-keep-outputs? gc-keep-outputs?)))
+         (append
+          (if unattended-upgrade
+              (list (service unattended-upgrade-service-type
+                             unattended-upgrade))
+              '())
+          (tuned-desktop-services #:authorized-keys authorized-keys
+                                  #:substitute-urls substitute-urls
+                                  #:dnsmasq-configuration-files
+                                  dnsmasq-configuration-files
+                                  #:sleep-hooks sleep-hooks
+                                  #:gc-keep-outputs? gc-keep-outputs?))))
