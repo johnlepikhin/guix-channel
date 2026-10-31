@@ -261,6 +261,11 @@
                                ;; #f for none, e.g. on a machine updated
                                ;; from prebuilt pinned channels.
                                (pull-job guix-pull-job)
+                               ;; The machine's host name, for services that
+                               ;; otherwise take the one of the machine the
+                               ;; configuration is evaluated on, such as a
+                               ;; build server preparing it; #f for that.
+                               (host-name #f)
                                ;; An unattended-upgrade-configuration, or #f.
                                (unattended-upgrade
                                 (unattended-upgrade-configuration
@@ -345,7 +350,12 @@
                                              (compression-algorithm 'zstd)))
 
          (service libvirt-service-type
-                  (libvirt-configuration (unix-sock-group "libvirt")))
+                  (if host-name
+                      (libvirt-configuration
+                       (unix-sock-group "libvirt")
+                       (mdns-name (string-append "Virtualization Host "
+                                                 host-name)))
+                      (libvirt-configuration (unix-sock-group "libvirt"))))
          (service virtlog-service-type)
          (service openvswitch-service-type)
 
