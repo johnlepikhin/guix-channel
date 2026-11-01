@@ -372,7 +372,10 @@
                                           (avoid-regexp "xmonad")))
 
          (service containerd-service-type)
-         (service docker-service-type)
+         (service docker-service-type
+                  (docker-configuration
+                   (config-file (docker-daemon-config-file))))
+         docker-runtime-migration-service
 
          ;; (service fprintd-service-type)
 

@@ -33,7 +33,6 @@
   #:use-module (gnu services networking)           ; ntp
   #:use-module (gnu services ssh)
   #:use-module (guix gexp)
-  #:use-module (json)
   #:use-module (johnlepikhin system services common)
   #:use-module (johnlepikhin system services restart-on-upgrade)
   #:export (%server-substitute-urls
@@ -78,8 +77,8 @@ alist of user names to lists of public key files, as in
 SUBSTITUTE-URLS configure substitutes.  CHANNELS, when true, is written to
 /etc/guix/channels.scm.  GUIX-EXTRA-OPTIONS are passed to guix-daemon, e.g.
 @code{\"--max-jobs=4\"}.  DOCKER-DAEMON-SETTINGS, an alist, goes to dockerd's
-daemon.json, e.g. @code{'((\"live-restore\" . #t))}; dockerd reads it only
-when it starts."
+daemon.json, e.g. @code{'((\"live-restore\" . #t))}, next to the runtime set
+by @code{docker-daemon-config-file}; dockerd reads it only when it starts."
   (cons*
    (service openssh-service-type
             (openssh-configuration
@@ -92,12 +91,9 @@ when it starts."
    (service elogind-service-type)
    (service containerd-service-type)
    (service docker-service-type
-            (if (null? docker-daemon-settings)
-                (docker-configuration)
-                (docker-configuration
-                 (config-file
-                  (plain-file "daemon.json"
-                              (scm->json-string docker-daemon-settings))))))
+            (docker-configuration
+             (config-file (docker-daemon-config-file docker-daemon-settings))))
+   docker-runtime-migration-service
 
    ;; Announces guix publish on the local network.
    (service avahi-service-type)

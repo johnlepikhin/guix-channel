@@ -19,6 +19,8 @@
 ;;; Building blocks shared by the desktop and the server system services.
 
 (define-module (johnlepikhin system services common)
+  #:use-module (gnu packages containers)           ; runc
+  #:use-module (gnu packages guile)                ; guile-json-4
   #:use-module (gnu packages linux)                ; util-linux
   #:use-module (gnu services)
   #:use-module (guix gexp)
@@ -28,7 +30,9 @@
             make-system-generations-job
             guix-gc-job
             fstrim-job
-            prefer-ipv4-service))
+            prefer-ipv4-service
+            docker-daemon-config-file
+            docker-runtime-migration-service))
 
 ;; Also signs the substitutes served by cache-cdn.guix.moe.
 (define nonguix-signing-key
@@ -85,3 +89,87 @@ at deleted generations."
                   (list `("gai.conf"
                           ,(plain-file "gai.conf"
                                        "precedence ::ffff:0:0/96 100\n")))))
+
+;; Guix patches dockerd so that the name of its stock runtime is the store
+;; file name of runc.  dockerd records that name in the hostconfig.json of
+;; every container it creates, so once runc is upgraded that name matches no
+;; runtime and these containers refuse to start with "Unknown runtime
+;; specified".  A runtime declared in daemon.json under a fixed name is
+;; recorded by that name instead, and its path is looked up each time dockerd
+;; starts.  The name "runc" is free: the reserved one is the store file name.
+(define* (docker-daemon-config-file #:optional (settings '()))
+  "Return a daemon.json for dockerd holding the alist SETTINGS together with
+a default runtime whose name survives upgrades of runc."
+  (for-each (lambda (key)
+              (when (assoc key settings)
+                (error "docker-daemon-config-file: setting is managed here:"
+                       key)))
+            '("runtimes" "default-runtime"))
+  (computed-file
+   "daemon.json"
+   (with-extensions (list guile-json-4)
+     #~(begin
+         (use-modules (json))
+         (call-with-output-file #$output
+           (lambda (port)
+             (scm->json
+              `(("runtimes"
+                 ("runc" ("path" . #$(file-append runc "/sbin/runc"))))
+                ("default-runtime" . "runc")
+                ,@'#$settings)
+              port)))))))
+
+;; Containers created before `docker-daemon-config-file' was in use, or by a
+;; dockerd started without it, record the runtime by its store file name.
+;; Rename it to "runc" at boot, before dockerd starts: a running dockerd
+;; writes its own idea of hostconfig.json back when it stops, so an edit made
+;; under it is lost.  On a reconfigure dockerd keeps running, and the rename
+;; waits for the next boot; until then the old name still matches the stock
+;; runtime as long as runc is not upgraded and dockerd not restarted.
+(define docker-runtime-migration-service
+  (simple-service
+   'docker-runtime-migration activation-service-type
+   #~(begin
+       (use-modules (ice-9 ftw)
+                    (ice-9 regex)
+                    (ice-9 textual-ports)
+                    (srfi srfi-1))
+
+       (define (dockerd-running?)
+         (any (lambda (pid)
+                (let ((comm (string-append "/proc/" pid "/comm")))
+                  (false-if-exception
+                   (string=? "dockerd"
+                             (call-with-input-file comm
+                               (compose string-trim-both get-string-all))))))
+              (or (scandir "/proc" (lambda (name)
+                                     (string-every char-set:digit name)))
+                  '())))
+
+       (define store-runtime
+         (make-regexp "\"Runtime\":\"/gnu/store/[^\"]*/runc\""))
+
+       (define (migrate file)
+         (let* ((text (call-with-input-file file get-string-all))
+                (new (regexp-substitute/global #f store-runtime text
+                                               'pre "\"Runtime\":\"runc\""
+                                               'post)))
+           (unless (string=? text new)
+             (let ((tmp (string-append file ".tmp")))
+               (call-with-output-file tmp
+                 (lambda (port) (put-string port new)))
+               (chmod tmp (stat:perms (stat file)))
+               (rename-file tmp file)
+               (format #t "docker: runtime of ~a renamed to runc~%"
+                       (basename (dirname file)))))))
+
+       (let ((dir "/var/lib/docker/containers"))
+         (when (and (file-exists? dir) (not (dockerd-running?)))
+           (for-each (lambda (id)
+                       (let ((file (string-append dir "/" id
+                                                  "/hostconfig.json")))
+                         (when (file-exists? file)
+                           (migrate file))))
+                     (or (scandir dir (lambda (name)
+                                        (not (member name '("." "..")))))
+                         '())))))))
