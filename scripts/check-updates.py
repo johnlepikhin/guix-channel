@@ -47,7 +47,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 # Packages that are deliberately pinned: bootstrap toolchains and dated
 # nightly snapshots, where "newest upstream" is not what we want.
-PINNED = re.compile(r"^(rust|rust-next|rust-nightly|rust-src|rust-clippy|"
+PINNED = re.compile(r"^(rust|rust-nightly|rust-src|rust-clippy|"
                     r"rust-binary(-complete)?|google-chromium)$")
 
 INVENTORY_SCM = r"""

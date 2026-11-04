@@ -33,7 +33,6 @@ cat > "$SCRIPT" <<'SCHEME'
 ;; from the list so lint-all.sh doesn't waste time linting them.
 (define excluded-modules
   '((johnlepikhin packages rust-crates)
-    (johnlepikhin packages rust)
     (johnlepikhin packages rust-binary)
     (johnlepikhin packages rust-nightly)
     (johnlepikhin packages python-xyz)))
