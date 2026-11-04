@@ -60,6 +60,7 @@
   #:use-module (johnlepikhin system services utils)
   #:use-module (json)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-26)
   #:export (alert-rule
             alert-rule?
             alert-rule-group
@@ -2054,19 +2055,39 @@ or prometheus_notifications_alertmanagers_discovered < 1")
        (category "monitoring")
        (summary "Prometheus storage fails or nears its size limit")))))))
 
+(define (uplink-down-expr uplink interface)
+  "Return a PromQL expression with a value while UPLINK on the router
+INTERFACE is down."
+  (string-append "(max(mktxp_interface_running{name=\"" interface
+                 "\"}) == 0 or max(probe_success{uplink=\"" uplink
+                 "\"}) == 0)"))
+
+(define (uplink-up-expr uplink interface)
+  "Return a PromQL expression with a value while UPLINK on the router
+INTERFACE is up."
+  (string-append "(max(mktxp_interface_running{name=\"" interface
+                 "\"}) == 1 and on () max(probe_success{uplink=\"" uplink
+                 "\"}) == 1)"))
+
 (define* (network-alert-rules #:key
                               (uplinks '())
+                              (backup-uplinks '())
                               (router-ports '())
                               (latency-threshold 0.2)
                               (router-cpu-load 90)
                               (router-free-memory 10e6))
   "Return alert groups for a MikroTik router and its uplinks, watched by
 mktxp and by blackbox ICMP probes labelled uplink=NAME.  UPLINKS is a list
-of (NAME INTERFACE) for the uplinks and their router interfaces: a probe
-alone cannot tell a dead uplink, as the router sends the probes of a dead
-one through the others.  ROUTER-PORTS is an alist of router interfaces to
-their expected rate in Mbit/s.  LATENCY-THRESHOLD is in seconds."
-  (let ((n number->config-string))
+of (NAME INTERFACE) for the primary uplinks and their router interfaces: a
+probe alone cannot tell a dead uplink, as the router sends the probes of a
+dead one through the others.  BACKUP-UPLINKS has the same form for the
+uplinks the router falls back to: they may be off on purpose, so they only
+alert when the traffic fails over to them.  ROUTER-PORTS is an alist of
+router interfaces to their expected rate in Mbit/s, checked while they are
+up.  LATENCY-THRESHOLD is in seconds."
+  (let ((n number->config-string)
+        (all-uplinks (append uplinks backup-uplinks))
+        (down (cut apply uplink-down-expr <>)))
     (list
      (alert-rule-group
       (name "network")
@@ -2076,16 +2097,31 @@ their expected rate in Mbit/s.  LATENCY-THRESHOLD is in seconds."
                ((uplink interface)
                 (alert-rule
                  (alert "UplinkDown")
-                 (expr (string-append
-                        "max(mktxp_interface_running{name=\"" interface
-                        "\"}) == 0 or max(probe_success{uplink=\"" uplink
-                        "\"}) == 0"))
+                 (expr (uplink-down-expr uplink interface))
                  (for "3m")
                  (category "network")
                  (labels `(("uplink" . ,uplink)))
                  (summary (string-append "Uplink " uplink " (" interface
                                          ") is down")))))
              uplinks)
+        (if (null? uplinks)
+            '()
+            (map (match-lambda
+                   ((uplink interface)
+                    (alert-rule
+                     (alert "UplinkFailover")
+                     (expr (string-append
+                            "("
+                            (string-join (map down uplinks) " or ")
+                            ") and on () "
+                            (uplink-up-expr uplink interface)))
+                     (for "3m")
+                     (category "network")
+                     (labels `(("uplink" . ,uplink)))
+                     (summary (string-append
+                               "Internet goes through the backup uplink "
+                               uplink " (" interface ")")))))
+                 backup-uplinks))
         (map (match-lambda
                ((uplink interface)
                 (alert-rule
@@ -2100,25 +2136,27 @@ their expected rate in Mbit/s.  LATENCY-THRESHOLD is in seconds."
                  (summary (string-append
                            "Uplink " uplink ": median RTT {{ $value | "
                            "humanizeDuration }}")))))
-             uplinks)
-        (if (null? uplinks)
+             all-uplinks)
+        (if (null? all-uplinks)
             '()
             (list (alert-rule
                    (alert "UplinksAllDown")
-                   (expr (string-append
-                          "count(ALERTS{alertname=\"UplinkDown\","
-                          "alertstate=\"firing\"}) >= "
-                          (n (length uplinks))))
+                   (expr (string-join (map down all-uplinks)
+                                      " and on () "))
+                   (for "3m")
                    (severity 'critical)
                    (category "network")
-                   (summary "All uplinks were down"))))
+                   (summary "All uplinks are down"))))
         (map (match-lambda
                ((interface . mbits)
                 (alert-rule
                  (alert "RouterPortSlow")
+                 ;; A port that is down, e.g. of a backup uplink switched
+                 ;; off, is not slow.
                  (expr (string-append
                         "mktxp_interface_rate{name=\"" interface "\"} < "
-                        (n mbits)))
+                        (n mbits) " and on (name) mktxp_interface_running"
+                        "{name=\"" interface "\"} == 1"))
                  (for "10m")
                  (category "network")
                  (summary (string-append
@@ -2297,13 +2335,16 @@ compromised client"))
 (define* (home-assistant-alert-rules #:key
                                      (battery-percent 20)
                                      (device-entities ".*")
+                                     (excluded-entities #f)
                                      (unavailable-for "1h")
                                      (outage #f))
   "Return alert groups for the devices of Home Assistant, from the metrics of
 its prometheus integration.  DEVICE-ENTITIES is a regular expression of the
 entities, one per device, whose unavailability means the device is gone,
-e.g. its battery or power sensor.  OUTAGE, when a PromQL expression, is true
-during a power cut, which takes mains devices away as expected."
+e.g. its battery or power sensor.  EXCLUDED-ENTITIES, when a regular
+expression, drops the matching ones of them, e.g. of devices switched off on
+purpose.  OUTAGE, when a PromQL expression, is true during a power cut, which
+takes mains devices away as expected."
   (let ((n number->config-string))
     (list
      (alert-rule-group
@@ -2322,7 +2363,11 @@ during a power cut, which takes mains devices away as expected."
          (alert "DeviceUnavailable")
          (expr (string-append
                 ;; A raw string: the regular expression goes as it is.
-                "hass_entity_available{entity=~`" device-entities "`} == 0"
+                "hass_entity_available{entity=~`" device-entities "`"
+                (if excluded-entities
+                    (string-append ",entity!~`" excluded-entities "`")
+                    "")
+                "} == 0"
                 (if outage
                     (string-append " unless on () (" outage ")")
                     "")))

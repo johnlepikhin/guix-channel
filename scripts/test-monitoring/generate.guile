@@ -32,8 +32,8 @@
                            (service-alert-rules)
                            (stack-alert-rules)
                            (network-alert-rules
-                            #:uplinks '(("jet" "pppoe-out1")
-                                        ("starlink" "ether2"))
+                            #:uplinks '(("jet" "pppoe-out1"))
+                            #:backup-uplinks '(("starlink" "ether2"))
                             #:router-ports '(("ether2" . 1000)))
                            (backup-alert-rules
                             #:repositories
@@ -46,6 +46,7 @@
                             #:storage-bytes 1e12)
                            (home-assistant-alert-rules
                             #:device-entities "sensor\\..*_(battery|power)"
+                            #:excluded-entities "sensor\\.starlink_.*"
                             #:outage "hass_input_boolean_state{entity=\"input_boolean.outage\"} == 1")
                            (update-alert-rules)
                            (prebuild-alert-rules

@@ -176,7 +176,57 @@ tests:
           - exp_labels: {severity: warning, category: network, uplink: jet}
             exp_annotations: {summary: "Uplink jet (pppoe-out1) is down"}
       - eval_time: 5m
+        alertname: UplinkFailover
+        exp_alerts:
+          - exp_labels: {severity: warning, category: network, uplink: starlink}
+            exp_annotations: {summary: "Internet goes through the backup uplink starlink (ether2)"}
+      - eval_time: 5m
         alertname: UplinksAllDown
+        exp_alerts: []
+
+  # A backup uplink switched off while the primary one works: no alert.
+  - interval: 1m
+    input_series:
+      - series: 'mktxp_interface_running{name="pppoe-out1",routerboard_name="r"}'
+        values: '1x10'
+      - series: 'probe_success{instance="9.9.9.9",uplink="jet"}'
+        values: '1x10'
+      - series: 'mktxp_interface_running{name="ether2",routerboard_name="r"}'
+        values: '1 0x10'
+      - series: 'probe_success{instance="1.0.0.1",uplink="starlink"}'
+        values: '1 0x10'
+      - series: 'mktxp_interface_rate{name="ether2",routerboard_name="r"}'
+        values: '1000 0x10'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: UplinkDown
+        exp_alerts: []
+      - eval_time: 10m
+        alertname: UplinkFailover
+        exp_alerts: []
+      - eval_time: 10m
+        alertname: RouterPortSlow
+        exp_alerts: []
+
+  # Both uplinks down: the primary's probes fail too, with nowhere to go.
+  - interval: 1m
+    input_series:
+      - series: 'mktxp_interface_running{name="pppoe-out1",routerboard_name="r"}'
+        values: '1 0x10'
+      - series: 'probe_success{instance="9.9.9.9",uplink="jet"}'
+        values: '1 0x10'
+      - series: 'mktxp_interface_running{name="ether2",routerboard_name="r"}'
+        values: '0x10'
+      - series: 'probe_success{instance="1.0.0.1",uplink="starlink"}'
+        values: '0x10'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: UplinksAllDown
+        exp_alerts:
+          - exp_labels: {severity: critical, category: network}
+            exp_annotations: {summary: "All uplinks are down"}
+      - eval_time: 5m
+        alertname: UplinkFailover
         exp_alerts: []
 
   # A port negotiated below its expected rate.
@@ -184,6 +234,8 @@ tests:
     input_series:
       - series: 'mktxp_interface_rate{name="ether2",routerboard_name="r"}'
         values: '100x15'
+      - series: 'mktxp_interface_running{name="ether2",routerboard_name="r"}'
+        values: '1x15'
     alert_rule_test:
       - eval_time: 11m
         alertname: RouterPortSlow
@@ -339,6 +391,8 @@ tests:
       - series: 'hass_entity_available{instance="h",entity="sensor.kladovka_server_power"}'
         values: '0x120'
       - series: 'hass_entity_available{instance="h",entity="sensor.server_cost"}'
+        values: '0x120'
+      - series: 'hass_entity_available{instance="h",entity="sensor.starlink_power"}'
         values: '0x120'
       - series: 'hass_input_boolean_state{instance="h",entity="input_boolean.outage"}'
         values: '0x90 1x30'
