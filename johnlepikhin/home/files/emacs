@@ -1,3 +1,4 @@
+;;; .emacs  -*- lexical-binding: t -*-
 
 (require 'package)
 (add-to-list 'package-archives
