@@ -66,6 +66,7 @@
   #:use-module (gnu packages markup)
   #:use-module (gnu packages maths)
   #:use-module (gnu packages messaging)
+  #:use-module (gnu packages moreutils)
   #:use-module (gnu packages music)
   #:use-module (gnu packages networking)
   #:use-module (gnu packages node)
@@ -262,6 +263,7 @@
    graphviz
    grep
    imdu
+   moreutils
    netcat
    pigz
    procps
