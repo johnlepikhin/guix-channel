@@ -29,14 +29,14 @@
 (define-public i3im
   (package
     (name "i3im")
-    (version "0.2.1")
+    (version "0.3.0")
     (source
      (origin
        (method url-fetch)
        (uri (crate-uri name version))
        (file-name (string-append name "-" version ".tar.gz"))
        (sha256
-        (base32 "02sfir2p7nrbvzcjv5diva7skrv0irpg5vp2msmai7i0g62mayh0"))))
+        (base32 "0fv55341svnxc2rdjhpjm20ifasywmzh90sgcivb029ng150zn7z"))))
     (build-system cargo-build-system)
     (arguments
      `(#:install-source? #f))

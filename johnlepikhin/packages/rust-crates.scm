@@ -6434,6 +6434,7 @@
               rust-serde-json-1.0.134
               rust-serde-regex-1.1.0
               rust-serde-yaml-0.9.34+deprecated
+              rust-shell-words-1.1.1
               rust-shellexpand-3.1.0
               rust-slog-2.7.0
               rust-slog-envlogger-2.2.0
