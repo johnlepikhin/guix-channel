@@ -29,6 +29,7 @@
   #:use-module (gnu packages elf)
   #:use-module (gnu packages rust-apps)
   #:use-module (gnu packages version-control)
+  #:use-module (gnu packages virtualization)
   #:use-module (nonguix licenses))
 
 ;; Anthropic Claude Code CLI.
@@ -144,3 +145,79 @@ dependency resolution.")
     ;; Agreements outlined here: https://code.claude.com/docs/en/legal-and-compliance"
     (license (nonfree
               "https://code.claude.com/docs/en/legal-and-compliance"))))
+
+;; OpenAI Codex CLI.
+;;
+;; Upstream publishes a fully static (musl, static-pie) build per release, so
+;; unlike claude-code no patchelf is needed: the binary is unpacked as-is into
+;; `bin/.codex-real'.  Building from source is impractical given the size of
+;; the cargo dependency graph.
+;;
+;; The Linux sandbox looks up `bwrap' on PATH (falling back to a bundled
+;; `codex-resources/bwrap' next to the executable, which we do not ship) and
+;; shells out to `rg' for file search and deny-glob expansion.  The wrapper
+;; pins bubblewrap, ripgrep, git and coreutils by store path for that.
+(define-public codex
+  (package
+    (name "codex")
+    (version "0.167.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append "https://github.com/openai/codex/releases/download/"
+                           "rust-v" version
+                           "/codex-x86_64-unknown-linux-musl.tar.gz"))
+       (sha256
+        (base32 "06i5vbmjd7sbld0pxgaqcl8afz6ypiz4qig41vlp9cym0rhq6r4x"))))
+    (build-system trivial-build-system)
+    (arguments
+     (list #:modules '((guix build utils))
+           #:builder
+           #~(begin
+               (use-modules (guix build utils))
+               (let* ((tar #$(file-append tar "/bin/tar"))
+                      (bash #$(file-append bash-minimal "/bin/bash"))
+                      (bin (string-append #$output "/bin"))
+                      (real (string-append bin "/.codex-real"))
+                      (tmpdir "codex-extract"))
+
+                 (mkdir-p bin)
+                 (mkdir-p tmpdir)
+
+                 ;; gzip is required by GNU tar for `-z'.
+                 (setenv "PATH" #$(file-append gzip "/bin"))
+                 (invoke tar "-xzf" #$source "-C" tmpdir)
+
+                 ;; The tarball holds a single file named after the target.
+                 (copy-file (string-append tmpdir
+                                           "/codex-x86_64-unknown-linux-musl")
+                            real)
+                 (chmod real #o755)
+
+                 (call-with-output-file (string-append bin "/codex")
+                   (lambda (port)
+                     (format port "#!~a~%~
+                                  export PATH=~a:~a:~a:~a:$PATH~%~
+                                  exec ~a \"$@\"~%"
+                             bash
+                             #$(file-append ripgrep "/bin")
+                             #$(file-append git-minimal "/bin")
+                             #$(file-append bubblewrap "/bin")
+                             #$(file-append coreutils "/bin")
+                             real)))
+                 (chmod (string-append bin "/codex") #o755)
+
+                 (delete-file-recursively tmpdir)))))
+    (native-inputs
+     (list tar gzip))
+    (inputs
+     (list bash-minimal bubblewrap coreutils ripgrep git-minimal))
+    (supported-systems '("x86_64-linux"))
+    (home-page "https://github.com/openai/codex")
+    (synopsis "OpenAI's coding agent for the terminal")
+    (description
+     "Codex CLI is OpenAI's agentic coding tool that runs locally in the
+terminal.  It reads and edits the codebase and runs commands inside a
+@code{bubblewrap}-based sandbox.  This package wires in @code{bubblewrap},
+@code{ripgrep}, @code{git} and @code{coreutils} via a shell wrapper.")
+    (license license:asl2.0)))

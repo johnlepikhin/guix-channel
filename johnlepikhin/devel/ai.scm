@@ -50,6 +50,7 @@
     ;; Core AI development tools
     ast-index
     claude-code
+    codex
     opencode)
    (home-devel-ai-configuration-extra-packages config)))
 
