@@ -146,12 +146,22 @@ dependency resolution.")
     (license (nonfree
               "https://code.claude.com/docs/en/legal-and-compliance"))))
 
+;; URI of the static Linux build of release asset NAME.
+(define (codex-release-uri version name)
+  (string-append "https://github.com/openai/codex/releases/download/rust-v"
+                 version "/" name "-x86_64-unknown-linux-musl.tar.gz"))
+
 ;; OpenAI Codex CLI.
 ;;
-;; Upstream publishes a fully static (musl, static-pie) build per release, so
-;; unlike claude-code no patchelf is needed: the binary is unpacked as-is into
-;; `bin/.codex-real'.  Building from source is impractical given the size of
-;; the cargo dependency graph.
+;; Upstream publishes fully static (musl, static-pie) builds per release, so
+;; unlike claude-code no patchelf is needed: the binaries are unpacked as-is
+;; into `libexec/codex'.  Building from source is impractical given the size
+;; of the cargo dependency graph.
+;;
+;; Code Mode runs JavaScript in a separate `codex-code-mode-host' process,
+;; which codex looks up next to its own executable.  It is shipped as a
+;; separate release asset; keeping both in `libexec/codex' satisfies that
+;; lookup without exposing the host on the profile's PATH.
 ;;
 ;; The Linux sandbox looks up `bwrap' on PATH (falling back to a bundled
 ;; `codex-resources/bwrap' next to the executable, which we do not ship) and
@@ -164,9 +174,7 @@ dependency resolution.")
     (source
      (origin
        (method url-fetch)
-       (uri (string-append "https://github.com/openai/codex/releases/download/"
-                           "rust-v" version
-                           "/codex-x86_64-unknown-linux-musl.tar.gz"))
+       (uri (codex-release-uri version "codex"))
        (sha256
         (base32 "06i5vbmjd7sbld0pxgaqcl8afz6ypiz4qig41vlp9cym0rhq6r4x"))))
     (build-system trivial-build-system)
@@ -178,21 +186,34 @@ dependency resolution.")
                (let* ((tar #$(file-append tar "/bin/tar"))
                       (bash #$(file-append bash-minimal "/bin/bash"))
                       (bin (string-append #$output "/bin"))
-                      (real (string-append bin "/.codex-real"))
+                      (libexec (string-append #$output "/libexec/codex"))
+                      (real (string-append libexec "/codex"))
                       (tmpdir "codex-extract"))
 
+                 (define (install-binary archive name)
+                   ;; Each tarball holds a single file named after the target.
+                   (let ((target (string-append libexec "/" name)))
+                     (invoke tar "-xzf" archive "-C" tmpdir)
+                     (copy-file (string-append tmpdir "/" name
+                                               "-x86_64-unknown-linux-musl")
+                                target)
+                     (chmod target #o755)))
+
                  (mkdir-p bin)
+                 (mkdir-p libexec)
                  (mkdir-p tmpdir)
 
                  ;; gzip is required by GNU tar for `-z'.
                  (setenv "PATH" #$(file-append gzip "/bin"))
-                 (invoke tar "-xzf" #$source "-C" tmpdir)
-
-                 ;; The tarball holds a single file named after the target.
-                 (copy-file (string-append tmpdir
-                                           "/codex-x86_64-unknown-linux-musl")
-                            real)
-                 (chmod real #o755)
+                 (install-binary #$source "codex")
+                 (install-binary
+                  #$(origin
+                      (method url-fetch)
+                      (uri (codex-release-uri version "codex-code-mode-host"))
+                      (sha256
+                       (base32
+                        "1m3xy1n9lpy4wb0i4zx2yp0k3zwfb154jzljfg0b4hs6srfls1xm")))
+                  "codex-code-mode-host")
 
                  (call-with-output-file (string-append bin "/codex")
                    (lambda (port)
