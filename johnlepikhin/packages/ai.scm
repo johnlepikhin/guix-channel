@@ -167,6 +167,12 @@ dependency resolution.")
 ;; `codex-resources/bwrap' next to the executable, which we do not ship) and
 ;; shells out to `rg' for file search and deny-glob expansion.  The wrapper
 ;; pins bubblewrap, ripgrep, git and coreutils by store path for that.
+;;
+;; By default the TUI hands sessions to a shared background app-server, which
+;; it first installs by copying the CLI's "complete package" (the upstream
+;; `codex-package' layout) into CODEX_HOME and then keeps updated on its own.
+;; That would move codex out of Guix's control, so the wrapper disables the
+;; `daemon_auto_start' feature and codex runs the app-server embedded.
 (define-public codex
   (package
     (name "codex")
@@ -219,7 +225,7 @@ dependency resolution.")
                    (lambda (port)
                      (format port "#!~a~%~
                                   export PATH=~a:~a:~a:~a:$PATH~%~
-                                  exec ~a \"$@\"~%"
+                                  exec ~a --disable daemon_auto_start \"$@\"~%"
                              bash
                              #$(file-append ripgrep "/bin")
                              #$(file-append git-minimal "/bin")
