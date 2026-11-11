@@ -137,22 +137,30 @@ and analysis.")
          ;; Since 1.90 rustc links x86_64-linux-gnu with its self-contained
          ;; rust-lld, bypassing Guix's ld-wrapper, so produced binaries
          ;; (including build scripts) lack the RUNPATH to libgcc_s.  Fall back
-         ;; to the system linker; the flag goes first so users can override it.
+         ;; to the system linker.  clippy-driver embeds its own rustc, and
+         ;; `cargo clippy` compiles workspace crates (and their build scripts)
+         ;; with it, so it needs the flag too.  rustc and rustdoc get it first,
+         ;; so users can override it; clippy-driver last, because cargo calls
+         ;; it as `clippy-driver <path-to-rustc> ARGS...`.
          (add-after 'split-outputs 'disable-self-contained-lld
            (lambda* (#:key outputs #:allow-other-keys)
-             (let ((bin (string-append (assoc-ref outputs "out") "/bin")))
-               (for-each
-                (lambda (prog)
-                  (let ((file (string-append bin "/" prog))
-                        (real (string-append bin "/." prog "-real")))
-                    (rename-file file real)
-                    (call-with-output-file file
-                      (lambda (port)
-                        (format port "#!~a
-exec -a \"$0\" \"~a\" -Clinker-features=-lld \"$@\""
-                                (which "bash") real)))
-                    (chmod file #o755)))
-                '("rustc" "rustdoc")))))
+             (define (wrap dir prog flag-first?)
+               (let ((file (string-append dir "/" prog))
+                     (real (string-append dir "/." prog "-real")))
+                 (rename-file file real)
+                 (call-with-output-file file
+                   (lambda (port)
+                     (format port "#!~a
+exec -a \"$0\" \"~a\" ~a~%"
+                             (which "bash") real
+                             (if flag-first?
+                                 "-Clinker-features=-lld \"$@\""
+                                 "\"$@\" -Clinker-features=-lld"))))
+                 (chmod file #o755)))
+             (let ((bin (string-append (assoc-ref outputs "out") "/bin"))
+                   (tools-bin (string-append (assoc-ref outputs "tools") "/bin")))
+               (for-each (lambda (prog) (wrap bin prog #t)) '("rustc" "rustdoc"))
+               (wrap tools-bin "clippy-driver" #f))))
          (add-after 'disable-self-contained-lld 'wrap-rust-analyzer
            (lambda* (#:key inputs outputs #:allow-other-keys)
              (let* ((tools (assoc-ref outputs "tools"))
