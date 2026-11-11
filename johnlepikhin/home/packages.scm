@@ -21,7 +21,6 @@
   #:use-module (gnu packages admin)
   #:use-module (gnu packages android)
   #:use-module (gnu packages aspell)
-  #:use-module (gnu packages astronomy)
   #:use-module (gnu packages audio)
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages base)
@@ -131,7 +130,6 @@
             %devel-other-packages
             %editors-packages
             %mail-packages
-            %astro-packages
             %mapping-packages))
 
 ;; Usable without a graphical session, e.g. on a headless server.
@@ -318,11 +316,6 @@
 
 (define %mail-packages
   (list))
-
-(define %astro-packages
-  (list
-   stellarium
-   celestia))
 
 (define %mapping-packages
   (list
