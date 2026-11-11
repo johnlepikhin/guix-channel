@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2024 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2024, 2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -26,6 +26,7 @@
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages node)
   #:use-module (johnlepikhin packages ai)
+  #:use-module (johnlepikhin packages antigravity-cli)
   #:use-module (johnlepikhin packages ast-index)
   #:use-module (johnlepikhin packages opencode-ai)
   #:use-module (srfi srfi-1)
@@ -48,6 +49,7 @@
   (append
    (list
     ;; Core AI development tools
+    antigravity-cli
     ast-index
     claude-code
     codex
