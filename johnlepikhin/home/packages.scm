@@ -82,7 +82,6 @@
   #:use-module (gnu packages rust-apps)
   #:use-module (gnu packages terminals)
   #:use-module (gnu packages tex)
-  #:use-module (gnu packages texlive)
   #:use-module (gnu packages tls)
   #:use-module (gnu packages unicode)
   #:use-module (gnu packages version-control)
@@ -130,7 +129,8 @@
             %devel-other-packages
             %editors-packages
             %mail-packages
-            %mapping-packages))
+            %mapping-packages
+            %tex-packages))
 
 ;; Usable without a graphical session, e.g. on a headless server.
 (define %devel-cli-tools-packages
@@ -273,7 +273,6 @@
    rsync
    sed
    sshfs
-   texlive-scheme-full
    unzip
    which
    whois
@@ -320,3 +319,30 @@
 (define %mapping-packages
   (list
    josm))
+
+;; pdflatex with beamer, Russian and listings: the presentations and the
+;; articles exported from Org.
+(define %tex-packages
+  (list
+   texlive-scheme-basic
+   texlive-amsfonts
+   texlive-adjustbox
+   texlive-anysize
+   texlive-babel-russian
+   texlive-beamer
+   texlive-capt-of
+   texlive-cm-super
+   texlive-cmap
+   texlive-collectbox
+   texlive-courier
+   texlive-cyrillic
+   texlive-fancyvrb
+   texlive-hyphen-complete
+   texlive-lh
+   texlive-listings
+   texlive-lstaddons
+   texlive-microtype
+   texlive-pgf
+   texlive-ulem
+   texlive-wrapfig
+   texlive-xcolor))
