@@ -20,7 +20,8 @@
 ;;; updates: the profile of `guix pull' for its channels, and its system and
 ;;; home configurations, taken from a git repository.  The guix publish of
 ;;; this host then serves them; its cache is warmed for every item, as it
-;;; answers 404 for big items it has not baked yet.
+;;; answers 404 for big items it has not baked yet.  That includes the
+;;; ungrafted items the other machine needs to compute grafts itself.
 ;;;
 ;;; Each published run records the commits of the channels it pinned, so
 ;;; that the other machine pulls exactly those: see
@@ -136,6 +137,56 @@ gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nO
     (johnlepikhin system services host-process)
     (johnlepikhin system services monitoring textfile)))
 
+;; Run by `guix repl' with derivations as arguments: print the closure of
+;; the items in the store that the graft derivations of their closure take
+;; as inputs, every output of them.  Graft derivations are not
+;; substitutable, so the other machine builds them and needs those
+;; ungrafted items, which are not in the closure of the results.
+(define %graft-inputs-script
+  (scheme-file
+   "guix-prebuild-graft-inputs.scm"
+   #~(begin
+       (use-modules (guix derivations)
+                    (guix store)
+                    (ice-9 match)
+                    (srfi srfi-1)
+                    (srfi srfi-26))
+
+       (define (graft? drv)
+         (eq? 'graft (assq-ref (derivation-properties drv) 'type)))
+
+       (define (input-derivations drv)
+         (map derivation-input-derivation (derivation-inputs drv)))
+
+       (define (graft-inputs drvs)
+         (let ((seen (make-hash-table)))
+           (let loop ((pending drvs) (result '()))
+             (match pending
+               (() (delete-duplicates result))
+               ((drv . rest)
+                (let ((new (remove (compose (cut hash-ref seen <>)
+                                            derivation-file-name)
+                                   (input-derivations drv))))
+                  (for-each (compose (cut hash-set! seen <> #t)
+                                     derivation-file-name)
+                            new)
+                  (loop (append new rest)
+                        (if (graft? drv)
+                            (append (append-map
+                                     (compose (cut map cdr <>)
+                                              derivation->output-paths)
+                                     (input-derivations drv))
+                                    result)
+                            result))))))))
+
+       (with-store store
+         (for-each (lambda (item) (display item) (newline))
+                   (requisites store
+                               (filter (cut valid-path? store <>)
+                                       (graft-inputs
+                                        (map read-derivation-from-file
+                                             (cdr (command-line)))))))))))
+
 (define (target->list target)
   (match-record target <guix-prebuild-target> (name kind file load-path)
     (list name kind file load-path)))
@@ -178,6 +229,7 @@ gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nO
                 ;; The guix of the system only starts time-machine and
                 ;; pull; the pinned channels decide the revision.
                 (guix . "/run/current-system/profile/bin/guix")
+                (graft-inputs . ,#$%graft-inputs-script)
                 (git . ,#$(file-append git "/bin/git"))
                 (ssh . ,#$(file-append openssh "/bin/ssh"))
                 (timeout . ,#$(file-append coreutils "/bin/timeout"))

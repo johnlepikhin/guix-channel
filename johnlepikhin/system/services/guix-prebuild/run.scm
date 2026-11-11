@@ -301,14 +301,32 @@ derivation, or #f."
                (symlink out link)
                #t))))
 
+    (define (store-paths text)
+      (filter store-path? (string-split (string-trim-both text) #\newline)))
+
+    (define (graft-inputs paths)
+      "The closure of the ungrafted items that grafting PATHS takes, found
+from their derivers, or #f."
+      (let* ((derivers (as-user "warm" guix (cons* "gc" "--derivers" paths)))
+             (drvs (and derivers (store-paths derivers))))
+        (and (pair? drvs)
+             (let ((text (as-user "warm" guix
+                                  (cons* "repl" "--"
+                                         (config-ref config 'graft-inputs)
+                                         drvs))))
+               (and text (store-paths text))))))
+
     (define (warm paths)
-      "Request the narinfo of every item in the closure of PATHS until all
-are served or the warm budget is over; return how many are still missing."
+      "Request the narinfo of every item in the closure of PATHS, and of the
+items their grafts take, until all are served or the warm budget is over;
+return how many are still missing, or #f."
       (let* ((text (as-user "warm" guix (cons* "gc" "-R" paths)))
-             (items (if text
-                        (filter store-path?
-                                (string-split (string-trim-both text)
-                                              #\newline))
+             (grafts (and text (graft-inputs paths)))
+             (items (if grafts
+                        (let ((table (make-hash-table)))
+                          (for-each (cut hash-set! table <> #t)
+                                    (append (store-paths text) grafts))
+                          (hash-map->list (lambda (item _) item) table))
                         '()))
              (url (config-ref config 'publish-url))
              (deadline (+ (current-time)
@@ -326,7 +344,7 @@ are served or the warm budget is over; return how many are still missing."
                   (close-port socket)
                   (= 200 (response-code response)))))
             (const #f)))
-        (if (not text)
+        (if (not grafts)
             #f
             (let loop ((missing items) (pass 1))
               (let ((missing (remove served? missing)))
