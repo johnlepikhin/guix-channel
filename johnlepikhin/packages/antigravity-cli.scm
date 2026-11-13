@@ -42,10 +42,10 @@
 ;; updates itself in place when its AutoUpdate setting allows; in the store
 ;; that cannot happen, and Guix decides the version.
 (define-public antigravity-cli
-  (let ((build-id "5521199590146048"))
+  (let ((build-id "4602374149505024"))
     (package
       (name "antigravity-cli")
-      (version "1.5.6")
+      (version "1.5.8")
       (source
        (origin
          (method url-fetch)
@@ -54,7 +54,7 @@
                "antigravity-cli/" version "-" build-id
                "/linux-x64-musl/cli_linux_x64_musl.tar.gz"))
          (sha256
-          (base32 "1v1wgswv76fvrxbgjabykrz39q3jvxz0c35b2nyyxb0ikmgksic0"))))
+          (base32 "1i3lna5i1x5xk6d4y66zdrlbvcvnvp1daxgyya00hlbbrdwc2wfx"))))
       (build-system trivial-build-system)
       (arguments
        (list #:modules '((guix build utils))
