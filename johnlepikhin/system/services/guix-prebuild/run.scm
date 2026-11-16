@@ -25,7 +25,8 @@
 ;;; State directory:
 ;;;   checkout/                  the configuration repository
 ;;;   generations/<n>/           one run: pinned.scm, pull-profile*,
-;;;                              and, once published, commits.scm, info.scm
+;;;                              and, once published, commits.scm, info.scm,
+;;;                              graft-inputs
 ;;;   latest -> generations/<n>  the newest published run
 ;;;
 ;;; info.scm, version 1, is read by the updating machine:
@@ -34,6 +35,9 @@
 ;;;                  (targets ((name "…") (out "/gnu/store/…")
 ;;;                            (drv "/gnu/store/….drv" or #f)) …))
 ;;; commits.scm is the list of (NAME "COMMIT") of the pinned channels.
+;;; graft-inputs lists, one per line, the ungrafted items the grafts of the
+;;; targets take: with them and the targets in its store, the updating
+;;; machine computes the same derivations without building anything.
 
 (define-module (johnlepikhin system services guix-prebuild run)
   #:use-module (ice-9 ftw)
@@ -316,13 +320,12 @@ from their derivers, or #f."
                                          drvs))))
                (and text (store-paths text))))))
 
-    (define (warm paths)
-      "Request the narinfo of every item in the closure of PATHS, and of the
-items their grafts take, until all are served or the warm budget is over;
-return how many are still missing, or #f."
+    (define (warm paths grafts)
+      "Request the narinfo of every item in the closure of PATHS, and of
+GRAFTS, the items their grafts take, until all are served or the warm budget
+is over; return how many are still missing, or #f."
       (let* ((text (as-user "warm" guix (cons* "gc" "-R" paths)))
-             (grafts (and text (graft-inputs paths)))
-             (items (if grafts
+             (items (if text
                         (let ((table (make-hash-table)))
                           (for-each (cut hash-set! table <> #t)
                                     (append (store-paths text) grafts))
@@ -344,7 +347,7 @@ return how many are still missing, or #f."
                   (close-port socket)
                   (= 200 (response-code response)))))
             (const #f)))
-        (if (not grafts)
+        (if (not text)
             #f
             (let loop ((missing items) (pass 1))
               (let ((missing (remove served? missing)))
@@ -357,9 +360,16 @@ return how many are still missing, or #f."
                       (loop missing (+ pass 1)))))))))
 
     (define (publish generation generation-dir commits configs-commit
-                     results)
+                     results grafts)
       (call-as user
                (lambda ()
+                 (call-with-output-file (string-append generation-dir
+                                                       "/graft-inputs")
+                   (lambda (port)
+                     (for-each (lambda (item)
+                                 (display item port)
+                                 (newline port))
+                               grafts)))
                  (call-with-output-file (string-append generation-dir
                                                        "/commits.scm")
                    (lambda (port) (write commits port) (newline port)))
@@ -452,14 +462,18 @@ return how many are still missing, or #f."
                                (list name (and result (car result)) rooted?)))
                             built))
               (ok? (publishable? results))
-              (missing (and ok? (warm (map cadr results))))
+              (grafts (and ok? (graft-inputs (map cadr results))))
+              (missing (and grafts (warm (map cadr results) grafts)))
               (published?
                (and ok?
                     (publish generation generation-dir (cdr pinned)
                              configs-commit
                              (map (match-lambda
                                     ((name (out drv) _ _) (list name out drv)))
-                                  built))))
+                                  built)
+                             ;; Without them the other machine still
+                             ;; updates, only slower.
+                             (or grafts '()))))
               (cleaned? (false-if-exception (cleanup generation))))
          (prebuild-metrics
           #:steps `(("fetch" . ,(and configs-commit #t))
