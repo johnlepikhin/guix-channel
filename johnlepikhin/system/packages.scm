@@ -23,6 +23,7 @@
   #:use-module (gnu packages certs)
   #:use-module (gnu packages disk)
   #:use-module (gnu packages file)
+  #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages lsof)
@@ -69,6 +70,8 @@
 (define system-packages
   (cons*
    network-manager-openvpn
+   ;; mmcli; the daemon itself comes with network-manager-service-type.
+   modem-manager
    bluez
    macchanger
    wireshark
