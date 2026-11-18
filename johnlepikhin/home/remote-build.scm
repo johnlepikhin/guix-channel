@@ -45,6 +45,12 @@
 ;;; when rb or the connection goes away, the remote command is killed
 ;;; instead of holding locks such as target/.cargo-lock.
 ;;;
+;;; The host's login scripts must not leave a daemon holding the output of a
+;;; non-interactive ssh session, as upstream's on-first-login does with the
+;;; user's Shepherd (see (johnlepikhin home shepherd)): the first command of
+;;; each new connection would never return.  rb gives that first command a
+;;; deadline and fails instead of hanging.
+;;;
 ;;; Runbook:
 ;;;   rb status            container, setup, services, running commands
 ;;;   rb ps / rb kill [ID] commands running in the container
@@ -314,9 +320,12 @@ is made of; services carry hashes of their own."
                     (rnrs bytevectors)
                     (srfi srfi-1)
                     (srfi srfi-11)
-                    (srfi srfi-26))
+                    (srfi srfi-26)
+                    (system foreign)
+                    (system foreign-library))
 
        (define %ssh #$(file-append openssh-sans-x "/bin/ssh"))
+       (define %timeout #$(file-append coreutils "/bin/timeout"))
        (define %rsync #$(file-append rsync "/bin/rsync"))
        (define %git #$(file-append git-minimal "/bin/git"))
        (define %tar #$(file-append tar "/bin/tar"))
@@ -361,6 +370,22 @@ is made of; services carry hashes of their own."
        ;; Processes.  Pipes are close-on-exec, so a child never holds the
        ;; write end of its own stdin open.
        ;;
+       ;; Children die with rb: a signal killing rb alone, as `kill PID'
+       ;; does, would leave an ssh holding its session open, the project
+       ;; lock included.  A Guile signal handler cannot do it, since it runs
+       ;; only once a blocking waitpid or read returns, so the kernel does:
+       ;; PR_SET_PDEATHSIG.  An ssh's ControlMaster is a fork of that ssh and
+       ;; does not inherit it.
+       ;;
+
+       (define %pr-set-pdeathsig 1)
+       (define prctl
+         (foreign-library-function #f "prctl"
+                                   #:return-type int
+                                   #:arg-types (list int unsigned-long
+                                                     unsigned-long
+                                                     unsigned-long
+                                                     unsigned-long)))
 
        (define (make-pipe)
          (let ((ends (pipe)))
@@ -369,11 +394,16 @@ is made of; services carry hashes of their own."
            ends))
 
        (define* (spawn args #:key stdin stdout)
-         (let ((pid (primitive-fork)))
+         (let* ((parent (getpid))
+                (pid (primitive-fork)))
            (if (zero? pid)
                (begin
                  (catch #t
                    (lambda ()
+                     (prctl %pr-set-pdeathsig SIGTERM 0 0 0)
+                     ;; rb died before the prctl.
+                     (unless (= (getppid) parent)
+                       (primitive-_exit 127))
                      (when stdin (dup2 (port->fdes stdin) 0))
                      (when stdout (dup2 (port->fdes stdout) 1))
                      (apply execl (car args) args))
@@ -498,25 +528,42 @@ code and, with CAPTURE?, its stdout."
                                             target target target)))
                       #:input (call-with-input-file local get-string-all))))
 
+       ;; Seconds the first ssh of a run may take.  It opens the connection
+       ;; when no ControlMaster is up, and a daemon started by the host's
+       ;; login scripts with the session's output would keep it from ever
+       ;; returning; the deadline turns that into an error.
+       (define %probe-timeout 60)
+
        (define (ensure-uploaded project)
          "Copy the helper, rb-wrap and the specification to the host unless
 it has them already: their names carry the store hash."
          (let ((files `((,%helper . ,(helper-remote))
                         (,%wrap . ,(wrap-remote))
                         (,(third project) . ,(spec-remote project)))))
-           (match (run-code (append (ssh-arguments)
-                               (list (string-join
-                                      (map (lambda (file)
-                                             (string-append
-                                              "test -f "
-                                              (shell-quote (cdr file))))
-                                           files)
-                                      " && "))))
+           ;; --foreground keeps ssh in rb's process group: in a background
+           ;; one it would stop on the terminal.
+           (match (run-code (append (list %timeout "--foreground"
+                                          "--kill-after=5"
+                                          (number->string %probe-timeout))
+                                    (ssh-arguments "-n")
+                                    (list (string-join
+                                           (map (lambda (file)
+                                                  (string-append
+                                                   "test -f "
+                                                   (shell-quote (cdr file))))
+                                                files)
+                                           " && "))))
              (0 #t)
-             (255 (fail "ssh to ~a failed" %host))
-             (_ (for-each (match-lambda
+             (1 (for-each (match-lambda
                             ((local . remote) (upload local remote)))
-                          files)))))
+                          files))
+             (255 (fail "ssh to ~a failed" %host))
+             ;; 124: timed out; 137: killed after it.
+             ((or 124 137)
+              (fail "~a did not answer within ~as; a process started by its \
+login scripts may hold the ssh session open"
+                    %host %probe-timeout))
+             (code (fail "probe of ~a failed (exit ~a)" %host code)))))
 
        (define (call-with-project-lock project thunk)
          "Hold the project's lock on the host, a flock kept by an ssh session
