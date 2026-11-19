@@ -528,33 +528,34 @@ Each target becomes the instance label of its probe."
            retention-size memory)
     (oci-extension
      (containers
-      (list (oci-container-configuration
-             (provision "prometheus")
-             (user "root")
-             (group "root")
-             (image image)
-             (network "host")
-             (container-user (container-user uid gid))
-             (respawn? #t)
-             (log-file "/var/log/prometheus.log")
-             (volumes
-              `((,(prometheus-config-file config)
-                 . ,(string-append %prometheus-config-path ":ro"))
-                (,(prometheus-rules-file config)
-                 . ,(string-append %prometheus-rules-path ":ro"))
-                (,data-directory . "/prometheus")
-                ,@(append-map scrape-job-volumes
-                              (prometheus-configuration-scrape-jobs
-                               config))))
-             (command
-              (list (string-append "--config.file=" %prometheus-config-path)
-                    "--storage.tsdb.path=/prometheus"
-                    (string-append "--storage.tsdb.retention.time="
-                                   retention-time)
-                    (string-append "--storage.tsdb.retention.size="
-                                   retention-size)
-                    (string-append "--web.listen-address=" listen-address)))
-             (extra-arguments (list "--memory" memory))))))))
+      (list (with-podman-pid-file
+             (oci-container-configuration
+              (provision "prometheus")
+              (user "root")
+              (group "root")
+              (image image)
+              (network "host")
+              (container-user (container-user uid gid))
+              (respawn? #t)
+              (log-file "/var/log/prometheus.log")
+              (volumes
+               `((,(prometheus-config-file config)
+                  . ,(string-append %prometheus-config-path ":ro"))
+                 (,(prometheus-rules-file config)
+                  . ,(string-append %prometheus-rules-path ":ro"))
+                 (,data-directory . "/prometheus")
+                 ,@(append-map scrape-job-volumes
+                               (prometheus-configuration-scrape-jobs
+                                config))))
+              (command
+               (list (string-append "--config.file=" %prometheus-config-path)
+                     "--storage.tsdb.path=/prometheus"
+                     (string-append "--storage.tsdb.retention.time="
+                                    retention-time)
+                     (string-append "--storage.tsdb.retention.size="
+                                    retention-size)
+                     (string-append "--web.listen-address=" listen-address)))
+              (extra-arguments (list "--memory" memory)))))))))
 
 (define (prometheus-activation config)
   (match-record config <prometheus-configuration>
@@ -711,29 +712,30 @@ services add their scrape jobs, rules and Alertmanagers by extending it.")))
     (image uid gid listen-address data-directory webhook-url-file memory)
     (oci-extension
      (containers
-      (list (oci-container-configuration
-             (provision "alertmanager")
-             (user "root")
-             (group "root")
-             (image image)
-             (network "host")
-             (container-user (container-user uid gid))
-             (respawn? #t)
-             (log-file "/var/log/alertmanager.log")
-             (volumes
-              `((,(alertmanager-config-file config)
-                 . ,(string-append %alertmanager-config-path ":ro"))
-                (,webhook-url-file
-                 . ,(string-append %alertmanager-webhook-url-path ":ro"))
-                (,data-directory . "/alertmanager")))
-             (command
-              (list (string-append "--config.file="
-                                   %alertmanager-config-path)
-                    "--storage.path=/alertmanager"
-                    (string-append "--web.listen-address=" listen-address)
-                    ;; A single instance: no gossip port on all interfaces.
-                    "--cluster.listen-address="))
-             (extra-arguments (list "--memory" memory))))))))
+      (list (with-podman-pid-file
+             (oci-container-configuration
+              (provision "alertmanager")
+              (user "root")
+              (group "root")
+              (image image)
+              (network "host")
+              (container-user (container-user uid gid))
+              (respawn? #t)
+              (log-file "/var/log/alertmanager.log")
+              (volumes
+               `((,(alertmanager-config-file config)
+                  . ,(string-append %alertmanager-config-path ":ro"))
+                 (,webhook-url-file
+                  . ,(string-append %alertmanager-webhook-url-path ":ro"))
+                 (,data-directory . "/alertmanager")))
+              (command
+               (list (string-append "--config.file="
+                                    %alertmanager-config-path)
+                     "--storage.path=/alertmanager"
+                     (string-append "--web.listen-address=" listen-address)
+                     ;; A single instance: no gossip port on all interfaces.
+                     "--cluster.listen-address="))
+              (extra-arguments (list "--memory" memory)))))))))
 
 (define (alertmanager-activation config)
   (match-record config <alertmanager-configuration>
@@ -923,35 +925,36 @@ alerts repeat more often than warnings.")))
            memory)
     (oci-extension
      (containers
-      (list (oci-container-configuration
-             (provision "grafana")
-             (user "root")
-             (group "root")
-             (image image)
-             (network "host")
-             (container-user (container-user uid gid))
-             (respawn? #t)
-             (log-file "/var/log/grafana.log")
-             (environment
-              `(("GF_SERVER_HTTP_ADDR" . ,http-address)
-                ("GF_SERVER_HTTP_PORT" . ,(number->string http-port))
-                ("GF_SECURITY_ADMIN_PASSWORD__FILE"
-                 . ,%grafana-admin-password-path)
-                ("GF_PATHS_PROVISIONING" . ,%grafana-provisioning-path)
-                ("GF_USERS_ALLOW_SIGN_UP" . "false")
-                ;; Alerts are Prometheus' job.
-                ("GF_UNIFIED_ALERTING_ENABLED" . "false")
-                ("GF_ANALYTICS_REPORTING_ENABLED" . "false")
-                ("GF_ANALYTICS_CHECK_FOR_UPDATES" . "false")
-                ("GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES" . "false")
-                ("GF_NEWS_NEWS_FEED_ENABLED" . "false")))
-             (volumes
-              `((,(grafana-provisioning config)
-                 . ,(string-append %grafana-provisioning-path ":ro"))
-                (,admin-password-file
-                 . ,(string-append %grafana-admin-password-path ":ro"))
-                (,data-directory . "/var/lib/grafana")))
-             (extra-arguments (list "--memory" memory))))))))
+      (list (with-podman-pid-file
+             (oci-container-configuration
+              (provision "grafana")
+              (user "root")
+              (group "root")
+              (image image)
+              (network "host")
+              (container-user (container-user uid gid))
+              (respawn? #t)
+              (log-file "/var/log/grafana.log")
+              (environment
+               `(("GF_SERVER_HTTP_ADDR" . ,http-address)
+                 ("GF_SERVER_HTTP_PORT" . ,(number->string http-port))
+                 ("GF_SECURITY_ADMIN_PASSWORD__FILE"
+                  . ,%grafana-admin-password-path)
+                 ("GF_PATHS_PROVISIONING" . ,%grafana-provisioning-path)
+                 ("GF_USERS_ALLOW_SIGN_UP" . "false")
+                 ;; Alerts are Prometheus' job.
+                 ("GF_UNIFIED_ALERTING_ENABLED" . "false")
+                 ("GF_ANALYTICS_REPORTING_ENABLED" . "false")
+                 ("GF_ANALYTICS_CHECK_FOR_UPDATES" . "false")
+                 ("GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES" . "false")
+                 ("GF_NEWS_NEWS_FEED_ENABLED" . "false")))
+              (volumes
+               `((,(grafana-provisioning config)
+                  . ,(string-append %grafana-provisioning-path ":ro"))
+                 (,admin-password-file
+                  . ,(string-append %grafana-admin-password-path ":ro"))
+                 (,data-directory . "/var/lib/grafana")))
+              (extra-arguments (list "--memory" memory)))))))))
 
 (define (grafana-activation config)
   (match-record config <grafana-configuration>
@@ -1069,32 +1072,33 @@ datasources and dashboards.  Its own alerting is off.")))
     (image listen-address memory)
     (oci-extension
      (containers
-      (list (oci-container-configuration
-             (provision "blackbox-exporter")
-             (user "root")
-             (group "root")
-             (image image)
-             (network "host")
-             (respawn? #t)
-             (log-file "/var/log/blackbox-exporter.log")
-             (volumes
-              `((,(blackbox-exporter-config-file config)
-                 . ,(string-append %blackbox-exporter-config-path ":ro"))
-                ,@(filter-map
-                   (lambda (module)
-                     (and (blackbox-http-module-ca-file module)
-                          (cons (blackbox-http-module-ca-file module)
-                                (string-append
-                                 (blackbox-module-ca-path module) ":ro"))))
-                   (blackbox-exporter-configuration-extra-modules config))))
-             (command
-              (list (string-append "--config.file="
-                                   %blackbox-exporter-config-path)
-                    (string-append "--web.listen-address=" listen-address)))
-             ;; ICMP probes need raw sockets, nothing else does.
-             (extra-arguments
-              (list "--cap-drop" "ALL" "--cap-add" "NET_RAW"
-                    "--memory" memory))))))))
+      (list (with-podman-pid-file
+             (oci-container-configuration
+              (provision "blackbox-exporter")
+              (user "root")
+              (group "root")
+              (image image)
+              (network "host")
+              (respawn? #t)
+              (log-file "/var/log/blackbox-exporter.log")
+              (volumes
+               `((,(blackbox-exporter-config-file config)
+                  . ,(string-append %blackbox-exporter-config-path ":ro"))
+                 ,@(filter-map
+                    (lambda (module)
+                      (and (blackbox-http-module-ca-file module)
+                           (cons (blackbox-http-module-ca-file module)
+                                 (string-append
+                                  (blackbox-module-ca-path module) ":ro"))))
+                    (blackbox-exporter-configuration-extra-modules config))))
+              (command
+               (list (string-append "--config.file="
+                                    %blackbox-exporter-config-path)
+                     (string-append "--web.listen-address=" listen-address)))
+              ;; ICMP probes need raw sockets, nothing else does.
+              (extra-arguments
+               (list "--cap-drop" "ALL" "--cap-add" "NET_RAW"
+                     "--memory" memory)))))))))
 
 (define (blackbox-exporter-prometheus-extension config)
   (prometheus-extension
@@ -1340,23 +1344,24 @@ HTTP, TCP and ICMP probes declared with @code{blackbox-scrape-job}.")))
     (image uid gid credentials-file memory)
     (oci-extension
      (containers
-      (list (oci-container-configuration
-             (provision "mktxp")
-             (user "root")
-             (group "root")
-             (image image)
-             (network "host")
-             (container-user (container-user uid gid))
-             (respawn? #t)
-             (log-file "/var/log/mktxp.log")
-             (volumes
-              `((,(mktxp-config-directory config)
-                 . ,(string-append %mktxp-config-path ":ro"))
-                (,credentials-file
-                 . ,(string-append %mktxp-credentials-path ":ro"))))
-             (command (list "mktxp" "--cfg-dir" %mktxp-config-path
-                            "export"))
-             (extra-arguments (list "--memory" memory))))))))
+      (list (with-podman-pid-file
+             (oci-container-configuration
+              (provision "mktxp")
+              (user "root")
+              (group "root")
+              (image image)
+              (network "host")
+              (container-user (container-user uid gid))
+              (respawn? #t)
+              (log-file "/var/log/mktxp.log")
+              (volumes
+               `((,(mktxp-config-directory config)
+                  . ,(string-append %mktxp-config-path ":ro"))
+                 (,credentials-file
+                  . ,(string-append %mktxp-credentials-path ":ro"))))
+              (command (list "mktxp" "--cfg-dir" %mktxp-config-path
+                             "export"))
+              (extra-arguments (list "--memory" memory)))))))))
 
 (define (mktxp-activation config)
   (match-record config <mktxp-configuration> (credentials-file uid)
@@ -1483,24 +1488,25 @@ and resources of MikroTik RouterOS devices through their API.")))
     (image uid gid data-directory rule-groups memory)
     (oci-extension
      (containers
-      (list (oci-container-configuration
-             (provision "loki")
-             (user "root")
-             (group "root")
-             (image image)
-             (network "host")
-             (container-user (container-user uid gid))
-             (respawn? #t)
-             (log-file "/var/log/loki.log")
-             (volumes
-              `((,(loki-config-file config)
-                 . ,(string-append %loki-config-path ":ro"))
-                (,(alert-rule-groups-file "loki-rules.yml" rule-groups)
-                 . ,(string-append %loki-rules-path ":ro"))
-                (,data-directory . "/loki")))
-             (command (list (string-append "-config.file="
-                                           %loki-config-path)))
-             (extra-arguments (list "--memory" memory))))))))
+      (list (with-podman-pid-file
+             (oci-container-configuration
+              (provision "loki")
+              (user "root")
+              (group "root")
+              (image image)
+              (network "host")
+              (container-user (container-user uid gid))
+              (respawn? #t)
+              (log-file "/var/log/loki.log")
+              (volumes
+               `((,(loki-config-file config)
+                  . ,(string-append %loki-config-path ":ro"))
+                 (,(alert-rule-groups-file "loki-rules.yml" rule-groups)
+                  . ,(string-append %loki-rules-path ":ro"))
+                 (,data-directory . "/loki")))
+              (command (list (string-append "-config.file="
+                                            %loki-config-path)))
+              (extra-arguments (list "--memory" memory)))))))))
 
 (define (loki-activation config)
   (match-record config <loki-configuration> (data-directory uid gid)
@@ -1640,29 +1646,30 @@ Alertmanager.")))
     (image listen-address data-directory log-directory memory)
     (oci-extension
      (containers
-      (list (oci-container-configuration
-             (provision "alloy")
-             (user "root")
-             (group "root")
-             (image image)
-             (network "host")
-             ;; Root, without capabilities: the owner of the log files.
-             (container-user "0:0")
-             (respawn? #t)
-             (log-file "/var/log/alloy.log")
-             (volumes
-              `((,(alloy-config-file config)
-                 . ,(string-append %alloy-config-path ":ro"))
-                (,log-directory . ,(string-append log-directory ":ro"))
-                (,data-directory . "/var/lib/alloy")))
-             (command
-              (list "run" %alloy-config-path
-                    "--storage.path=/var/lib/alloy/data"
-                    (string-append "--server.http.listen-addr="
-                                   listen-address)
-                    "--disable-reporting"))
-             (extra-arguments
-              (list "--cap-drop" "ALL" "--memory" memory))))))))
+      (list (with-podman-pid-file
+             (oci-container-configuration
+              (provision "alloy")
+              (user "root")
+              (group "root")
+              (image image)
+              (network "host")
+              ;; Root, without capabilities: the owner of the log files.
+              (container-user "0:0")
+              (respawn? #t)
+              (log-file "/var/log/alloy.log")
+              (volumes
+               `((,(alloy-config-file config)
+                  . ,(string-append %alloy-config-path ":ro"))
+                 (,log-directory . ,(string-append log-directory ":ro"))
+                 (,data-directory . "/var/lib/alloy")))
+              (command
+               (list "run" %alloy-config-path
+                     "--storage.path=/var/lib/alloy/data"
+                     (string-append "--server.http.listen-addr="
+                                    listen-address)
+                     "--disable-reporting"))
+              (extra-arguments
+               (list "--cap-drop" "ALL" "--memory" memory)))))))))
 
 (define (alloy-activation config)
   (data-directory-activation (alloy-configuration-data-directory config)

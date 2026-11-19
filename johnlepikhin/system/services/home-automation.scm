@@ -33,6 +33,7 @@
   #:use-module (guix records)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-1)
+  #:use-module (johnlepikhin system services utils)
   #:export (mosquitto-local-configuration-file
 
             zigbee2mqtt-configuration
@@ -178,28 +179,29 @@ frontend back to the file, which therefore must never be replaced."
 (define (zigbee2mqtt-oci-extension config)
   (oci-extension
    (containers
-    (list (oci-container-configuration
-           (provision "zigbee2mqtt")
-           (user "root")
-           (group "root")
-           (image (zigbee2mqtt-configuration-image config))
-           (network "host")
-           (respawn? #t)
-           (requirement '(mosquitto))
-           (log-file "/var/log/zigbee2mqtt.log")
-           (environment
-            `(("TZ" . ,(zigbee2mqtt-configuration-timezone config))))
-           (volumes
-            `((,(zigbee2mqtt-configuration-data-directory config)
-               . "/app/data")
-              ("/run/udev" . "/run/udev:ro")))
-           (extra-arguments
-            (list "--device"
-                  (string-append
-                   (zigbee2mqtt-configuration-serial-port config)
-                   ":" %zigbee2mqtt-container-serial-port)
-                  "--env-file"
-                  (zigbee2mqtt-configuration-environment-file config))))))))
+    (list (with-podman-pid-file
+           (oci-container-configuration
+            (provision "zigbee2mqtt")
+            (user "root")
+            (group "root")
+            (image (zigbee2mqtt-configuration-image config))
+            (network "host")
+            (respawn? #t)
+            (requirement '(mosquitto))
+            (log-file "/var/log/zigbee2mqtt.log")
+            (environment
+             `(("TZ" . ,(zigbee2mqtt-configuration-timezone config))))
+            (volumes
+             `((,(zigbee2mqtt-configuration-data-directory config)
+                . "/app/data")
+               ("/run/udev" . "/run/udev:ro")))
+            (extra-arguments
+             (list "--device"
+                   (string-append
+                    (zigbee2mqtt-configuration-serial-port config)
+                    ":" %zigbee2mqtt-container-serial-port)
+                   "--env-file"
+                   (zigbee2mqtt-configuration-environment-file config)))))))))
 
 (define zigbee2mqtt-service-type
   (service-type
@@ -267,31 +269,32 @@ environment file.")))
 (define (home-assistant-oci-extension config)
   (oci-extension
    (containers
-    (list (oci-container-configuration
-           (provision "home-assistant")
-           (user "root")
-           (group "root")
-           (image (home-assistant-configuration-image config))
-           (network "host")
-           (respawn? #t)
-           ;; Started after BlueZ has the adapter up, otherwise Home
-           ;; Assistant takes the unpowered adapter for missing rights.
-           (requirement (if (home-assistant-configuration-bluetooth? config)
-                            '(bluetooth)
-                            '()))
-           (log-file "/var/log/home-assistant.log")
-           (environment
-            `(("TZ" . ,(home-assistant-configuration-timezone config))))
-           (volumes
-            `((,(home-assistant-configuration-config-directory config)
-               . "/config")
-              ,@(if (home-assistant-configuration-bluetooth? config)
-                    '(("/run/dbus" . "/run/dbus:ro"))
-                    '())))
-           (extra-arguments
-            (if (home-assistant-configuration-bluetooth? config)
-                '("--cap-add" "NET_ADMIN" "--cap-add" "NET_RAW")
-                '())))))))
+    (list (with-podman-pid-file
+           (oci-container-configuration
+            (provision "home-assistant")
+            (user "root")
+            (group "root")
+            (image (home-assistant-configuration-image config))
+            (network "host")
+            (respawn? #t)
+            ;; Started after BlueZ has the adapter up, otherwise Home
+            ;; Assistant takes the unpowered adapter for missing rights.
+            (requirement (if (home-assistant-configuration-bluetooth? config)
+                             '(bluetooth)
+                             '()))
+            (log-file "/var/log/home-assistant.log")
+            (environment
+             `(("TZ" . ,(home-assistant-configuration-timezone config))))
+            (volumes
+             `((,(home-assistant-configuration-config-directory config)
+                . "/config")
+               ,@(if (home-assistant-configuration-bluetooth? config)
+                     '(("/run/dbus" . "/run/dbus:ro"))
+                     '())))
+            (extra-arguments
+             (if (home-assistant-configuration-bluetooth? config)
+                 '("--cap-add" "NET_ADMIN" "--cap-add" "NET_RAW")
+                 '()))))))))
 
 (define home-assistant-service-type
   (service-type
