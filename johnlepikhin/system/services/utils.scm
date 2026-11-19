@@ -1,5 +1,5 @@
 ;;; GNU Guix --- Functional package management for GNU
-;;; Copyright © 2025-2026 Evgenii Lepikhin <johnlepikhin@gmail.com>
+;;; Copyright © 2025 Evgenii Lepikhin <johnlepikhin@gmail.com>
 ;;;
 ;;; This file is not part of GNU Guix.
 ;;;
@@ -19,12 +19,10 @@
 (define-module (johnlepikhin system services utils)
   #:use-module (guix gexp)
   #:use-module (guix records)
-  #:use-module (gnu services containers)
   #:use-module (gnu services shepherd)
   #:export (make-simple-shepherd-service
             data-directory-activation
-            secret-file-check
-            with-podman-pid-file))
+            secret-file-check))
 
 (define* (make-simple-shepherd-service
           #:key
@@ -93,21 +91,3 @@ not start~%" file))
              (format (current-error-port)
                      "warning: secret file ~a must belong to uid ~a and have \
 mode 0400~%" file uid)))))
-
-;; TODO: drop once Guix passes the pid-file field on to `podman run'.  Since
-;; Guix commit a051fad7895 (2026-11-13) Shepherd waits for the pid file of
-;; every podman container, but `oci-container-configuration->
-;; oci-container-invocation' leaves the field out, so podman never writes
-;; the file and Shepherd kills the container at the timeout.
-(define (with-podman-pid-file config)
-  "Return CONFIG, an <oci-container-configuration> with a provision, whose
-container writes its pid file where its Shepherd service waits for it."
-  (let ((pid-file (string-append
-                   "/run/" (oci-container-configuration-provision config)
-                   ".pid")))
-    (oci-container-configuration
-     (inherit config)
-     (pid-file pid-file)
-     (extra-arguments
-      (cons* "--pidfile" pid-file
-             (oci-container-configuration-extra-arguments config))))))
