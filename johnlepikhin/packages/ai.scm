@@ -51,7 +51,7 @@
 (define-public claude-code
   (package
     (name "claude-code")
-    (version "2.1.311")
+    (version "2.1.323")
     (source
      (origin
        (method url-fetch)
@@ -59,7 +59,7 @@
                            "@anthropic-ai/claude-code-linux-x64/-/"
                            "claude-code-linux-x64-" version ".tgz"))
        (sha256
-        (base32 "0mhvvw1h0y8b6yw82yjabq4c1g8j29gs2j2kab2n6c53z48wcls3"))))
+        (base32 "1qncxgq9ibj9581138wz6lq939kak7v7jwg8fg03jwhfv7xj696i"))))
     (build-system trivial-build-system)
     (arguments
      (list #:modules '((guix build utils))
@@ -176,13 +176,13 @@ dependency resolution.")
 (define-public codex
   (package
     (name "codex")
-    (version "0.167.0")
+    (version "0.171.0")
     (source
      (origin
        (method url-fetch)
        (uri (codex-release-uri version "codex"))
        (sha256
-        (base32 "06i5vbmjd7sbld0pxgaqcl8afz6ypiz4qig41vlp9cym0rhq6r4x"))))
+        (base32 "13ayq5b71ndap8plql3frddzpqyzwkaapy5jwmxmky09g3ja5fh1"))))
     (build-system trivial-build-system)
     (arguments
      (list #:modules '((guix build utils))
@@ -218,7 +218,7 @@ dependency resolution.")
                       (uri (codex-release-uri version "codex-code-mode-host"))
                       (sha256
                        (base32
-                        "1m3xy1n9lpy4wb0i4zx2yp0k3zwfb154jzljfg0b4hs6srfls1xm")))
+                        "13467mppk1mazrzxhqywksfss8zs3dy6crwwki6hm38v1h1ik1np")))
                   "codex-code-mode-host")
 
                  (call-with-output-file (string-append bin "/codex")
