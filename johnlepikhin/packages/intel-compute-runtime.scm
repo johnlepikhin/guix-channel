@@ -189,7 +189,13 @@
     (native-search-paths
      (list (search-path-specification
             (variable "OCL_ICD_VENDORS")
-            (files '("etc/OpenCL/vendors")))))
+            (files '("etc/OpenCL/vendors"))
+            ;; The ICD loader reads OCL_ICD_VENDORS as a single
+            ;; directory, not a list (same as upstream's
+            ;; opencl-icd-loader spec).  With the default ":" separator
+            ;; etc/profile prepends to the old value, so sourcing it
+            ;; twice yields "DIR:DIR" and the loader finds 0 platforms.
+            (separator #f))))
     (home-page "https://github.com/intel/compute-runtime")
     (synopsis "Intel Compute Runtime (OpenCL + Level Zero GPU)")
     (description
