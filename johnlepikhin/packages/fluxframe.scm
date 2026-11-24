@@ -46,7 +46,7 @@
 (define-public fluxframe
   (package
     (name "fluxframe")
-    (version "0.10.0")
+    (version "0.11.0")
     (source (origin
               (method git-fetch)
               (uri (git-reference
@@ -55,7 +55,7 @@
               (file-name (git-file-name name version))
               (sha256
                (base32
-                "0xal6q09fm3r8n1y6vljjnjnj6h4c38jiw43ywbp6q7xk15xndaq"))))
+                "1xan0zq95v45iiz7335sd3yav9iy9g4652nn8ga46kjbpjxqckg1"))))
     (build-system cargo-build-system)
     (arguments
      (list
