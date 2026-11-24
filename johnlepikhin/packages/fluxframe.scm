@@ -46,7 +46,7 @@
 (define-public fluxframe
   (package
     (name "fluxframe")
-    (version "0.11.0")
+    (version "0.12.0")
     (source (origin
               (method git-fetch)
               (uri (git-reference
@@ -55,7 +55,7 @@
               (file-name (git-file-name name version))
               (sha256
                (base32
-                "1xan0zq95v45iiz7335sd3yav9iy9g4652nn8ga46kjbpjxqckg1"))))
+                "0zk6ka0wjwvlhfa83cp3rk90s9gvsaxlkddz9s65zvjsr0h4drlr"))))
     (build-system cargo-build-system)
     (arguments
      (list
@@ -75,6 +75,16 @@
             (lambda* (#:key inputs #:allow-other-keys)
               (setenv "LIBCLANG_PATH"
                       (string-append (assoc-ref inputs "clang") "/lib"))))
+          ;; Unit tests that load a device-restricted model go through
+          ;; openvino-rs runtime linking, as `run' does.  Give them the
+          ;; same OPENVINO_INSTALL_DIR the wrapper bakes in below;
+          ;; otherwise Core::new fails to find `openvino_c' and the
+          ;; tests see "runtime unavailable" instead of the device
+          ;; error they assert on.
+          (add-before 'check 'set-openvino-install-dir
+            (lambda* (#:key inputs #:allow-other-keys)
+              (setenv "OPENVINO_INSTALL_DIR"
+                      (assoc-ref inputs "openvino-full"))))
           ;; Явно устанавливаем оба бинарника workspace'а, чтобы не
           ;; зависеть от того, что cargo-build-system по умолчанию
           ;; разложит multi-bin workspace корректно.
