@@ -4966,9 +4966,9 @@
   (crate-source "slotmap" "1.1.1"
                 "0f20xf53zaysx9ydzkwwqm6hsjyb8lj2j6amhg57iln3jcy8rmdx"))
 
-(define rust-spin-0.9.8
-  (crate-source "spin" "0.9.8"
-                "0rvam5r0p3a6qhc18scqpvpgb3ckzyqxpgdfyjnghh8ja7byi039"))
+(define rust-spin-0.9.9
+  (crate-source "spin" "0.9.9"
+                "03psal0vh1xdxp7agphw09p7kf50v3bj1zshijq1s5bkdd7jcqrp"))
 
 (define rust-spirv-0.4.0+sdk-1.4.341.0
   (crate-source "spirv" "0.4.0+sdk-1.4.341.0"
@@ -8427,7 +8427,7 @@
                 rust-slab-0.4.12
                 rust-slotmap-1.1.1
                 rust-smallvec-1.15.1
-                rust-spin-0.9.8
+                rust-spin-0.9.9
                 rust-spirv-0.4.0+sdk-1.4.341.0
                 rust-static-assertions-1.1.0
                 rust-strsim-0.11.1
