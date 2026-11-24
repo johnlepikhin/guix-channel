@@ -3,8 +3,8 @@
 (define-module (johnlepikhin home pipewire)
   #:use-module (guix gexp)
 
-  #:use-module (gnu packages linux)
   #:use-module (gnu packages pulseaudio)
+  #:use-module (johnlepikhin packages pipewire)
 
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd))
@@ -16,23 +16,23 @@
        #~(string-append
           "<"
           #$(file-append
-             pipewire
+             pipewire/sco-fix
              "/share/alsa/alsa.conf.d/50-pipewire.conf")
           ">\n<"
           #$(file-append
-             pipewire
+             pipewire/sco-fix
              "/share/alsa/alsa.conf.d/99-pipewire-default.conf")
           ">\n"
           "
 pcm_type.pipewire {
   lib " #$(file-append
-           pipewire
+           pipewire/sco-fix
            "/lib/alsa-lib/libasound_module_pcm_pipewire.so") "
 }
 
 ctl_type.pipewire {
   lib " #$(file-append
-           pipewire
+           pipewire/sco-fix
            "/lib/alsa-lib/libasound_module_ctl_pipewire.so") "
 }
 ")))))
@@ -44,13 +44,13 @@ ctl_type.pipewire {
     (provision '(pipewire))
     (stop  #~(make-kill-destructor))
     (start #~(make-forkexec-constructor
-              (list #$(file-append pipewire "/bin/pipewire")))))
+              (list #$(file-append pipewire/sco-fix "/bin/pipewire")))))
    (shepherd-service
     (requirement '(pipewire))
     (provision '(wireplumber))
     (stop  #~(make-kill-destructor))
     (start #~(make-forkexec-constructor
-              (list #$(file-append wireplumber "/bin/wireplumber")))))
+              (list #$(file-append wireplumber/sco-fix "/bin/wireplumber")))))
    #;
    (shepherd-service
     (requirement '(pipewire))
@@ -70,7 +70,7 @@ ctl_type.pipewire {
     (provision '(pipewire-pulse))
     (stop  #~(make-kill-destructor))
     (start #~(make-forkexec-constructor
-              (list #$(file-append pipewire "/bin/pipewire-pulse")))))))
+              (list #$(file-append pipewire/sco-fix "/bin/pipewire-pulse")))))))
 
 (define-public home-pipewire-service-type
   (service-type
@@ -84,6 +84,6 @@ ctl_type.pipewire {
            home-pipewire-shepherd-service)
           (service-extension
            home-profile-service-type
-           (const (list pipewire pulseaudio)))))
+           (const (list pipewire/sco-fix pulseaudio)))))
    (default-value #f)
    (description "run pipewire and stuff")))

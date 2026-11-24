@@ -1,0 +1,53 @@
+Clear a stale error state on SCO transport acquire.
+
+After an HFP session ends (for example, WirePlumber's autoswitch
+restores A2DP once the last capture stream closes), sco_release_cb
+moves the SCO transport from active to idle.  media-sink treats
+active -> idle of a started, non-duplex output as a remote failure and
+sets the transport state to error.  The SCO transport object survives
+the profile switch, so that error state is still there on the next
+switch to HFP.  When the second node acquires the already acquired
+transport, spa_bt_transport_acquire() re-emits the stale state, both
+nodes emit SPA_NODE_EVENT_Error, and the client's capture stream dies
+after ~0.6 s.  The failed attempt resets the state, so every other
+call works: automatic HFP switching fails exactly every second time.
+
+Reset the error state when a new SCO acquire starts.  Real failures
+during that acquire set it again.
+
+Also backport the 1.6.11 change that clears the error counter after a
+successful acquire, so a few quick HFP sessions in a row do not hit
+TRANSPORT_ERROR_MAX_RETRY because of these release-time errors.
+
+--- a/spa/plugins/bluez5/backend-native.c
++++ b/spa/plugins/bluez5/backend-native.c
+@@ -2814,6 +2814,18 @@
+ 
+ 	spa_log_debug(backend->log, "transport %p: enter sco_acquire_cb", t);
+ 
++	/* The SCO transport outlives its nodes across profile switches, and
++	 * releasing a running sink marks it as failed (media-sink treats
++	 * active -> idle of a started output as an error).  Nothing resets
++	 * that state before the next acquire, so the next user's nodes see
++	 * the stale error and fail at once.  A new acquire is a new attempt:
++	 * start it from idle; real failures below set the error state again.
++	 */
++	if (t->state == SPA_BT_TRANSPORT_STATE_ERROR) {
++		spa_log_debug(backend->log, "transport %p: clearing stale error state", t);
++		spa_bt_transport_set_state(t, SPA_BT_TRANSPORT_STATE_IDLE);
++	}
++
+ 	if (optional || t->fd > 0)
+ 		sock = t->fd;
+ 	else
+--- a/spa/plugins/bluez5/bluez5-dbus.c
++++ b/spa/plugins/bluez5/bluez5-dbus.c
+@@ -3452,6 +3452,8 @@
+ 	if (res >= 0) {
+ 		transport->acquire_refcount = 1;
+ 		transport->acquired = true;
++		/* a transport that acquires is working */
++		transport->error_count = 0;
+ 	}
+ 
+ 	return res;
