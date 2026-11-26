@@ -28,6 +28,7 @@
   #:use-module (johnlepikhin packages ai)
   #:use-module (johnlepikhin packages antigravity-cli)
   #:use-module (johnlepikhin packages ast-index)
+  #:use-module (johnlepikhin packages gemini-api-cli)
   #:use-module (johnlepikhin packages opencode-ai)
   #:use-module (srfi srfi-1)
   #:use-module (guix records)
@@ -53,6 +54,7 @@
     ast-index
     claude-code
     codex
+    gemini-api-cli
     opencode)
    (home-devel-ai-configuration-extra-packages config)))
 
